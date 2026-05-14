@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Software Integration Directory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+    <div class="mt-12 flex justify-center items-center space-x-4">
+            {% if page > 1 %}
+            <a href="/?q={{ q }}&page={{ page - 1 }}" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+                &larr; Previous
+            </a>
+            {% endif %}
+            
+            <span class="text-gray-500 font-medium">Page {{ page }} of {{ total_pages }}</span>
+            
+            {% if page < total_pages %}
+            <a href="/?q={{ q }}&page={{ page + 1 }}" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+                Next &rarr;
+            </a>
+            {% endif %}
+        </div>
+    <div class="max-w-5xl mx-auto px-4 py-16">
+        <h1 class="text-4xl font-extrabold text-center mb-4 text-blue-600">Find Your Perfect Software Integration</h1>
+        <p class="text-center text-lg text-gray-500 mb-12">Browse our database of tools to automate your workflow.</p>
+        
+        <!-- Search Bar -->
+        <div class="max-w-2xl mx-auto mb-12">
+            <form action="/" method="get" class="flex shadow-sm rounded-lg">
+                <input type="text" name="q" value="{{ q }}" placeholder="Search for a tool (e.g., Slack)..." class="w-full px-4 py-3 rounded-l-lg border border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-gray-700">
+                <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-r-lg font-bold hover:bg-blue-700 transition">Search</button>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item in integrations %}
+            <a href="/integrate/{{ item.slug }}" class="block bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition duration-200">
+                <h2 class="text-xl font-bold mb-2">{{ item.tool_a }} + {{ item.tool_b }}</h2>
+                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ item.description }}</p>
+                <span class="text-xs font-semibold text-blue-500 bg-blue-50 px-2 py-1 rounded-full">{{ item.search_volume }} Searches/mo</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

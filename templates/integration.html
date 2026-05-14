@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Dynamic SEO Meta Tags -->
+    <title>How to Integrate {{ data.tool_a }} with {{ data.tool_b }}</title>
+    <meta name="description" content="{{ data.description }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-gray-800 font-sans">
+    
+    <!-- Hero Section -->
+    <div class="bg-blue-600 text-white py-20 px-4">
+        <div class="max-w-3xl mx-auto text-center">
+            <h1 class="text-5xl font-extrabold mb-6">Integrate {{ data.tool_a }} with {{ data.tool_b }}</h1>
+            <p class="text-xl opacity-90 mb-8">{{ data.description }}</p>
+            <!-- Changed button to a functional link -->
+            <a href="https://www.make.com/en/register?pc=sampath9" target="_blank" class="inline-block bg-white text-blue-600 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition shadow-lg">Get Started Free</a>
+        </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="max-w-4xl mx-auto px-4 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+            
+            <!-- Left Column: Main Content -->
+            <div class="md:col-span-2">
+                <h2 class="text-3xl font-bold mb-6">Why connect {{ data.tool_a }} and {{ data.tool_b }}?</h2>
+                <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                    By connecting <strong>{{ data.tool_a }}</strong> directly to <strong>{{ data.tool_b }}</strong>, you eliminate manual data entry and save hours of work every week. With over {{ data.search_volume }} professionals looking for this exact solution monthly, it's one of the most powerful automations you can set up.
+                </p>
+                
+                <!-- SEO Rich Programmatic Content -->
+                <h3 class="text-2xl font-bold mb-4 mt-10">Popular Use Cases for {{ data.tool_a }}</h3>
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-lg mb-8">
+                    <ul class="list-none space-y-3 text-gray-700">
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2">✓</span>
+                            Create a new item in {{ data.tool_b }} every time a trigger happens in {{ data.tool_a }}.
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2">✓</span>
+                            Update existing records in {{ data.tool_b }} automatically without leaving {{ data.tool_a }}.
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2">✓</span>
+                            Send real-time notifications to your team.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right Column: Sticky Sidebar -->
+            <div class="md:col-span-1">
+                <div class="bg-gray-50 border border-gray-200 p-6 rounded-xl sticky top-6">
+                    <h4 class="font-bold text-lg mb-4 text-center">Quick Details</h4>
+                    <div class="space-y-4 text-sm text-gray-600">
+                        <div class="flex justify-between border-b pb-2">
+                            <span>App 1:</span>
+                            <span class="font-semibold text-gray-800">{{ data.tool_a }}</span>
+                        </div>
+                        <div class="flex justify-between border-b pb-2">
+                            <span>App 2:</span>
+                            <span class="font-semibold text-gray-800">{{ data.tool_b }}</span>
+                        </div>
+                        <div class="flex justify-between border-b pb-2">
+                            <span>Difficulty:</span>
+                            <span class="text-green-600 font-semibold bg-green-100 px-2 rounded">Beginner</span>
+                        </div>
+                    </div>
+                    <!-- Dynamic Search Link to simulate an affiliate click -->
+                    <a href="https://www.make.com/en/register?pc=sampath9" target="_blank" class="block w-full text-center bg-blue-600 text-white font-bold py-3 mt-6 rounded-lg hover:bg-blue-700 transition">
+                        Connect Now
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="mt-16 text-center border-t pt-8">
+            <a href="/" class="text-blue-500 hover:text-blue-700 font-medium">&larr; Back to Directory</a>
+        </div>
+    </div>
+</body>
+</html>
