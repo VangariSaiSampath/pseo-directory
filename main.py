@@ -9,10 +9,88 @@ from fastapi.responses import JSONResponse
 from google import genai
 import os
 from dotenv import load_dotenv
+import random
+import re
+from datetime import datetime
 
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
+
+
+# --- 1. The Public Blog Route ---
+@app.get("/blog")
+async def blog_index(request: Request):
+    conn = get_db_connection()
+    # Get the latest 20 blog posts
+    posts = conn.execute('SELECT * FROM blog_posts ORDER BY published_date DESC LIMIT 20').fetchall()
+    conn.close()
+    return templates.TemplateResponse("blog.html", {"request": request, "posts": posts})
+
+@app.get("/blog/{slug}")
+async def read_blog(request: Request, slug: str):
+    conn = get_db_connection()
+    post = conn.execute('SELECT * FROM blog_posts WHERE slug = ?', (slug,)).fetchone()
+    conn.close()
+    if not post:
+        return {"error": "Post not found"}
+    return templates.TemplateResponse("blog_post.html", {"request": request, "post": post})
+
+
+# --- 2. THE AI AGENT ENDPOINT (The Automated Writer) ---
+@app.get("/api/agent/daily-blog")
+async def run_ai_agent(secret: str):
+    # Security check: Only YOU can trigger this
+    if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
+        return {"error": "Unauthorized Access"}
+
+    conn = get_db_connection()
+    
+    # 1. Pick a random integration from your database to write about
+    integrations = conn.execute('SELECT tool_a, tool_b FROM integrations').fetchall()
+    if not integrations:
+        return {"error": "No integrations found to write about."}
+    random_pair = random.choice(integrations)
+    tool_a, tool_b = random_pair['tool_a'], random_pair['tool_b']
+
+    # 2. Prompt Gemini to act as a Tech Journalist (Ensures zero plagiarism)
+    prompt = f"""
+    Act as a senior tech journalist. Write an engaging, highly SEO-optimized blog post about integrating {tool_a} and {tool_b}. 
+    Discuss modern business trends, why this specific automation saves hours of manual data entry, and potential creative use cases for 2026.
+    
+    CRITICAL INSTRUCTIONS:
+    - Write 100% original content. Do not copy from other sources.
+    - Format the output strictly in HTML (using <h2>, <p>, <ul>, <li>, <strong>).
+    - Do not include standard greetings, just the HTML content.
+    - Start with an extremely catchy title wrapped in an <h1> tag.
+    """
+    
+    try:
+        # Generate the blog using Gemini 2.5 Flash
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        html_content = response.text
+
+        # 3. Extract the Title to create a URL Slug
+        title_match = re.search(r'<h1>(.*?)</h1>', html_content)
+        title = title_match.group(1) if title_match else f"{tool_a} and {tool_b} Automation Guide"
+        
+        # Create a URL-friendly slug (e.g., "slack-and-notion-automation-guide")
+        slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+
+        # 4. Save to Database
+        conn.execute('INSERT OR IGNORE INTO blog_posts (title, slug, content) VALUES (?, ?, ?)', 
+                    (title, slug, html_content))
+        conn.commit()
+        conn.close()
+
+        return {"status": "Success", "posted": title}
+
+    except Exception as e:
+        print(f"Agent Error: {e}")
+        return {"status": "Failed", "error": str(e)}
 
 def get_db_connection():
     conn = sqlite3.connect('pseo_data.db')
