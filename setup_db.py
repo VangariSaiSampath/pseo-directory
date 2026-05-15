@@ -44,6 +44,15 @@ def setup_database():
         ("Action", "The task that happens automatically (e.g., 'Save to Spreadsheet').")
     ]
     cursor.executemany('INSERT OR IGNORE INTO glossary (term, definition) VALUES (?, ?)', terms)
+    # 5. THE LEADS TABLE (For user integration requests)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS leads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT,
+            requested_tools TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
 
     conn.commit()
     conn.close()

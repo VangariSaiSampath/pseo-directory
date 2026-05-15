@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "{{ data.tool_a }} to {{ data.tool_b }} Integration",
+      "applicationCategory": "BusinessApplication",
+      "description": "Automate workflows by integrating {{ data.tool_a }} and {{ data.tool_b }}.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Dynamic SEO Meta Tags -->
@@ -103,6 +117,46 @@
             <p class="text-green-800 font-medium text-sm uppercase tracking-wide">Saved Per Month</p>
         </div>
     </div>
+    <div class="mt-12 p-8 bg-white border border-gray-200 rounded-2xl shadow-sm">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">✨ AI Smart Workflow Generator</h3>
+        <p class="mb-6 text-gray-600">Enter your industry to see a custom automation strategy for {{ data.tool_a }} and {{ data.tool_b }}.</p>
+        
+        <form id="ai-form" class="flex gap-4 mb-6" onsubmit="generateAIWorkflow(event)">
+            <input type="hidden" id="ai-tool-a" value="{{ data.tool_a }}">
+            <input type="hidden" id="ai-tool-b" value="{{ data.tool_b }}">
+            <input type="text" id="ai-industry" placeholder="e.g., Real Estate, E-commerce, HR..." required class="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+            <button type="submit" class="bg-blue-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-700 transition">Generate</button>
+        </form>
+        
+        <div id="ai-result" class="hidden p-6 bg-blue-50 border border-blue-100 rounded-lg text-gray-700">
+            </div>
+    </div>
+
+    <script>
+    async function generateAIWorkflow(event) {
+        event.preventDefault();
+        const resultDiv = document.getElementById('ai-result');
+        const submitBtn = event.target.querySelector('button');
+        
+        resultDiv.innerHTML = "<p class='animate-pulse'>Analyzing tools and generating workflow...</p>";
+        resultDiv.classList.remove('hidden');
+        submitBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('industry', document.getElementById('ai-industry').value);
+        formData.append('tool_a', document.getElementById('ai-tool-a').value);
+        formData.append('tool_b', document.getElementById('ai-tool-b').value);
+
+        const response = await fetch('/api/generate-workflow', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        resultDiv.innerHTML = data.workflow;
+        submitBtn.disabled = false;
+    }
+    </script>
 
     <script>
     function calculateROI() {

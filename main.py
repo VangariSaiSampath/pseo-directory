@@ -1,7 +1,14 @@
+import os
+
 from fastapi import FastAPI, Request, HTTPException, Response
 from fastapi.templating import Jinja2Templates
 import sqlite3
 import math
+from fastapi import Form
+from fastapi.responses import JSONResponse
+from google import genai
+import os
+from dotenv import load_dotenv
 
 
 app = FastAPI()
@@ -11,7 +18,37 @@ def get_db_connection():
     conn = sqlite3.connect('pseo_data.db')
     conn.row_factory = sqlite3.Row
     return conn
+load_dotenv()
+# Configure Gemini API (You will add this key in Render later)
+client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+model = "gemini-1.5-flash"
 
+# --- NEW FEATURE 1: Lead Capture Route ---
+@app.post("/request-integration")
+async def request_integration(email: str = Form(...), tools: str = Form(...)):
+    conn = get_db_connection()
+    conn.execute('INSERT INTO leads (email, requested_tools) VALUES (?, ?)', (email, tools))
+    conn.commit()
+    conn.close()
+    # Redirect back to home with a success message (simplified for this example)
+    return {"message": "Success! We will notify you when this integration is live."}
+
+# --- NEW FEATURE 2: AI Workflow Generator ---
+@app.post("/api/generate-workflow")
+async def generate_workflow(industry: str = Form(...), tool_a: str = Form(...), tool_b: str = Form(...)):
+    try:
+        prompt = f"Act as an automation expert. Give me a 3-step specific, highly practical workflow integrating {tool_a} and {tool_b} for a business in the {industry} industry. Keep it brief and formatted in HTML list tags (<ul><li>)."
+        
+        # NEW: Generating content with the updated genai syntax
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        return JSONResponse(content={"workflow": response.text})
+    except Exception as e:
+        print(f"AI Error: {e}") # This will log the error in your terminal if it fails
+        return JSONResponse(content={"workflow": "<p>Error generating workflow. Please try again.</p>"})
+    
 @app.get("/")
 async def home(request: Request, q: str = "", page: int = 1):
     conn = get_db_connection()
