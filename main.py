@@ -84,13 +84,9 @@ async def run_ai_agent(secret: str):
     """
     
     try:
-        # Generate the blog using the stable Gemini 1.5 Flash model
+        # Generate the blog using the latest Gemini 2.0 Flash model
         response = client.models.generate_content(
-<<<<<<< HEAD
-            model='gemini-1.5-flash',
-=======
             model='gemini-2.0-flash',
->>>>>>> f8ebaffcfb1bee8c86569b4c6e11b7d1bb710128
             contents=prompt,
         )
         html_content = response.text
@@ -133,11 +129,7 @@ async def generate_workflow(industry: str = Form(...), tool_a: str = Form(...), 
         prompt = f"Act as an automation expert. Give me a 3-step specific, highly practical workflow integrating {tool_a} and {tool_b} for a business in the {industry} industry. Keep it brief and formatted in HTML list tags (<ul><li>)."
         
         response = client.models.generate_content(
-<<<<<<< HEAD
-            model='gemini-1.5-flash',
-=======
             model='gemini-2.0-flash',
->>>>>>> f8ebaffcfb1bee8c86569b4c6e11b7d1bb710128
             contents=prompt,
         )
         return JSONResponse(content={"workflow": response.text})
