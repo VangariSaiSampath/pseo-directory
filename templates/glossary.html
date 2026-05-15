@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Glossary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+    
+    <nav class="bg-white border-b py-4 px-4 shadow-sm mb-8">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <a href="/" class="text-xl font-black text-blue-600">Integration Directory</a>
+            <div class="space-x-6 text-sm font-medium text-gray-600">
+                <a href="/best-integrations-for/slack" class="hover:text-blue-600 transition">Best for Slack</a>
+                <a href="/glossary" class="hover:text-blue-600 transition">Glossary</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-3xl mx-auto px-4 py-8">
+        <h1 class="text-4xl font-extrabold text-center mb-4 text-blue-600">Automation Glossary</h1>
+        <p class="text-center text-gray-500 mb-12">Confused by the tech jargon? We've got you covered.</p>
+        
+        <div class="space-y-6">
+            {% for item in terms %}
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                <h2 class="text-2xl font-bold mb-2 text-gray-800">{{ item.term }}</h2>
+                <p class="text-gray-600 text-lg">{{ item.definition }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-12 text-center">
+            <a href="/" class="text-blue-500 hover:underline">&larr; Back to Directory</a>
+        </div>
+    </div>
+</body>
+</html>

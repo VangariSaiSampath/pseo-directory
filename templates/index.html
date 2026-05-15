@@ -7,26 +7,27 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
-    <div class="mt-12 flex justify-center items-center space-x-4">
-            {% if page > 1 %}
-            <a href="/?q={{ q }}&page={{ page - 1 }}" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
-                &larr; Previous
-            </a>
-            {% endif %}
-            
-            <span class="text-gray-500 font-medium">Page {{ page }} of {{ total_pages }}</span>
-            
-            {% if page < total_pages %}
-            <a href="/?q={{ q }}&page={{ page + 1 }}" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
-                Next &rarr;
-            </a>
-            {% endif %}
+    <nav class="bg-white border-b py-4 px-4 shadow-sm mb-8">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <a href="/" class="text-xl font-black text-blue-600">Integration Directory</a>
+            <div class="space-x-4 md:space-x-6 text-sm font-medium text-gray-600">
+                <a href="/best-integrations-for/slack" class="hover:text-blue-600 transition">Best for Slack</a>
+                <a href="/best-integrations-for/notion" class="hover:text-blue-600 transition">Best for Notion</a>
+                <a href="/glossary" class="text-blue-600 hover:text-blue-800 transition">Glossary</a>
+            </div>
         </div>
-    <div class="max-w-5xl mx-auto px-4 py-16">
-        <h1 class="text-4xl font-extrabold text-center mb-4 text-blue-600">Find Your Perfect Software Integration</h1>
+    </nav>
+
+    <div class="max-w-5xl mx-auto px-4 py-8">
+        <h1 class="text-4xl font-extrabold text-center mb-4 text-blue-600">
+            {% if title %}
+                {{ title }}
+            {% else %}
+                Find Your Perfect Software Integration
+            {% endif %}
+        </h1>
         <p class="text-center text-lg text-gray-500 mb-12">Browse our database of tools to automate your workflow.</p>
-        
-        <!-- Search Bar -->
+
         <div class="max-w-2xl mx-auto mb-12">
             <form action="/" method="get" class="flex shadow-sm rounded-lg">
                 <input type="text" name="q" value="{{ q }}" placeholder="Search for a tool (e.g., Slack)..." class="w-full px-4 py-3 rounded-l-lg border border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-gray-700">
@@ -43,6 +44,24 @@
             </a>
             {% endfor %}
         </div>
+
+        {% if total_pages is defined and total_pages > 1 %}
+        <div class="mt-12 flex justify-center items-center space-x-4">
+            {% if page > 1 %}
+            <a href="/?q={{ q }}&page={{ page - 1 }}" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+                &larr; Previous
+            </a>
+            {% endif %}
+
+            <span class="text-gray-500 font-medium">Page {{ page }} of {{ total_pages }}</span>
+
+            {% if page < total_pages %}
+            <a href="/?q={{ q }}&page={{ page + 1 }}" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+                Next &rarr;
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 </body>
 </html>

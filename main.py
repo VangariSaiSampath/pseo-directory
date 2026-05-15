@@ -19,7 +19,7 @@ async def home(request: Request, q: str = "", page: int = 1):
         # Save what the user searched for into our new table
         conn.execute('INSERT INTO search_logs (query) VALUES (?)', (q.strip(),))
         conn.commit() # We must commit because we are writing data
-        
+
     items_per_page = 15
     offset = (page - 1) * items_per_page
 
@@ -46,6 +46,35 @@ async def home(request: Request, q: str = "", page: int = 1):
     })
 
 
+@app.get("/glossary")
+async def glossary(request: Request):
+    conn = get_db_connection()
+    terms = conn.execute('SELECT * FROM glossary').fetchall()
+    conn.close()
+    return templates.TemplateResponse("glossary.html", {"request": request, "terms": terms})
+
+@app.get("/compare/{tool_a}-vs-{tool_b}")
+async def compare(request: Request, tool_a: str, tool_b: str):
+    # This generates a programmatic comparison page
+    return templates.TemplateResponse("compare.html", {
+        "request": request, 
+        "tool_a": tool_a.capitalize(), 
+        "tool_b": tool_b.capitalize()
+    })
+
+@app.get("/best-integrations-for/{tool}")
+async def curated_list(request: Request, tool: str):
+    conn = get_db_connection()
+    query = f"%{tool}%"
+    integrations = conn.execute('SELECT * FROM integrations WHERE tool_a LIKE ? OR tool_b LIKE ? LIMIT 10', (query, query)).fetchall()
+    conn.close()
+    return templates.TemplateResponse("index.html", {
+        "request": request, 
+        "integrations": integrations, 
+        "q": tool,
+        "title": f"Top 10 Best Integrations for {tool.capitalize()}"
+    })
+
 @app.get("/integrate/{slug}")
 async def integration_page(request: Request, slug: str):
     conn = get_db_connection()
@@ -65,7 +94,7 @@ async def sitemap():
     conn.close()
 
     # Change this to your actual domain before deployment
-    base_url = "https://yourdomain.com" 
+    base_url = "https://integration-directory.onrender.com" 
     
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
