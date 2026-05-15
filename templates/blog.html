@@ -5,9 +5,30 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
-    <div class="max-w-4xl mx-auto px-4 py-12">
-        <h1 class="text-4xl font-black mb-8 text-blue-600">The Techie Blog</h1>
-        <p class="mb-8 text-gray-600">Daily insights on the latest software integrations and automation strategies.</p>
+    
+    <nav class="bg-white border-b py-4 px-4 shadow-sm mb-8">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <a href="/" class="text-xl font-black text-blue-600">Integration Directory</a>
+            <div class="space-x-4 md:space-x-6 text-sm font-medium text-gray-600">
+                <a href="/best-integrations-for/slack" class="hover:text-blue-600 transition">Best for Slack</a>
+                <a href="/best-integrations-for/notion" class="hover:text-blue-600 transition">Best for Notion</a>
+                <a href="/glossary" class="hover:text-blue-600 transition">Glossary</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-4 pb-12">
+        
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 pb-6 border-b border-gray-200">
+            <div>
+                <h1 class="text-4xl font-black text-blue-600">The Techie Blog</h1>
+                <p class="text-gray-600 mt-2">Daily insights on the latest software integrations and automation strategies.</p>
+            </div>
+            
+            <a href="/" class="mt-4 md:mt-0 whitespace-nowrap bg-blue-50 text-blue-600 font-bold px-5 py-2.5 rounded-lg hover:bg-blue-100 transition shadow-sm border border-blue-100">
+                &larr; Back to Directory
+            </a>
+        </div>
         
         <div class="space-y-6">
             {% for post in posts %}
@@ -19,9 +40,10 @@
             <p>The AI Agent is writing its first post. Check back soon!</p>
             {% endfor %}
         </div>
-        <a href="/" class="mt-4 md:mt-0 whitespace-nowrap bg-blue-50 text-blue-600 font-bold px-5 py-2.5 rounded-lg hover:bg-blue-100 transition shadow-sm border border-blue-100">
-                &larr; Back to Directory
-        </a>
+        
+        <div class="mt-10 text-center">
+            <a href="/" class="text-blue-500 hover:underline font-medium">&larr; Return to Directory</a>
+        </div>
     </div>
 </body>
 </html>
