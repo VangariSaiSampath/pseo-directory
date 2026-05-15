@@ -248,3 +248,5 @@ async def sitemap():
     xml += '</urlset>'
     
     return Response(content=xml, media_type="application/xml")
+
+
