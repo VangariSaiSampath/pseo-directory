@@ -61,7 +61,7 @@ async def run_ai_agent(secret: str):
 
     conn, cursor = get_db_connection()
     
-    # 1. Pick a random integration from your database to write about
+    # Pick a random integration
     cursor.execute('SELECT tool_a, tool_b FROM integrations')
     integrations = cursor.fetchall()
     
@@ -72,7 +72,6 @@ async def run_ai_agent(secret: str):
     random_pair = random.choice(integrations)
     tool_a, tool_b = random_pair['tool_a'], random_pair['tool_b']
 
-    # 2. Prompt Gemini to act as a Tech Journalist
     prompt = f"""
     Act as a senior tech journalist. Write an engaging, highly SEO-optimized blog post about integrating {tool_a} and {tool_b}. 
     Discuss modern business trends, why this specific automation saves hours of manual data entry, and potential creative use cases for 2026.
@@ -85,8 +84,9 @@ async def run_ai_agent(secret: str):
     """
     
     try:
+        # Generate the blog using the stable Gemini 1.5 Flash model
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-1.5-flash',
             contents=prompt,
         )
         html_content = response.text
@@ -95,6 +95,7 @@ async def run_ai_agent(secret: str):
         title = title_match.group(1) if title_match else f"{tool_a} and {tool_b} Automation Guide"
         slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
 
+        # Save to Postgres
         cursor.execute('''
             INSERT INTO blog_posts (title, slug, content) 
             VALUES (%s, %s, %s) 
@@ -128,7 +129,7 @@ async def generate_workflow(industry: str = Form(...), tool_a: str = Form(...), 
         prompt = f"Act as an automation expert. Give me a 3-step specific, highly practical workflow integrating {tool_a} and {tool_b} for a business in the {industry} industry. Keep it brief and formatted in HTML list tags (<ul><li>)."
         
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-1.5-flash',
             contents=prompt,
         )
         return JSONResponse(content={"workflow": response.text})
