@@ -131,7 +131,7 @@ async def sitemap():
     conn.close()
 
     # Change this to your actual domain before deployment
-    base_url = "https://integration-directory.onrender.com" 
+    base_url = "https://integration-directory.com" 
     
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
