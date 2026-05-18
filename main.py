@@ -294,6 +294,10 @@ async def run_news_agent(secret: str):
             contents=prompt,
         )
         html_content = response.text
+        
+        html_content = html_content.replace("```html", "").replace("```", "").strip()
+        
+        title_match = re.search(r'<h1>(.*?)</h1>', html_content)
 
         title_match = re.search(r'<h1>(.*?)</h1>', html_content)
         title = title_match.group(1) if title_match else "Latest AI and Automation News"
