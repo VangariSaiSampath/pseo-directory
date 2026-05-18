@@ -249,7 +249,14 @@ async def news_index(request: Request):
     posts = cursor.fetchall()
     conn.close()
     # Reusing existing blog layout!
-    return templates.TemplateResponse("blog.html", {"request": request, "posts": posts, "page_title": "Latest AI & Tech News", "subtitle": "Stay updated with the latest breakthroughs in AI, LLMs, and the future of work."}) 
+    return templates.TemplateResponse("blog.html", {
+        "request": request, 
+        "posts": posts, 
+        "page_title": "Latest AI & Tech News",
+        "page_subtitle": "Breaking news on Artificial Intelligence, LLMs, and the future of work.",
+        "post_type": "news"
+
+    })
 
 @app.get("/news/{slug}")
 async def read_news(request: Request, slug: str):
