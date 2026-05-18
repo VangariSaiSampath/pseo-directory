@@ -317,3 +317,108 @@ async def run_news_agent(secret: str):
     except Exception as e:
         print(f"News Agent Error: {e}")
         return {"status": "Failed", "error": str(e)}
+    
+    # --- 8. Legal Pages (AdSense Compliance) ---
+@app.get("/privacy")
+async def privacy_page(request: Request):
+    return templates.TemplateResponse("privacy.html", {"request": request})
+
+@app.get("/terms")
+async def terms_page(request: Request):
+    return templates.TemplateResponse("terms.html", {"request": request})
+
+# --- 9. NEW: AI Social Media Manager ---
+
+@app.get("/api/agent/draft-socials")
+async def draft_socials(secret: str):
+    """Cron Job Endpoint: Reads the latest news post and drafts social media copy."""
+    if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
+        return {"error": "Unauthorized Access"}
+
+    conn, cursor = get_db_connection()
+    
+    try:
+        # Get the most recently published news article
+        cursor.execute('SELECT title, slug, content FROM news_posts ORDER BY published_date DESC LIMIT 1')
+        latest_post = cursor.fetchone()
+        
+        if not latest_post:
+            return {"status": "Failed", "error": "No news articles found to draft socials for."}
+
+        title = latest_post['title']
+        link = f"https://integration-directory.com/news/{latest_post['slug']}"
+        snippet = latest_post['content'][:800] # Give the AI the first 800 characters to read
+
+        prompt = f"""
+        Act as an expert B2B Social Media Manager. I just published a new article on my tech blog titled: "{title}".
+        Here is a snippet of the article: {snippet}
+        
+        Task 1: Write a highly engaging, professional LinkedIn post summarizing the value of this article. Use bullet points and professional hashtags.
+        Task 2: Write a punchy, viral Twitter (X) post under 280 characters.
+        
+        CRITICAL: 
+        - You MUST include this exact link at the end of both posts: {link}
+        - Format your response exactly like this:
+        [LINKEDIN]
+        (The linkedin post here)
+        [TWITTER]
+        (The twitter post here)
+        """
+        
+        # Call Gemini 2.5 Flash
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        ai_response = response.text
+        
+        # Parse the AI response into LinkedIn and Twitter variables
+        linkedin_part = ai_response.split('[TWITTER]')[0].replace('[LINKEDIN]', '').strip()
+        twitter_part = ai_response.split('[TWITTER]')[1].strip() if '[TWITTER]' in ai_response else "Twitter draft failed."
+
+        # Save the drafts to the database
+        cursor.execute('''
+            INSERT INTO social_drafts (article_title, linkedin_post, twitter_post) 
+            VALUES (%s, %s, %s)
+        ''', (title, linkedin_part, twitter_part))
+        
+        conn.commit()
+        return {"status": "Success", "message": f"Social drafts created for: {title}"}
+
+    except Exception as e:
+        print(f"Social Agent Error: {e}")
+        return {"status": "Failed", "error": str(e)}
+    finally:
+        conn.close()
+
+@app.get("/social-dashboard")
+async def view_social_drafts(request: Request, secret: str = None):
+    """A private page for you to copy your AI-generated social posts."""
+    if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
+        return {"error": "Unauthorized. Please provide your secret in the URL."}
+
+    conn, cursor = get_db_connection()
+    cursor.execute('SELECT * FROM social_drafts ORDER BY created_at DESC LIMIT 10')
+    drafts = cursor.fetchall()
+    conn.close()
+    
+    # We will build a simple HTML string right here so you don't even need a new template file!
+    html_content = """
+    <html><body style="font-family: sans-serif; padding: 40px; background: #f4f4f5;">
+    <h1 style="color: #18181b;">🤖 Your AI Social Media Dashboard</h1>
+    <p>Copy and paste these drafts to your social accounts to drive traffic.</p>
+    """
+    for draft in drafts:
+        html_content += f"""
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h2 style="margin-top:0; color: #2563eb;">Article: {draft['article_title']}</h2>
+            <h3 style="color: #0077b5;">LinkedIn Draft</h3>
+            <textarea style="width: 100%; height: 150px; padding: 10px;">{draft['linkedin_post']}</textarea>
+            <h3 style="color: #0f1419;">Twitter Draft</h3>
+            <textarea style="width: 100%; height: 80px; padding: 10px;">{draft['twitter_post']}</textarea>
+        </div>
+        """
+    html_content += "</body></html>"
+    
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=html_content)
