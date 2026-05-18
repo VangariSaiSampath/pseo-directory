@@ -240,3 +240,69 @@ async def sitemap():
     xml += '</urlset>'
     
     return Response(content=xml, media_type="application/xml")
+
+# --- 7. NEW: Autonomous Tech News Engine ---
+@app.get("/news")
+async def news_index(request: Request):
+    conn, cursor = get_db_connection()
+    cursor.execute('SELECT * FROM news_posts ORDER BY published_date DESC LIMIT 20')
+    posts = cursor.fetchall()
+    conn.close()
+    # Reusing existing blog layout!
+    return templates.TemplateResponse("blog.html", {"request": request, "posts": posts, "page_title": "Latest AI & Tech News", "subtitle": "Stay updated with the latest breakthroughs in AI, LLMs, and the future of work."}) 
+
+@app.get("/news/{slug}")
+async def read_news(request: Request, slug: str):
+    conn, cursor = get_db_connection()
+    cursor.execute('SELECT * FROM news_posts WHERE slug = %s', (slug,))
+    post = cursor.fetchone()
+    conn.close()
+    
+    if not post:
+        return {"error": "News article not found"}
+    return templates.TemplateResponse("blog_post.html", {"request": request, "post": post})
+
+@app.get("/api/agent/daily-news")
+async def run_news_agent(secret: str):
+    if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
+        return {"error": "Unauthorized Access"}
+
+    conn, cursor = get_db_connection()
+    
+    prompt = """
+    Act as a senior tech journalist. Write a highly engaging, SEO-optimized news article about a very recent breakthrough in Artificial Intelligence, Large Language Models, or SaaS automation for 2026. 
+    Focus on how these technologies are transforming business workflows and the future of work.
+    
+    CRITICAL INSTRUCTIONS:
+    - Write 100% original content. 
+    - Format the output strictly in HTML (using <h2>, <p>, <ul>, <li>, <strong>).
+    - Start with an extremely catchy title wrapped in an <h1> tag.
+    - Do not include standard greetings.
+    """
+    
+    try:
+        # Using gemini-2.5-flash as established for your account
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        html_content = response.text
+
+        title_match = re.search(r'<h1>(.*?)</h1>', html_content)
+        title = title_match.group(1) if title_match else "Latest AI and Automation News"
+        slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+
+        cursor.execute('''
+            INSERT INTO news_posts (title, slug, content) 
+            VALUES (%s, %s, %s) 
+            ON CONFLICT (slug) DO NOTHING
+        ''', (title, slug, html_content))
+        
+        conn.commit()
+        conn.close()
+
+        return {"status": "Success", "posted": title}
+
+    except Exception as e:
+        print(f"News Agent Error: {e}")
+        return {"status": "Failed", "error": str(e)}
