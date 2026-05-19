@@ -260,7 +260,7 @@ async def home(request: Request, q: str = "", page: int = 1):
     # ----------------------------------------------------------------
     
     # --- NEW: Fetch E-Commerce Deals ---
-    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 3')
+    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 9')
     daily_deals = cursor.fetchall()
     # ---------------------------------------------------------------
 
