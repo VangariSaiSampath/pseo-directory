@@ -340,7 +340,7 @@ async def curated_list(request: Request, tool: str):
     trending_searches = [{"term": row['query'], "count": row['search_count']} for row in trending_raw]
     
     # 3. Fetch E-Commerce Deals for the Sidebar
-    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 3')
+    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 9')
     daily_deals = cursor.fetchall()
     
     conn.close()
