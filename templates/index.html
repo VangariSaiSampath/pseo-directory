@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta name='impact-site-verification' value='4827f88a-5817-4418-9d56-eaa4385f23b2'>
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7SNZL2J29"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -16,76 +15,186 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Software Integration Directory</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Small custom style to hide the default browser arrow on details summary tags */
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
+    
     <nav class="bg-white border-b py-4 px-4 shadow-sm mb-8">
-        <div class="max-w-5xl mx-auto flex justify-between items-center">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
             <a href="/" class="text-xl font-black text-blue-600">Integration Directory</a>
             <div class="space-x-4 md:space-x-6 text-sm font-medium text-gray-600">
-                <div class="space-x-4 md:space-x-6 text-sm font-medium text-gray-600">
                 <a href="/blog" class="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full hover:bg-blue-100 transition">Techie Blog</a>
                 <a href="/news" class="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full hover:bg-blue-100 transition">AI News</a>
                 <a href="/best-integrations-for/slack" class="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full hover:bg-blue-100 transition">Best for Slack</a>
                 <a href="/best-integrations-for/notion" class="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full hover:bg-blue-100 transition">Best for Notion</a>
-                </div>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-5xl mx-auto px-4 py-8">
-        <h1 class="text-4xl font-extrabold text-center mb-4 text-blue-600">
-            {% if title %}
-                {{ title }}
-            {% else %}
-                Find Your Perfect Software Integration
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col lg:flex-row gap-8">
+        
+        <main class="w-full lg:w-3/4">
+            <h1 class="text-4xl font-extrabold text-center lg:text-left mb-4 text-blue-600">
+                {% if title %}
+                    {{ title }}
+                {% else %}
+                    Find Your Perfect Software Integration
+                {% endif %}
+            </h1>
+            <p class="text-center lg:text-left text-lg text-gray-500 mb-8">Browse our database of tools to automate your workflow.</p>
+
+            <div class="mb-10">
+                <form action="/" method="get" class="flex shadow-sm rounded-lg">
+                    <input type="text" name="q" value="{{ q or '' }}" placeholder="Search for a tool (e.g., Slack)..." class="w-full px-4 py-3 rounded-l-lg border border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-gray-700">
+                    <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-r-lg font-bold hover:bg-blue-700 transition">Search</button>
+                </form>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for item in integrations %}
+                <a href="/integrate/{{ item.slug }}" class="block bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition duration-200">
+                    <h2 class="text-xl font-bold mb-2">{{ item.tool_a }} + {{ item.tool_b }}</h2>
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ item.description }}</p>
+                    <span class="text-xs font-semibold text-blue-500 bg-blue-50 px-2 py-1 rounded-full">{{ item.search_volume }} Searches/mo</span>
+                </a>
+                {% endfor %}
+            </div>
+
+            {% if total_pages is defined and total_pages > 1 %}
+            <div class="mt-12 flex justify-center items-center space-x-4">
+                {% if page > 1 %}
+                <a href="/?q={{ q or '' }}&page={{ page - 1 }}" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+                    &larr; Previous
+                </a>
+                {% endif %}
+
+                <span class="text-gray-500 font-medium">Page {{ page }} of {{ total_pages }}</span>
+
+                {% if page < total_pages %}
+                <a href="/?q={{ q or '' }}&page={{ page + 1 }}" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+                    Next &rarr;
+                </a>
+                {% endif %}
+            </div>
             {% endif %}
-        </h1>
-        <p class="text-center text-lg text-gray-500 mb-12">Browse our database of tools to automate your workflow.</p>
+        </main>
 
-        <div class="max-w-2xl mx-auto mb-12">
-            <form action="/" method="get" class="flex shadow-sm rounded-lg">
-                <input type="text" name="q" value="{{ q }}" placeholder="Search for a tool (e.g., Slack)..." class="w-full px-4 py-3 rounded-l-lg border border-gray-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-gray-700">
-                <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-r-lg font-bold hover:bg-blue-700 transition">Search</button>
-            </form>
-        </div>
+        <aside class="w-full lg:w-1/4 space-y-6 lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:overflow-y-auto pr-2 pb-10">
+            
+            <details class="bg-white rounded-xl shadow-sm border border-gray-200 group" open>
+                <summary class="p-5 text-base font-bold text-gray-900 cursor-pointer flex justify-between items-center select-none">
+                    🛒 Daily Deals
+                    <span class="text-gray-400 group-open:rotate-180 transition-transform duration-300">▼</span>
+                </summary>
+                <div class="px-5 pb-5">
+                    {% for deal in daily_deals %}
+                    <a href="{{ deal.affiliate_link }}" target="_blank" class="block bg-gray-50 hover:bg-gray-100 p-3 rounded-lg mb-3 border-l-4 border-{{ deal.color_theme }} transition">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ deal.platform }}</span>
+                        <p class="text-sm font-semibold text-gray-800 leading-tight mt-1">{{ deal.product_name }}</p>
+                        <span class="text-xs text-blue-600 font-medium mt-2 inline-block">View Deal &rarr;</span>
+                    </a>
+                    {% else %}
+                    <p class="text-sm text-gray-500 italic">Finding today's best deals...</p>
+                    {% endfor %}
+                </div>
+            </details>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for item in integrations %}
-            <a href="/integrate/{{ item.slug }}" class="block bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition duration-200">
-                <h2 class="text-xl font-bold mb-2">{{ item.tool_a }} + {{ item.tool_b }}</h2>
-                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ item.description }}</p>
-                <span class="text-xs font-semibold text-blue-500 bg-blue-50 px-2 py-1 rounded-full">{{ item.search_volume }} Searches/mo</span>
-            </a>
-            {% endfor %}
-        </div>
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-5 rounded-xl shadow-md text-white">
+                <h3 class="text-sm font-bold text-blue-100 uppercase tracking-wider mb-2">⭐ Tool of the Day</h3>
+                <h4 class="text-lg font-bold mb-2">Make.com Automation</h4>
+                <p class="text-xs mb-4 opacity-90 leading-relaxed">Design, build, and automate anything visually without writing code.</p>
+                <a href="https://www.make.com/en/register?pc=sampath9" target="_blank" class="block text-center bg-white text-blue-700 text-sm font-bold py-2 rounded-lg hover:bg-gray-100 transition shadow-sm">Start for Free</a>
+            </div>
 
-        {% if total_pages is defined and total_pages > 1 %}
-        <div class="mt-12 flex justify-center items-center space-x-4">
-            {% if page > 1 %}
-            <a href="/?q={{ q }}&page={{ page - 1 }}" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
-                &larr; Previous
-            </a>
-            {% endif %}
+            <details class="bg-white rounded-xl shadow-sm border border-gray-200 group" open>
+                <summary class="p-5 text-base font-bold text-gray-900 cursor-pointer flex justify-between items-center select-none">
+                    📈 Trending Searches
+                    <span class="text-gray-400 group-open:rotate-180 transition-transform duration-300">▼</span>
+                </summary>
+                
+                <div class="px-5 pb-5">
+                    <ul class="space-y-3">
+                        {% for trend in trending_searches %}
+                        <li>
+                            <a href="/?q={{ trend.term }}" class="text-sm text-gray-600 hover:text-blue-600 hover:underline flex items-center justify-between group">
+                                <span class="capitalize">{{ loop.index }}. {{ trend.term }}</span> 
+                                {% if loop.index == 1 %}
+                                    <span class="text-[10px] bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded group-hover:bg-red-200 transition">HOT</span>
+                                {% else %}
+                                    <span class="text-[10px] bg-gray-100 text-gray-500 font-bold px-2 py-0.5 rounded">{{ trend.count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="text-sm text-gray-500 italic">No searches yet today.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </details>
 
-            <span class="text-gray-500 font-medium">Page {{ page }} of {{ total_pages }}</span>
+            <div class="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                <h3 class="text-sm font-bold text-blue-900 mb-1">📬 The Techie Newsletter</h3>
+                <p class="text-xs text-blue-700 mb-4">Get the latest AI workflows sent straight to your inbox.</p>
+                <form id="newsletter-form" class="flex flex-col gap-2">
+                    <input type="email" id="newsletter-email" name="email" required placeholder="Your email address" class="px-3 py-2 rounded border border-blue-200 text-sm focus:outline-none focus:border-blue-500">
+                    <button type="submit" id="newsletter-btn" class="bg-blue-600 text-white text-sm font-bold py-2 rounded hover:bg-blue-700 transition">Subscribe</button>
+                </form>
+                <p id="newsletter-msg" class="hidden text-xs mt-2 font-bold text-green-600"></p>
+            </div>
 
-            {% if page < total_pages %}
-            <a href="/?q={{ q }}&page={{ page + 1 }}" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
-                Next &rarr;
-            </a>
-            {% endif %}
-        </div>
-        {% endif %}
+        </aside>
     </div>
-    <div class="max-w-3xl mx-auto mt-20 mb-12 bg-blue-600 text-white p-8 rounded-2xl shadow-lg text-center">
+
+    <div class="max-w-4xl mx-auto mt-12 mb-12 bg-blue-600 text-white p-8 rounded-2xl shadow-lg text-center mx-4 md:mx-auto">
         <h2 class="text-3xl font-bold mb-4">Can't find your tools?</h2>
         <p class="mb-6 opacity-90">Tell us what you want to connect, and our automation experts will build it for you.</p>
         <form action="/request-integration" method="POST" class="flex flex-col md:flex-row gap-4 justify-center">
-            <input type="text" name="tools" placeholder="E.g., QuickBooks + Shopify" required class="px-4 py-3 rounded-lg text-gray-800 w-full md:w-1/3 outline-none">
-            <input type="email" name="email" placeholder="Your Email Address" required class="px-4 py-3 rounded-lg text-gray-800 w-full md:w-1/3 outline-none">
-            <button type="submit" class="bg-white text-blue-600 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition shadow">Request Integration</button>
+            <input type="text" name="tools" placeholder="E.g., QuickBooks + Shopify" required class="px-4 py-3 rounded-lg text-gray-800 w-full md:w-1/3 outline-none shadow-inner">
+            <input type="email" name="email" placeholder="Your Email Address" required class="px-4 py-3 rounded-lg text-gray-800 w-full md:w-1/3 outline-none shadow-inner">
+            <button type="submit" class="bg-white text-blue-600 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition shadow text-center flex justify-center items-center">Request Integration</button>
         </form>
     </div>
-    <a href="/privacy" class="hover:text-blue-600 transition">Privacy Policy</a> | <a href="/terms" class="hover:text-blue-600 transition">Terms of Service</a>
+
+    <div class="text-center pb-10 text-sm text-gray-500">
+        <a href="/privacy" class="hover:text-blue-600 transition">Privacy Policy</a> 
+        <span class="mx-2">|</span> 
+        <a href="/terms" class="hover:text-blue-600 transition">Terms of Service</a>
+    </div>
+<script>
+        document.getElementById('newsletter-form').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Stops the page from redirecting
+            
+            const emailInput = document.getElementById('newsletter-email');
+            const msgEl = document.getElementById('newsletter-msg');
+            const btn = document.getElementById('newsletter-btn');
+            
+            btn.innerText = "Subscribing...";
+            
+            try {
+                const formData = new FormData();
+                formData.append("email", emailInput.value);
+                
+                const response = await fetch('/subscribe', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                msgEl.innerText = data.message;
+                msgEl.classList.remove('hidden'); // Show the success message
+                emailInput.value = ''; // Clear the input box
+            } catch (error) {
+                msgEl.innerText = "Error. Please try again.";
+                msgEl.classList.remove('hidden');
+                msgEl.classList.replace('text-green-600', 'text-red-600');
+            }
+            btn.innerText = "Subscribe";
+        });
+    </script>
 </body>
 </html>
+

@@ -13,12 +13,17 @@
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
     <div class="max-w-3xl mx-auto px-4 py-12">
-        <a href="/" class="text-blue-500 font-bold mb-8 inline-block">&larr; Back to Directory</a>
-        
+        <a href="{{ back_url | default('/') }}" onclick="if(document.referrer.includes(window.location.hostname)) { history.back(); return false; }" class="text-blue-600 font-bold hover:underline mb-8 inline-block">
+            &larr; Back to {{ back_text | default('Directory') }}
+        </a>
         <div class="bg-white p-8 md:p-12 rounded-2xl shadow-sm border prose">
             {{ post.content | safe }} 
         </div>
     </div>
-    <a href="/privacy" class="hover:text-blue-600 transition">Privacy Policy</a> | <a href="/terms" class="hover:text-blue-600 transition">Terms of Service</a>
+    <div class="text-center pb-10 text-sm text-gray-500">
+        <a href="/privacy" class="hover:text-blue-600 transition">Privacy Policy</a> 
+        <span class="mx-2">|</span> 
+        <a href="/terms" class="hover:text-blue-600 transition">Terms of Service</a>
+    </div>
 </body>
 </html>

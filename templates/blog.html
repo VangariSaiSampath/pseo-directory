@@ -12,7 +12,6 @@
             <div class="space-x-4 md:space-x-6 text-sm font-medium text-gray-600">
                 <a href="/best-integrations-for/slack" class="hover:text-blue-600 transition">Best for Slack</a>
                 <a href="/best-integrations-for/notion" class="hover:text-blue-600 transition">Best for Notion</a>
-                <a href="/glossary" class="hover:text-blue-600 transition">Glossary</a>
             </div>
         </div>
     </nav>
@@ -25,7 +24,7 @@
                 <p class="text-gray-600 mt-2">{{ page_subtitle | default("Daily insights on the latest software integrations and automation strategies.") }}</p>
             </div>
             
-            <a href="/" class="mt-4 md:mt-0 whitespace-nowrap bg-blue-50 text-blue-600 font-bold px-5 py-2.5 rounded-lg hover:bg-blue-100 transition shadow-sm border border-blue-100">
+            <a href="javascript:history.back()" class="mt-4 md:mt-0 whitespace-nowrap bg-blue-50 text-blue-600 font-bold px-5 py-2.5 rounded-lg hover:bg-blue-100 transition shadow-sm border border-blue-100">
                 &larr; Back to Directory
             </a>
         </div>
@@ -42,9 +41,13 @@
         </div>
         
         <div class="mt-10 text-center">
-            <a href="/" class="text-blue-500 hover:underline font-medium">&larr; Return to Directory</a>
+            <a href="javascript:history.back()" class="text-blue-500 hover:underline font-medium">&larr; Return to Directory</a>
         </div>
-        <a href="/privacy" class="hover:text-blue-600 transition">Privacy Policy</a> | <a href="/terms" class="hover:text-blue-600 transition">Terms of Service</a>
+    </div>
+    <div class="text-center pb-10 text-sm text-gray-500">
+        <a href="/privacy" class="hover:text-blue-600 transition">Privacy Policy</a> 
+        <span class="mx-2">|</span> 
+        <a href="/terms" class="hover:text-blue-600 transition">Terms of Service</a>
     </div>
 </body>
 </html>
