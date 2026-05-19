@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><title>Techie Blog | Automation News</title>
+    <meta charset="UTF-8">
+    <title>{{ page_title | default("Techie Blog | Automation News") }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
@@ -24,7 +25,7 @@
                 <p class="text-gray-600 mt-2">{{ page_subtitle | default("Daily insights on the latest software integrations and automation strategies.") }}</p>
             </div>
             
-            <a href="javascript:history.back()" class="mt-4 md:mt-0 whitespace-nowrap bg-blue-50 text-blue-600 font-bold px-5 py-2.5 rounded-lg hover:bg-blue-100 transition shadow-sm border border-blue-100">
+            <a href="/" class="mt-4 md:mt-0 whitespace-nowrap bg-blue-50 text-blue-600 font-bold px-5 py-2.5 rounded-lg hover:bg-blue-100 transition shadow-sm border border-blue-100">
                 &larr; Back to Directory
             </a>
         </div>
@@ -36,15 +37,35 @@
                 <p class="text-sm text-gray-400">Published: {{ post.published_date }}</p>
             </a>
             {% else %}
-            <p>The AI Agent is writing its first post. Check back soon!</p>
+            <p class="text-gray-500 italic">The AI Agent is writing its first post. Check back soon!</p>
             {% endfor %}
+            
+            {% if total_pages is defined and total_pages > 1 %}
+            <div class="mt-12 flex justify-center items-center space-x-4">
+                {% if page > 1 %}
+                <a href="/{{ post_type | default('blog') }}?page={{ page - 1 }}" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+                    &larr; Previous
+                </a>
+                {% endif %}
+
+                <span class="text-gray-500 font-medium px-4 py-2 bg-gray-100 rounded-lg">Page {{ page }} of {{ total_pages }}</span>
+
+                {% if page < total_pages %}
+                <a href="/{{ post_type | default('blog') }}?page={{ page + 1 }}" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+                    Next &rarr;
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+            
         </div>
         
         <div class="mt-10 text-center">
-            <a href="javascript:history.back()" class="text-blue-500 hover:underline font-medium">&larr; Return to Directory</a>
+            <a href="/" class="text-blue-500 hover:underline font-medium">&larr; Return to Directory</a>
         </div>
     </div>
-    <div class="text-center pb-10 text-sm text-gray-500">
+    
+    <div class="text-center pb-10 text-sm text-gray-500 border-t pt-8 mt-8">
         <a href="/privacy" class="hover:text-blue-600 transition">Privacy Policy</a> 
         <span class="mx-2">|</span> 
         <a href="/terms" class="hover:text-blue-600 transition">Terms of Service</a>

@@ -93,7 +93,7 @@ def send_newsletter(subject: str, content: str):
 @app.get("/blog")
 async def blog_index(request: Request, page: int = 1):
     conn, cursor = get_db_connection()
-    per_page = 25
+    per_page = 15
     offset = (page - 1) * per_page
     
     # Count total posts for pagination
@@ -101,7 +101,7 @@ async def blog_index(request: Request, page: int = 1):
     total_items = cursor.fetchone()['count']
     total_pages = math.ceil(total_items / per_page) if total_items > 0 else 1
     
-    # Fetch just the 25 posts for the current page
+    # Fetch just the 15 posts for the current page
     cursor.execute('SELECT * FROM blog_posts ORDER BY published_date DESC LIMIT %s OFFSET %s', (per_page, offset))
     posts = cursor.fetchall()
     conn.close()
@@ -260,7 +260,7 @@ async def home(request: Request, q: str = "", page: int = 1):
     # ----------------------------------------------------------------
     
     # --- NEW: Fetch E-Commerce Deals ---
-    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 3')
+    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 9')
     daily_deals = cursor.fetchall()
     # ---------------------------------------------------------------
 
@@ -340,7 +340,7 @@ async def curated_list(request: Request, tool: str):
     trending_searches = [{"term": row['query'], "count": row['search_count']} for row in trending_raw]
     
     # 3. Fetch E-Commerce Deals for the Sidebar
-    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 3')
+    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 9')
     daily_deals = cursor.fetchall()
     
     conn.close()
@@ -394,7 +394,7 @@ async def sitemap():
 @app.get("/news")
 async def news_index(request: Request, page: int = 1):
     conn, cursor = get_db_connection()
-    per_page = 25
+    per_page = 15
     offset = (page - 1) * per_page
     
     cursor.execute('SELECT COUNT(*) as count FROM news_posts')
