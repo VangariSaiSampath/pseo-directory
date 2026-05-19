@@ -29,6 +29,7 @@
             <div class="space-x-4 md:space-x-6 text-sm font-medium text-gray-600">
                 <a href="/blog" class="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full hover:bg-blue-100 transition">Techie Blog</a>
                 <a href="/news" class="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full hover:bg-blue-100 transition">AI News</a>
+                <a href="/gear" class="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full hover:bg-blue-100 transition">Top Deals</a>
                 <a href="/best-integrations-for/slack" class="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full hover:bg-blue-100 transition">Best for Slack</a>
                 <a href="/best-integrations-for/notion" class="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full hover:bg-blue-100 transition">Best for Notion</a>
             </div>
@@ -92,7 +93,7 @@
                 </summary>
                 <div class="px-5 pb-5">
                     {% for deal in daily_deals %}
-                    <a href="{{ deal.affiliate_link }}" target="_blank" class="block bg-gray-50 hover:bg-gray-100 p-3 rounded-lg mb-3 border-l-4 border-{{ deal.color_theme }} transition">
+                    <a href="{{ deal.affiliate_link }}" target="_blank" rel="sponsored nofollow" class="block bg-gray-50 hover:bg-gray-100 p-3 rounded-lg mb-3 border-l-4 border-{{ deal.color_theme }} transition">
                         <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ deal.platform }}</span>
                         <p class="text-sm font-semibold text-gray-800 leading-tight mt-1">{{ deal.product_name }}</p>
                         <span class="text-xs text-blue-600 font-medium mt-2 inline-block">View Deal &rarr;</span>

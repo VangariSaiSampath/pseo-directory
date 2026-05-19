@@ -163,6 +163,7 @@ async def run_ai_agent(secret: str, background_tasks: BackgroundTasks):
     - Format the output strictly in HTML (using <h2>, <p>, <ul>, <li>, <strong>).
     - Do not include standard greetings, just the HTML content.
     - Start with an extremely catchy title wrapped in an <h1> tag.
+    - Near the end of the article, add a section called "Recommended Products and Deals" and recommend a high-end Products and Deals.
     """
     
     try:
@@ -260,7 +261,7 @@ async def home(request: Request, q: str = "", page: int = 1):
     # ----------------------------------------------------------------
     
     # --- NEW: Fetch E-Commerce Deals ---
-    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 9')
+    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 4')
     daily_deals = cursor.fetchall()
     # ---------------------------------------------------------------
 
@@ -311,6 +312,7 @@ async def glossary(request: Request):
     conn.close()
     return templates.TemplateResponse("glossary.html", {"request": request, "terms": terms})
 
+
 @app.get("/compare/{tool_a}-vs-{tool_b}")
 async def compare(request: Request, tool_a: str, tool_b: str):
     return templates.TemplateResponse("compare.html", {
@@ -340,7 +342,7 @@ async def curated_list(request: Request, tool: str):
     trending_searches = [{"term": row['query'], "count": row['search_count']} for row in trending_raw]
     
     # 3. Fetch E-Commerce Deals for the Sidebar
-    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 9')
+    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 4')
     daily_deals = cursor.fetchall()
     
     conn.close()
@@ -367,6 +369,33 @@ async def integration_page(request: Request, slug: str):
         raise HTTPException(status_code=404, detail="Integration not found")
 
     return templates.TemplateResponse("integration.html", {"request": request, "data": integration})
+
+# --- NEW: Dedicated Affiliate Landing Page ---
+
+# --- Dedicated Affiliate Landing Page (Generalized) ---
+@app.get("/gear")
+async def gear_page(request: Request):
+    conn, cursor = get_db_connection()
+    
+    # Fetch ALL your affiliate links for the dedicated page
+    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY id DESC')
+    all_deals = cursor.fetchall()
+    
+    # Fetch trending searches to keep the sidebar functional
+    cursor.execute('SELECT query, COUNT(*) as search_count FROM search_logs GROUP BY query ORDER BY search_count DESC LIMIT 5')
+    trending_raw = cursor.fetchall()
+    trending_searches = [{"term": row['query'], "count": row['search_count']} for row in trending_raw]
+    
+    conn.close()
+
+    return templates.TemplateResponse("gear.html", {
+        "request": request,
+        "deals": all_deals,
+        "trending_searches": trending_searches,
+        "page_title": "Top Deals & Exclusive Offers",
+        "page_subtitle": "Hand-picked discounts, software tools, and top products across our favorite platforms."
+    })
+
 
 # --- 6. SEO Sitemap Generation ---
 @app.get("/sitemap.xml")
@@ -671,7 +700,7 @@ async def view_admin_deals(request: Request, secret: str = None):
         html_content += f"""
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-l-4 border-{deal['color_theme']}">{deal['platform']}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><a href="{deal['affiliate_link']}" target="_blank" class="text-blue-600 hover:underline">{deal['product_name']}</a></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><a href="{deal['affiliate_link']}" target="_blank" rel="sponsored nofollow" class="text-blue-600 hover:underline">{deal['product_name']}</a></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold">
                                 <form action="/admin/deals/delete" method="POST" style="margin:0;">
                                     <input type="hidden" name="secret" value="{secret}">
