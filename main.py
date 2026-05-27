@@ -20,6 +20,9 @@ from fastapi import BackgroundTasks
 
 from fastapi.responses import RedirectResponse
 
+import feedparser
+import httpx
+
 
 # Load environment variables
 load_dotenv()
@@ -135,70 +138,102 @@ async def read_blog(request: Request, slug: str):
     })
 
 # --- 2. THE AI AGENT ENDPOINT (The Automated Writer) ---
+
 @app.get("/api/agent/daily-blog")
 async def run_ai_agent(secret: str, background_tasks: BackgroundTasks):
-    # Security check: Only YOU can trigger this
     if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
         return {"error": "Unauthorized Access"}
 
     conn, cursor = get_db_connection()
-    
-    # Pick a random integration
-    cursor.execute('SELECT tool_a, tool_b FROM integrations')
+
+    # ── RATE LIMIT: only one blog post per day ─────────────────────────────
+    cursor.execute(
+        "SELECT COUNT(*) as count FROM blog_posts WHERE published_date >= NOW() - INTERVAL '24 hours'"
+    )
+    posts_today = cursor.fetchone()["count"]
+    if posts_today >= 1:
+        conn.close()
+        return {"status": "Skipped", "reason": "Already posted a blog today. Cron will run again tomorrow."}
+    # ───────────────────────────────────────────────────────────────────────
+
+    # Pick a random integration pair
+    cursor.execute("SELECT tool_a, tool_b FROM integrations")
     integrations = cursor.fetchall()
-    
     if not integrations:
         conn.close()
-        return {"error": "No integrations found to write about."}
-        
-    random_pair = random.choice(integrations)
-    tool_a, tool_b = random_pair['tool_a'], random_pair['tool_b']
+        return {"error": "No integrations found in database."}
 
+    random_pair = random.choice(integrations)
+    tool_a, tool_b = random_pair["tool_a"], random_pair["tool_b"]
+
+    # ── IMPROVED PROMPT: SEO-optimised, no clickbait ───────────────────────
     prompt = f"""
-    Act as a senior tech journalist. Write an engaging, highly SEO-optimized blog post about integrating {tool_a} and {tool_b}. 
-    Discuss modern business trends, why this specific automation saves hours of manual data entry, and potential creative use cases for 2026.
-    
-    CRITICAL INSTRUCTIONS:
-    - Write 100% original content. Do not copy from other sources.
-    - Format the output strictly in HTML (using <h2>, <p>, <ul>, <li>, <strong>).
-    - Do not include standard greetings, just the HTML content.
-    - Start with an extremely catchy title wrapped in an <h1> tag.
-    - Near the end of the article, add a section called "Recommended Products and Deals" and recommend a high-end Products and Deals.
-    """
-    
+You are a B2B tech writer for integration-directory.com, a software integration directory.
+Write an 900-word SEO blog post about connecting {tool_a} and {tool_b} using Make.com automation.
+
+TITLE FORMAT (mandatory):
+"How to Connect {tool_a} and {tool_b}: Step-by-Step Guide (2026)"
+Wrap it in an <h1> tag.
+
+STRUCTURE (use these exact H2 headings):
+<h2>Why connect {tool_a} and {tool_b}?</h2>
+<h2>What you need before you start</h2>
+<h2>Step-by-step: How to integrate {tool_a} and {tool_b} using Make.com</h2>
+  → Write 3 numbered steps inside this section as <ol><li> tags
+<h2>Popular use cases</h2>
+  → 3 bullet points, realistic business scenarios
+<h2>How much time will this save?</h2>
+  → 1 short paragraph with realistic time savings estimate
+
+MAKE.COM CTA (insert after the step-by-step section, exact HTML):
+<div style="background:#eff6ff;border-left:4px solid #2563eb;padding:16px;border-radius:6px;margin:24px 0;">
+<strong>Ready to set this up?</strong> Build this automation for free on Make.com — no coding needed.<br>
+<a href="https://www.make.com/en/register?pc=sampath9" rel="sponsored" style="color:#2563eb;font-weight:bold;">Start free on Make.com →</a>
+</div>
+
+FAQ SECTION (at the end, mandatory for Google rich snippets):
+<h2>Frequently asked questions</h2>
+Write exactly 3 questions and answers about this integration using <h3> for questions and <p> for answers.
+
+STRICT RULES:
+- DO NOT use words: unleash, nexus, supercharge, revolutionize, game-changer, hyper-productivity
+- DO NOT invent product features
+- Use plain business language, not marketing hype
+- Format entire output in HTML only (<h1> <h2> <h3> <p> <ul> <ol> <li> <strong> <div>)
+- Do not include greetings or sign-offs
+"""
+    # ───────────────────────────────────────────────────────────────────────
+
     try:
-        # Generate the blog using the latest Gemini 2.5 Flash model
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model="gemini-2.5-flash",
             contents=prompt,
         )
         html_content = response.text
-        
-        # Clean up any potential markdown formatting from AI
         html_content = html_content.replace("```html", "").replace("```", "").strip()
 
-        title_match = re.search(r'<h1>(.*?)</h1>', html_content)
+        title_match = re.search(r"<h1>(.*?)</h1>", html_content)
         title = title_match.group(1) if title_match else f"{tool_a} and {tool_b} Automation Guide"
-        slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+        slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
 
-        # Save to Postgres
-        cursor.execute('''
-            INSERT INTO blog_posts (title, slug, content) 
-            VALUES (%s, %s, %s) 
+        cursor.execute(
+            """
+            INSERT INTO blog_posts (title, slug, content)
+            VALUES (%s, %s, %s)
             ON CONFLICT (slug) DO NOTHING
-        ''', (title, slug, html_content))
-        
+            """,
+            (title, slug, html_content),
+        )
         conn.commit()
         conn.close()
 
         background_tasks.add_task(send_newsletter, title, html_content)
-
         return {"status": "Success", "posted": title}
 
     except Exception as e:
         print(f"Agent Error: {e}")
+        conn.close()
         return {"status": "Failed", "error": str(e)}
-
 
 # --- 3. Lead Capture Route ---
 @app.post("/request-integration")
@@ -398,25 +433,49 @@ async def gear_page(request: Request):
 
 
 # --- 6. SEO Sitemap Generation ---
+
 @app.get("/sitemap.xml")
 async def sitemap():
     conn, cursor = get_db_connection()
-    cursor.execute('SELECT slug FROM integrations')
+
+    cursor.execute("SELECT slug FROM integrations")
     integrations = cursor.fetchall()
+
+    cursor.execute("SELECT slug FROM blog_posts ORDER BY published_date DESC")
+    blog_posts = cursor.fetchall()
+
+    cursor.execute("SELECT slug FROM news_posts ORDER BY published_date DESC")
+    news_posts = cursor.fetchall()
+
     conn.close()
 
-    base_url = "https://integration-directory.com" 
-    
+    base_url = "https://integration-directory.com"
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    
-    xml += f'  <url>\n    <loc>{base_url}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n'
-    
+
+    # Static pages
+    static_pages = [
+        ("", "1.0", "daily"),
+        ("/blog", "0.9", "daily"),
+        ("/news", "0.9", "daily"),
+        ("/gear", "0.7", "weekly"),
+    ]
+    for path, priority, freq in static_pages:
+        xml += f"  <url>\n    <loc>{base_url}{path}</loc>\n    <changefreq>{freq}</changefreq>\n    <priority>{priority}</priority>\n  </url>\n"
+
+    # Integration pages
     for item in integrations:
-        xml += f'  <url>\n    <loc>{base_url}/integrate/{item["slug"]}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n'
-        
-    xml += '</urlset>'
-    
+        xml += f"  <url>\n    <loc>{base_url}/integrate/{item['slug']}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n"
+
+    # Blog posts
+    for post in blog_posts:
+        xml += f"  <url>\n    <loc>{base_url}/blog/{post['slug']}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n"
+
+    # News posts
+    for post in news_posts:
+        xml += f"  <url>\n    <loc>{base_url}/news/{post['slug']}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n"
+
+    xml += "</urlset>"
     return Response(content=xml, media_type="application/xml")
 
 # --- 7. NEW: Autonomous Tech News Engine ---
@@ -463,54 +522,111 @@ async def read_news(request: Request, slug: str):
     })
 
 
+import feedparser
+import httpx
+
+# Real RSS sources — AI and automation news only
+RSS_FEEDS = [
+    "https://techcrunch.com/category/artificial-intelligence/feed/",
+    "https://venturebeat.com/category/ai/feed/",
+    "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+]
+
 @app.get("/api/agent/daily-news")
 async def run_news_agent(secret: str, background_tasks: BackgroundTasks):
     if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
         return {"error": "Unauthorized Access"}
 
     conn, cursor = get_db_connection()
-    
-    prompt = """
-    Act as a senior tech journalist. Write a highly engaging, SEO-optimized news article about a very recent breakthrough in Artificial Intelligence, Large Language Models, or SaaS automation for 2026. 
-    Focus on how these technologies are transforming business workflows and the future of work.
-    
-    CRITICAL INSTRUCTIONS:
-    - Write 100% original content. 
-    - Format the output strictly in HTML (using <h2>, <p>, <ul>, <li>, <strong>).
-    - Start with an extremely catchy title wrapped in an <h1> tag.
-    - Do not include standard greetings.
-    """
-    
+
+    # ── RATE LIMIT: only one post per day ──────────────────────────────────
+    cursor.execute(
+        "SELECT COUNT(*) as count FROM news_posts WHERE published_date >= NOW() - INTERVAL '24 hours'"
+    )
+    posts_today = cursor.fetchone()["count"]
+    if posts_today >= 1:
+        conn.close()
+        return {"status": "Skipped", "reason": "Already posted news today. Cron will run again tomorrow."}
+    # ───────────────────────────────────────────────────────────────────────
+
+    # ── FETCH REAL NEWS FROM RSS ────────────────────────────────────────────
+    real_articles = []
+    for feed_url in RSS_FEEDS:
+        try:
+            feed = feedparser.parse(feed_url)
+            for entry in feed.entries[:5]:  # top 5 from each feed
+                real_articles.append({
+                    "title": entry.get("title", ""),
+                    "summary": entry.get("summary", entry.get("description", ""))[:600],
+                    "link": entry.get("link", ""),
+                    "source": feed.feed.get("title", "Tech News")
+                })
+        except Exception as e:
+            print(f"RSS fetch failed for {feed_url}: {e}")
+            continue
+
+    if not real_articles:
+        conn.close()
+        return {"status": "Failed", "error": "Could not fetch any RSS articles. Check feed URLs."}
+
+    # Pick one random real article to base the post on
+    source_article = random.choice(real_articles)
+    # ───────────────────────────────────────────────────────────────────────
+
+    # ── GEMINI: Write an original analysis based on the REAL article ────────
+    prompt = f"""
+You are a senior tech journalist writing for integration-directory.com, a site about software automation and AI tools.
+
+A real news article was just published:
+- Source: {source_article['source']}
+- Headline: {source_article['title']}
+- Summary: {source_article['summary']}
+
+Write a 700-word original analysis article inspired by this REAL news. Do not invent company names or fake products.
+Focus on: what this means for software integrations, workflow automation, and SaaS teams.
+
+STRICT INSTRUCTIONS:
+- Title must follow this format: "[Real Topic]: What It Means for Your Automation Workflows"
+- Start the title in an <h1> tag.
+- Use <h2>, <p>, <ul>, <li>, <strong> HTML only.
+- Do NOT use hype words like "unleash", "nexus", "revolutionizing", "cognitive engine".
+- Add a "How to automate this with Make.com" section near the end with this exact CTA:
+  <div style="background:#f0f4ff;padding:16px;border-radius:8px;margin:20px 0;">
+  <strong>Automate this workflow today →</strong> <a href="https://www.make.com/en/register?pc=sampath9" rel="sponsored">Start free on Make.com</a> — no code required.
+  </div>
+- End with a 3-question FAQ section using <h3> for questions and <p> for answers.
+- Do NOT invent statistics, company names, or product features that are not in the source article.
+"""
+
     try:
-        # Using gemini-2.5-flash as established for your account
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model="gemini-2.5-flash",
             contents=prompt,
         )
         html_content = response.text
-        
-        # Clean up any AI formatting
         html_content = html_content.replace("```html", "").replace("```", "").strip()
-        
-        title_match = re.search(r'<h1>(.*?)</h1>', html_content)
-        title = title_match.group(1) if title_match else "Latest AI and Automation News"
-        slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
 
-        cursor.execute('''
-            INSERT INTO news_posts (title, slug, content) 
-            VALUES (%s, %s, %s) 
+        title_match = re.search(r"<h1>(.*?)</h1>", html_content)
+        title = title_match.group(1) if title_match else source_article["title"]
+        slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+
+        cursor.execute(
+            """
+            INSERT INTO news_posts (title, slug, content)
+            VALUES (%s, %s, %s)
             ON CONFLICT (slug) DO NOTHING
-        ''', (title, slug, html_content))
-        
+            """,
+            (title, slug, html_content),
+        )
         conn.commit()
         conn.close()
 
         background_tasks.add_task(send_newsletter, title, html_content)
-
-        return {"status": "Success", "posted": title}
+        return {"status": "Success", "posted": title, "based_on": source_article["title"]}
 
     except Exception as e:
         print(f"News Agent Error: {e}")
+        conn.close()
         return {"status": "Failed", "error": str(e)}
     
 # --- 8. Legal Pages (AdSense Compliance) ---
