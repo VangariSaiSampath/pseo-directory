@@ -27,6 +27,69 @@ import httpx
 # Load environment variables
 load_dotenv()
 
+MAKE_AFFILIATE = "https://www.make.com/en/register?pc=sampath9"
+ 
+TOOL_LINKS = {
+    # Automation tools - use your affiliate for Make.com, direct links for others
+    "make.com":      {"url": MAKE_AFFILIATE,                              "label": "Try Make.com free →",    "badge": "Your Affiliate"},
+    "make":          {"url": MAKE_AFFILIATE,                              "label": "Try Make.com free →",    "badge": "Your Affiliate"},
+    "zapier":        {"url": "https://zapier.com/sign-up",                "label": "Try Zapier free →",      "badge": "Free plan"},
+    "n8n":           {"url": "https://n8n.io/",                           "label": "Try n8n free →",         "badge": "Open source"},
+    "activepieces":  {"url": "https://www.activepieces.com/",             "label": "Try Activepieces →",     "badge": "Free"},
+    # CRM / Sales
+    "hubspot":       {"url": "https://www.hubspot.com/products/crm",      "label": "Try HubSpot free CRM →", "badge": "Free forever"},
+    "salesforce":    {"url": "https://www.salesforce.com/form/signup/",   "label": "Try Salesforce →",       "badge": "30-day trial"},
+    "pipedrive":     {"url": "https://www.pipedrive.com/",                "label": "Try Pipedrive →",        "badge": "14-day trial"},
+    "zoho":          {"url": "https://www.zoho.com/crm/",                 "label": "Try Zoho CRM →",         "badge": "Free plan"},
+    # Project management
+    "notion":        {"url": "https://www.notion.so/signup",              "label": "Try Notion free →",      "badge": "Free plan"},
+    "trello":        {"url": "https://trello.com/signup",                 "label": "Try Trello free →",      "badge": "Free forever"},
+    "asana":         {"url": "https://asana.com/create-account",          "label": "Try Asana free →",       "badge": "Free plan"},
+    "monday.com":    {"url": "https://monday.com/lang/en/",               "label": "Try Monday.com →",       "badge": "Free trial"},
+    "airtable":      {"url": "https://airtable.com/signup",               "label": "Try Airtable free →",    "badge": "Free plan"},
+    "clickup":       {"url": "https://clickup.com/",                      "label": "Try ClickUp free →",     "badge": "Free forever"},
+    "jira":          {"url": "https://www.atlassian.com/software/jira",   "label": "Try Jira free →",        "badge": "Free for 10 users"},
+    # Communication
+    "slack":         {"url": "https://slack.com/get-started",             "label": "Try Slack free →",       "badge": "Free plan"},
+    "zoom":          {"url": "https://zoom.us/freesignup/",               "label": "Try Zoom free →",        "badge": "Free plan"},
+    "teams":         {"url": "https://www.microsoft.com/en/microsoft-teams/", "label": "Try Teams free →",   "badge": "Free plan"},
+    "discord":       {"url": "https://discord.com/register",              "label": "Join Discord →",         "badge": "Free"},
+    # Marketing
+    "mailchimp":     {"url": "https://mailchimp.com/",                    "label": "Try Mailchimp free →",   "badge": "Free plan"},
+    "mailerlite":    {"url": "https://www.mailerlite.com/",               "label": "Try MailerLite free →",  "badge": "Free plan"},
+    "activecampaign":{"url": "https://www.activecampaign.com/",           "label": "Try ActiveCampaign →",   "badge": "14-day trial"},
+    # E-commerce
+    "shopify":       {"url": "https://www.shopify.com/",                  "label": "Try Shopify →",          "badge": "3-day free trial"},
+    "woocommerce":   {"url": "https://woocommerce.com/",                  "label": "Try WooCommerce →",      "badge": "Free plugin"},
+    "stripe":        {"url": "https://dashboard.stripe.com/register",     "label": "Try Stripe →",           "badge": "No monthly fee"},
+    # Support
+    "zendesk":       {"url": "https://www.zendesk.com/register/",         "label": "Try Zendesk →",          "badge": "Free trial"},
+    "intercom":      {"url": "https://www.intercom.com/",                 "label": "Try Intercom →",         "badge": "14-day trial"},
+    "freshdesk":     {"url": "https://freshdesk.com/",                    "label": "Try Freshdesk free →",   "badge": "Free plan"},
+    # Storage / Productivity
+    "google sheets": {"url": "https://workspace.google.com/",             "label": "Try Google Workspace →", "badge": "Free personal"},
+    "google drive":  {"url": "https://workspace.google.com/",             "label": "Try Google Workspace →", "badge": "Free"},
+    "dropbox":       {"url": "https://www.dropbox.com/register",          "label": "Try Dropbox free →",     "badge": "Free 2GB"},
+    "onedrive":      {"url": "https://www.microsoft.com/en-us/microsoft-365/", "label": "Try Microsoft 365 →", "badge": "Free trial"},
+    # Dev tools
+    "github":        {"url": "https://github.com/signup",                 "label": "Try GitHub free →",      "badge": "Free forever"},
+    "gitlab":        {"url": "https://gitlab.com/users/sign_up",          "label": "Try GitLab free →",      "badge": "Free plan"},
+    "linear":        {"url": "https://linear.app/",                       "label": "Try Linear free →",      "badge": "Free plan"},
+    # Analytics
+    "google analytics":{"url": "https://analytics.google.com/",           "label": "Try Google Analytics →", "badge": "Free"},
+    "mixpanel":      {"url": "https://mixpanel.com/register/",            "label": "Try Mixpanel free →",    "badge": "Free plan"},
+}
+ 
+def get_tool_link(tool_name: str) -> dict:
+    """Helper: returns link info for a tool, falls back to Make.com for unknown tools."""
+    key = tool_name.lower().strip()
+    return TOOL_LINKS.get(key, {
+        "url": MAKE_AFFILIATE,
+        "label": f"Automate {tool_name} with Make.com →",
+        "badge": "Free trial"
+    })
+ 
+
 # Initialize FastAPI and Templates
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -185,7 +248,7 @@ STRUCTURE (use these exact H2 headings):
 <h2>How much time will this save?</h2>
   → 1 short paragraph with realistic time savings estimate
 
-MAKE.COM CTA (insert after the step-by-step section, exact HTML):
+COM CTA (insert after the step-by-step section, exact HTML):
 <div style="background:#eff6ff;border-left:4px solid #2563eb;padding:16px;border-radius:6px;margin:24px 0;">
 <strong>Ready to set this up?</strong> Build this automation for free on Make.com — no coding needed.<br>
 <a href="https://www.make.com/en/register?pc=sampath9" rel="sponsored" style="color:#2563eb;font-weight:bold;">Start free on Make.com →</a>
@@ -396,39 +459,243 @@ async def curated_list(request: Request, tool: str):
 @app.get("/integrate/{slug}")
 async def integration_page(request: Request, slug: str):
     conn, cursor = get_db_connection()
-    cursor.execute('SELECT * FROM integrations WHERE slug = %s', (slug,))
+    cursor.execute("SELECT * FROM integrations WHERE slug = %s", (slug,))
     integration = cursor.fetchone()
     conn.close()
-
+ 
     if integration is None:
         raise HTTPException(status_code=404, detail="Integration not found")
+ 
+    # Get direct links for both tools
+    tool_a_info = get_tool_link(integration["tool_a"])
+    tool_b_info = get_tool_link(integration["tool_b"])
+ 
+    return templates.TemplateResponse("integration.html", {
+        "request": request,
+        "data": integration,
+        "make_affiliate": MAKE_AFFILIATE,
+        "tool_a_info": tool_a_info,
+        "tool_b_info": tool_b_info,
+    })
 
-    return templates.TemplateResponse("integration.html", {"request": request, "data": integration})
 
-# --- NEW: Dedicated Affiliate Landing Page ---
 
 # --- Dedicated Affiliate Landing Page (Generalized) ---
+
 @app.get("/gear")
 async def gear_page(request: Request):
+    """B2B SaaS Tools landing page — optimised for AdSense + Make.com affiliate."""
     conn, cursor = get_db_connection()
-    
-    # Fetch ALL your affiliate links for the dedicated page
-    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY id DESC')
-    all_deals = cursor.fetchall()
-    
-    # Fetch trending searches to keep the sidebar functional
-    cursor.execute('SELECT query, COUNT(*) as search_count FROM search_logs GROUP BY query ORDER BY search_count DESC LIMIT 5')
+    cursor.execute(
+        "SELECT query, COUNT(*) as search_count FROM search_logs GROUP BY query ORDER BY search_count DESC LIMIT 5"
+    )
     trending_raw = cursor.fetchall()
-    trending_searches = [{"term": row['query'], "count": row['search_count']} for row in trending_raw]
-    
+    trending_searches = [{"term": row["query"], "count": row["search_count"]} for row in trending_raw]
     conn.close()
-
+ 
+    # B2B SaaS tool cards — direct links, no affiliate approval needed
+    # Replace URL with your affiliate link once approved for each program
+    saas_deals = [
+        # ── Automation ─────────────────────────────────────────────────────
+        {
+            "category": "Automation",
+            "platform": "Make.com",
+            "product_name": "Automate any workflow — 1,000 ops/month free",
+            "affiliate_link": "https://www.make.com/en/register?pc=sampath9",
+            "badge": "★ Our Top Pick",
+            "badge_color": "blue",
+            "description": "Connect 1,500+ apps. Build visual automation workflows without code.",
+            "is_affiliate": True,  # Your active affiliate
+        },
+        {
+            "category": "Automation",
+            "platform": "Zapier",
+            "product_name": "Connect 6,000+ apps — free plan available",
+            "affiliate_link": "https://zapier.com/sign-up",
+            "badge": "Free plan",
+            "badge_color": "orange",
+            "description": "The most popular automation tool. 100 tasks/month free.",
+            "is_affiliate": False,
+        },
+        {
+            "category": "Automation",
+            "platform": "n8n",
+            "product_name": "Open-source automation — self-host for free",
+            "affiliate_link": "https://n8n.io/",
+            "badge": "Open Source",
+            "badge_color": "green",
+            "description": "Free forever if self-hosted. 200+ integrations included.",
+            "is_affiliate": False,
+        },
+        # ── CRM ───────────────────────────────────────────────────────────
+        {
+            "category": "CRM & Sales",
+            "platform": "HubSpot",
+            "product_name": "Free CRM — unlimited contacts, forever free",
+            "affiliate_link": "https://www.hubspot.com/products/crm",
+            "badge": "Free forever",
+            "badge_color": "orange",
+            "description": "Manage contacts, deals and pipelines. No credit card needed.",
+            "is_affiliate": False,
+        },
+        {
+            "category": "CRM & Sales",
+            "platform": "Zoho CRM",
+            "product_name": "Free CRM for up to 3 users",
+            "affiliate_link": "https://www.zoho.com/crm/",
+            "badge": "Free plan",
+            "badge_color": "red",
+            "description": "Full-featured CRM. Connect with Make.com for automation.",
+            "is_affiliate": False,
+        },
+        # ── Project Management ────────────────────────────────────────────
+        {
+            "category": "Project Management",
+            "platform": "Notion",
+            "product_name": "All-in-one workspace — free for personal use",
+            "affiliate_link": "https://www.notion.so/signup",
+            "badge": "Free plan",
+            "badge_color": "gray",
+            "description": "Notes, databases, wikis and project tracking in one tool.",
+            "is_affiliate": False,
+        },
+        {
+            "category": "Project Management",
+            "platform": "Trello",
+            "product_name": "Visual project boards — free forever",
+            "affiliate_link": "https://trello.com/signup",
+            "badge": "Free forever",
+            "badge_color": "blue",
+            "description": "Kanban boards for any team. Integrates with 200+ tools.",
+            "is_affiliate": False,
+        },
+        {
+            "category": "Project Management",
+            "platform": "ClickUp",
+            "product_name": "Replace all your tools — free forever plan",
+            "affiliate_link": "https://clickup.com/",
+            "badge": "Free forever",
+            "badge_color": "purple",
+            "description": "Tasks, docs, goals, and chat. 100MB storage free.",
+            "is_affiliate": False,
+        },
+        # ── Communication ────────────────────────────────────────────────
+        {
+            "category": "Communication",
+            "platform": "Slack",
+            "product_name": "Team messaging — free plan for small teams",
+            "affiliate_link": "https://slack.com/get-started",
+            "badge": "Free plan",
+            "badge_color": "green",
+            "description": "90-day message history free. Integrates with Make.com.",
+            "is_affiliate": False,
+        },
+        {
+            "category": "Communication",
+            "platform": "Zoom",
+            "product_name": "Video meetings — 40 min free",
+            "affiliate_link": "https://zoom.us/freesignup/",
+            "badge": "Free plan",
+            "badge_color": "blue",
+            "description": "100 participants, unlimited meetings. No credit card needed.",
+            "is_affiliate": False,
+        },
+        # ── Marketing ────────────────────────────────────────────────────
+        {
+            "category": "Email Marketing",
+            "platform": "Mailchimp",
+            "product_name": "Email marketing — 500 contacts free",
+            "affiliate_link": "https://mailchimp.com/",
+            "badge": "Free plan",
+            "badge_color": "yellow",
+            "description": "1,000 emails/month free. Automate with Make.com.",
+            "is_affiliate": False,
+        },
+        {
+            "category": "Email Marketing",
+            "platform": "MailerLite",
+            "product_name": "Email newsletters — 1,000 subscribers free",
+            "affiliate_link": "https://www.mailerlite.com/",
+            "badge": "Free plan",
+            "badge_color": "green",
+            "description": "12,000 emails/month free. Great for newsletters.",
+            "is_affiliate": False,
+        },
+        # ── Support ──────────────────────────────────────────────────────
+        {
+            "category": "Customer Support",
+            "platform": "Freshdesk",
+            "product_name": "Help desk software — free for 10 agents",
+            "affiliate_link": "https://freshdesk.com/",
+            "badge": "Free plan",
+            "badge_color": "teal",
+            "description": "Tickets, live chat, and knowledge base. 100% free tier.",
+            "is_affiliate": False,
+        },
+        {
+            "category": "Customer Support",
+            "platform": "Zendesk",
+            "product_name": "Enterprise customer support platform",
+            "affiliate_link": "https://www.zendesk.com/register/",
+            "badge": "Free trial",
+            "badge_color": "green",
+            "description": "14-day free trial. Integrates with 1,000+ tools.",
+            "is_affiliate": False,
+        },
+        # ── E-commerce ──────────────────────────────────────────────────
+        {
+            "category": "E-commerce",
+            "platform": "Shopify",
+            "product_name": "Start your online store — 3-day free trial",
+            "affiliate_link": "https://www.shopify.com/",
+            "badge": "Free trial",
+            "badge_color": "green",
+            "description": "Build, run and grow your e-commerce business.",
+            "is_affiliate": False,
+        },
+        {
+            "category": "E-commerce",
+            "platform": "Stripe",
+            "product_name": "Accept payments online — no monthly fees",
+            "affiliate_link": "https://dashboard.stripe.com/register",
+            "badge": "No monthly fee",
+            "badge_color": "purple",
+            "description": "Pay only per transaction. Works with Make.com automation.",
+            "is_affiliate": False,
+        },
+    ]
+ 
     return templates.TemplateResponse("gear.html", {
+        "request": request,
+        "deals": saas_deals,
+        "trending_searches": trending_searches,
+        "make_affiliate": MAKE_AFFILIATE,
+        "page_title": "Best Free SaaS Tools for 2026",
+        "page_subtitle": "Hand-picked free and freemium tools to run your business. All connect with Make.com automation.",
+    })
+
+
+@app.get("/india-deals")
+async def india_deals_page(request: Request):
+    """Indian consumer deals — EarnKaro affiliate links live here."""
+    conn, cursor = get_db_connection()
+    # Fetch consumer deals from ecommerce_deals table (your EarnKaro links)
+    cursor.execute("SELECT * FROM ecommerce_deals ORDER BY id DESC")
+    all_deals = cursor.fetchall()
+    cursor.execute(
+        "SELECT query, COUNT(*) as search_count FROM search_logs GROUP BY query ORDER BY search_count DESC LIMIT 5"
+    )
+    trending_raw = cursor.fetchall()
+    trending_searches = [{"term": row["query"], "count": row["search_count"]} for row in trending_raw]
+    conn.close()
+ 
+    return templates.TemplateResponse("india_deals.html", {
         "request": request,
         "deals": all_deals,
         "trending_searches": trending_searches,
-        "page_title": "Top Deals & Exclusive Offers",
-        "page_subtitle": "Hand-picked discounts, software tools, and top products across our favorite platforms."
+        "page_title": "Top India Online Deals 2026",
+        "page_subtitle": "Exclusive deals on fashion, electronics, beauty and more from top Indian platforms.",
+        "make_affiliate": MAKE_AFFILIATE,
     })
 
 
@@ -459,6 +726,7 @@ async def sitemap():
         ("/blog", "0.9", "daily"),
         ("/news", "0.9", "daily"),
         ("/gear", "0.7", "weekly"),
+        ("/india-deals", "0.6", "weekly"),
     ]
     for path, priority, freq in static_pages:
         xml += f"  <url>\n    <loc>{base_url}{path}</loc>\n    <changefreq>{freq}</changefreq>\n    <priority>{priority}</priority>\n  </url>\n"
