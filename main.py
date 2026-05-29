@@ -20,6 +20,8 @@ from fastapi import BackgroundTasks
 
 from fastapi.responses import RedirectResponse
 
+from fastapi import BackgroundTasks
+
 import feedparser
 import httpx
 
@@ -143,6 +145,10 @@ def send_newsletter(subject: str, content: str):
                 {content}
                 <hr style="border: 1px solid #eee; margin: 20px 0;">
                 <p><a href="https://integration-directory.com" style="color: #2563eb; font-weight: bold;">View more on the website &rarr;</a></p>
+                <p style="font-size:12px;color:#999;text-align:center;margin-top:30px;">
+                You're receiving this because you subscribed at integration-directory.com.<br>
+                <a href="https://integration-directory.com/unsubscribe?email={sub['email']}" style="color:#999;">Unsubscribe</a>
+                </p>
             </div>
             </body></html>
             """
@@ -299,31 +305,133 @@ STRICT RULES:
         return {"status": "Failed", "error": str(e)}
 
 # --- 3. Lead Capture Route ---
+
 @app.post("/request-integration")
-async def request_integration(email: str = Form(...), tools: str = Form(...)):
+async def request_integration(
+    email: str = Form(...),
+    tools: str = Form(...),
+    background_tasks: BackgroundTasks = None
+):
     conn, cursor = get_db_connection()
     cursor.execute('INSERT INTO leads (email, requested_tools) VALUES (%s, %s)', (email, tools))
     conn.commit()
     conn.close()
+    background_tasks.add_task(send_integration_request_emails, email, tools)
     return {"message": "Success! We will notify you when this integration is live."}
 
+
+def send_integration_request_emails(user_email: str, tools: str):
+    sender_email = os.environ.get("SMTP_EMAIL")
+    sender_password = os.environ.get("SMTP_PASSWORD")
+    if not sender_email or not sender_password:
+        return
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+
+        # 1. Notify yourself (admin)
+        admin_msg = MIMEMultipart()
+        admin_msg['From'] = sender_email
+        admin_msg['To'] = sender_email
+        admin_msg['Subject'] = f"New Integration Request: {tools}"
+        admin_msg.attach(MIMEText(f"<p>New request from: <b>{user_email}</b><br>Tools: <b>{tools}</b></p>", 'html'))
+        server.send_message(admin_msg)
+
+        # 2. Confirmation to user
+        user_msg = MIMEMultipart()
+        user_msg['From'] = f"Integration Directory <{sender_email}>"
+        user_msg['To'] = user_email
+        user_msg['Subject'] = "We received your integration request! ✅"
+        user_body = f"""
+<html><body style="font-family:sans-serif;padding:20px;color:#333;">
+  <h2 style="color:#2563eb;">We got your request! 🙌</h2>
+  <p>Thanks for reaching out. You requested: <strong>{tools}</strong></p>
+  <p>Our team reviews all requests. We'll email you when this integration guide is live.</p>
+  <a href="https://integration-directory.com" style="background:#2563eb;color:white;padding:10px 20px;text-decoration:none;border-radius:6px;">Browse existing integrations →</a>
+  <p style="font-size:12px;color:#999;margin-top:30px;">Integration Directory · Hyderabad, India</p>
+</body></html>"""
+        user_msg.attach(MIMEText(user_body, 'html'))
+        server.send_message(user_msg)
+        server.quit()
+    except Exception as e:
+        print(f"Integration request email error: {e}")
+
 # --- NEW: Newsletter Subscription Route ---
+
+# In main.py — replace your /subscribe route with this:
+
 @app.post("/subscribe")
-async def subscribe_newsletter(email: str = Form(...)):
+async def subscribe_newsletter(email: str = Form(...), background_tasks: BackgroundTasks = None):
     conn, cursor = get_db_connection()
     try:
-        # ON CONFLICT DO NOTHING prevents server crashes if they subscribe twice
-        cursor.execute(
-            'INSERT INTO newsletter_subscribers (email) VALUES (%s) ON CONFLICT (email) DO NOTHING', 
+        result = cursor.execute(
+            'INSERT INTO newsletter_subscribers (email) VALUES (%s) ON CONFLICT (email) DO NOTHING RETURNING email',
             (email.strip().lower(),)
         )
         conn.commit()
+        # Only send welcome if they were newly inserted (not a duplicate)
+        inserted = cursor.fetchone()
+        if inserted:
+            background_tasks.add_task(send_welcome_email, email.strip().lower())
     except Exception as e:
         print(f"Subscription Error: {e}")
     finally:
         conn.close()
-        
     return {"message": f"Success! {email} has been added to the Techie Newsletter."}
+
+
+def send_welcome_email(email: str):
+    sender_email = os.environ.get("SMTP_EMAIL")
+    sender_password = os.environ.get("SMTP_PASSWORD")
+    if not sender_email or not sender_password:
+        print("SMTP credentials missing.")
+        return
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = f"Integration Directory <{sender_email}>"
+        msg['To'] = email
+        msg['Subject'] = "Welcome to The Techie Newsletter! 🚀"
+        body = f"""
+<html><body style="font-family: sans-serif; color: #333; line-height: 1.6;">
+<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+  <h2 style="color: #2563eb;">Welcome to The Techie Newsletter! 🎉</h2>
+  <p>Hey Techie,</p>
+  <p>You're now subscribed to the <strong>Integration Directory Newsletter</strong> — your weekly source for AI workflows, SaaS automation tips, and the latest in tech.</p>
+  <p>We'll send you updates whenever we publish new guides or news. No spam, ever.</p>
+  <hr style="border: 1px solid #eee; margin: 20px 0;">
+  <p>In the meantime, explore the directory:</p>
+  <a href="https://integration-directory.com" style="background:#2563eb;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;">Browse Integrations →</a>
+  <hr style="border: 1px solid #eee; margin: 20px 0;">
+  <p style="font-size:12px;color:#999;">
+    You subscribed at integration-directory.com. To unsubscribe, 
+    <a href="https://integration-directory.com/unsubscribe?email={email}" style="color:#999;">click here</a>.
+  </p>
+</div>
+</body></html>
+"""
+        msg.attach(MIMEText(body, 'html'))
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+        server.quit()
+        print(f"Welcome email sent to {email}")
+    except Exception as e:
+        print(f"Welcome email failed: {e}")
+
+
+@app.get("/unsubscribe")
+async def unsubscribe(email: str, request: Request):
+    conn, cursor = get_db_connection()
+    try:
+        cursor.execute("DELETE FROM newsletter_subscribers WHERE email = %s", (email.strip().lower(),))
+        conn.commit()
+    except Exception as e:
+        print(f"Unsubscribe error: {e}")
+    finally:
+        conn.close()
+    return templates.TemplateResponse("unsubscribe.html", {"request": request, "email": email})
 
 # --- 4. AI Workflow Generator ---
 @app.post("/api/generate-workflow")
@@ -984,38 +1092,69 @@ async def about_page(request: Request):
  
 
 #CONTACT_ROUTE = '''
+
 @app.get("/contact")
 async def contact_page(request: Request):
     return templates.TemplateResponse("contact.html", {"request": request})
 
-# --- Contact Form Submission (POST - handle form) ---
+
 @app.post("/contact")
-async def contact_submit(
+async def handle_contact(
     request: Request,
     name: str = Form(...),
     email: str = Form(...),
     subject: str = Form(...),
-    message: str = Form(...)
+    message: str = Form(...),
+    background_tasks: BackgroundTasks = None
 ):
-    """
-    Saves the contact form to the DB and optionally emails you.
-    Make sure you have a 'contact_submissions' table (see setup SQL below).
-    """
-    conn, cursor = get_db_connection()
+    background_tasks.add_task(send_contact_email, name, email, subject, message)
+    return templates.TemplateResponse("contact.html", {
+        "request": request,
+        "success": True
+    })
+
+
+def send_contact_email(name: str, user_email: str, subject: str, message: str):
+    sender_email = os.environ.get("SMTP_EMAIL")
+    sender_password = os.environ.get("SMTP_PASSWORD")
+    if not sender_email or not sender_password:
+        return
     try:
-        cursor.execute(
-            '''INSERT INTO contact_submissions (name, email, subject, message)
-               VALUES (%s, %s, %s, %s)''',
-            (name, email, subject, message)
-        )
-        conn.commit()
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+
+        # 1. Email to you (admin) with the message
+        admin_msg = MIMEMultipart()
+        admin_msg['From'] = sender_email
+        admin_msg['To'] = sender_email
+        admin_msg['Subject'] = f"Contact Form: {subject} — from {name}"
+        admin_msg.attach(MIMEText(f"""
+<html><body>
+  <h2>New Contact Form Submission</h2>
+  <p><b>Name:</b> {name}</p>
+  <p><b>Email:</b> {user_email}</p>
+  <p><b>Subject:</b> {subject}</p>
+  <p><b>Message:</b><br>{message}</p>
+</body></html>""", 'html'))
+        server.send_message(admin_msg)
+
+        # 2. Auto-reply to the user
+        user_msg = MIMEMultipart()
+        user_msg['From'] = f"Integration Directory <{sender_email}>"
+        user_msg['To'] = user_email
+        user_msg['Subject'] = "We received your message! ✅"
+        user_msg.attach(MIMEText(f"""
+<html><body style="font-family:sans-serif;padding:20px;color:#333;">
+  <h2 style="color:#2563eb;">Thanks, {name}! We got your message.</h2>
+  <p>We'll get back to you within 1–2 business days at this email address.</p>
+  <p>Your message: <em>{message[:200]}...</em></p>
+  <p style="font-size:12px;color:#999;">Integration Directory · beyond-torte.4k@icloud.com</p>
+</body></html>""", 'html'))
+        server.send_message(user_msg)
+        server.quit()
     except Exception as e:
-        print(f"Contact form error: {e}")
-    finally:
-        conn.close()
-    # Redirect back to contact page with success param
-    return RedirectResponse(url="/contact?sent=true", status_code=303)
- 
+        print(f"Contact email error: {e}") 
 
 
 # --- 9. NEW: AI Social Media Manager ---
