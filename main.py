@@ -359,8 +359,34 @@ async def home(request: Request, q: str = "", page: int = 1):
     # ----------------------------------------------------------------
     
     # --- NEW: Fetch E-Commerce Deals ---
-    cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 4')
-    daily_deals = cursor.fetchall()
+    cursor.execute("SELECT * FROM ecommerce_deals ORDER BY id DESC LIMIT 5")
+    daily_deals = [
+        {
+            "platform": "MAKE.COM",
+            "product_name": "Top Integration Tools",
+            "affiliate_link": "https://www.make.com/en/register?pc=sampath9",
+        },
+        {
+            "platform": "NOTION",
+            "product_name": "Free Workspace for Teams",
+            "affiliate_link": "https://www.notion.so/signup",
+        },
+        {
+            "platform": "HUBSPOT",
+            "product_name": "Free CRM — Forever Free",
+            "affiliate_link": "https://www.hubspot.com/products/crm",
+        },
+        {
+            "platform": "ZAPIER",
+            "product_name": "Automate 6,000+ Apps",
+            "affiliate_link": "https://zapier.com/sign-up",
+        },
+        {
+            "platform": "CLICKUP",
+            "product_name": "Free Project Management",
+            "affiliate_link": "https://clickup.com/",
+        },
+    ]
     # ---------------------------------------------------------------
 
 
@@ -727,6 +753,7 @@ async def sitemap():
         ("/news", "0.9", "daily"),
         ("/gear", "0.7", "weekly"),
         ("/india-deals", "0.6", "weekly"),
+        ("/contact", "0.5", "yearly"),
     ]
     for path, priority, freq in static_pages:
         xml += f"  <url>\n    <loc>{base_url}{path}</loc>\n    <changefreq>{freq}</changefreq>\n    <priority>{priority}</priority>\n  </url>\n"
@@ -1146,3 +1173,10 @@ async def delete_admin_deal(secret: str = Form(...), deal_id: int = Form(...)):
         conn.close()
         
     return RedirectResponse(url=f"/admin/deals?secret={secret}", status_code=303)
+
+
+
+#CONTACT_ROUTE = '''
+@app.get("/contact")
+async def contact_page(request: Request):
+    return templates.TemplateResponse("contact.html", {"request": request})

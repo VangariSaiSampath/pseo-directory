@@ -1,180 +1,456 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M7SNZL2J29"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    
-      gtag('config', 'G-M7SNZL2J29');
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Connect {{ data.tool_a }} and {{ data.tool_b }} | Integration Directory</title>
+    <meta name="description" content="Step-by-step guide: Connect {{ data.tool_a }} and {{ data.tool_b }} using Make.com. Save {{ data.hours_saved_per_month | default('5') }} hours/month with automation.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://integration-directory.com/integrate/{{ data.slug }}">
+    <!-- Open Graph -->
+    <meta property="og:title" content="How to Connect {{ data.tool_a }} and {{ data.tool_b }}">
+    <meta property="og:description" content="{{ data.description }}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://integration-directory.com/integrate/{{ data.slug }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- ── AdSense — replace with your real publisher ID when approved ───── -->
+    <!--
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    -->
+
+    <!-- ══ HowTo + FAQPage Schema Markup — boosts Google rich snippets ══ -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "{{ data.tool_a }} to {{ data.tool_b }} Integration",
-      "applicationCategory": "BusinessApplication",
-      "description": "Automate workflows by integrating {{ data.tool_a }} and {{ data.tool_b }}.",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      }
+      "@type": "HowTo",
+      "name": "How to Connect {{ data.tool_a }} and {{ data.tool_b }}",
+      "description": "Step-by-step guide to integrate {{ data.tool_a }} and {{ data.tool_b }} using Make.com automation.",
+      "totalTime": "PT10M",
+      "estimatedCost": {
+        "@type": "MonetaryAmount",
+        "currency": "USD",
+        "value": "0"
+      },
+      "step": [
+        {
+          "@type": "HowToStep",
+          "name": "Sign up for Make.com",
+          "text": "Create a free Make.com account at make.com. No credit card required.",
+          "url": "https://www.make.com/en/register?pc=sampath9"
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Connect {{ data.tool_a }}",
+          "text": "In Make.com, create a new scenario and add {{ data.tool_a }} as the trigger app."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Connect {{ data.tool_b }}",
+          "text": "Add {{ data.tool_b }} as the action app and configure the data mapping."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Turn on the automation",
+          "text": "Test your scenario and activate it. Make.com runs it automatically on schedule."
+        }
+      ]
     }
     </script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Dynamic SEO Meta Tags -->
-    <title>How to Integrate {{ data.tool_a }} with {{ data.tool_b }}</title>
-    <meta name="description" content="{{ data.description }}">
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I connect {{ data.tool_a }} and {{ data.tool_b }}?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Use Make.com to connect {{ data.tool_a }} and {{ data.tool_b }}. Create a free account, add {{ data.tool_a }} as a trigger and {{ data.tool_b }} as an action, then activate the automation. It takes under 10 minutes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is {{ data.tool_a }} and {{ data.tool_b }} integration free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Make.com offers a free plan with 1,000 operations per month, which is enough for most small teams to run this automation."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What can I automate between {{ data.tool_a }} and {{ data.tool_b }}?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "{{ data.description | default('You can sync data, trigger notifications, create records automatically, and eliminate manual copy-paste between these two tools.') }}"
+          }
+        }
+      ]
+    }
+    </script>
 </head>
-<body class="bg-white text-gray-800 font-sans">
-    
-    <!-- Hero Section -->
-    <div class="bg-blue-600 text-white py-20 px-4">
-        <div class="max-w-3xl mx-auto text-center">
-            <h1 class="text-5xl font-extrabold mb-6">Integrate {{ data.tool_a }} with {{ data.tool_b }}</h1>
-            <p class="text-xl opacity-90 mb-8">{{ data.description }}</p>
-            <!-- Changed button to a functional link -->
-            <a href="https://www.make.com/en/register?pc=sampath9" target="_blank" class="inline-block bg-white text-blue-600 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition shadow-lg">Get Started Free</a>
-        </div>
-    </div>
+<body class="bg-gray-50 font-sans">
 
-    <!-- Content Section -->
-    <div class="max-w-4xl mx-auto px-4 py-16">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-            
-            <!-- Left Column: Main Content -->
-            <div class="md:col-span-2">
-                <h2 class="text-3xl font-bold mb-6">Why connect {{ data.tool_a }} and {{ data.tool_b }}?</h2>
-                <p class="text-lg text-gray-700 leading-relaxed mb-6">
-                    By connecting <strong>{{ data.tool_a }}</strong> directly to <strong>{{ data.tool_b }}</strong>, you eliminate manual data entry and save hours of work every week. With over {{ data.search_volume }} professionals looking for this exact solution monthly, it's one of the most powerful automations you can set up.
+<!-- ── NAV ─────────────────────────────────────────────────────────────── -->
+<nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <a href="/" class="text-xl font-bold text-blue-600">⚡ Integration Directory</a>
+        <div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+            <a href="/" class="hover:text-blue-600">Directory</a>
+            <a href="/blog" class="hover:text-blue-600">Techie Blog</a>
+            <a href="/news" class="hover:text-blue-600">AI News</a>
+            <a href="/gear" class="hover:text-blue-600">SaaS Tools</a>
+        </div>
+        <a href="{{ make_affiliate }}" target="_blank" rel="sponsored nofollow"
+           class="bg-blue-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+            Automate with Make.com →
+        </a>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- Breadcrumb -->
+    <nav class="text-sm text-gray-500 mb-6" aria-label="breadcrumb">
+        <a href="/" class="hover:text-blue-600">Home</a>
+        <span class="mx-2">›</span>
+        <span class="text-gray-800 font-medium">{{ data.tool_a }} + {{ data.tool_b }}</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- ── MAIN CONTENT ──────────────────────────────────────────────── -->
+        <article class="lg:col-span-2">
+
+            <!-- Page header -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase">Integration Guide</span>
+                    {% if data.monthly_searches %}
+                    <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
+                        <i class="fa-solid fa-magnifying-glass mr-1"></i>{{ data.monthly_searches | int | string }} searches/mo
+                    </span>
+                    {% endif %}
+                </div>
+
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+                    How to Connect {{ data.tool_a }} and {{ data.tool_b }}
+                </h1>
+
+                <p class="text-gray-600 text-base leading-relaxed mb-6">
+                    {{ data.description }}
                 </p>
-                
-                <!-- SEO Rich Programmatic Content -->
-                <h3 class="text-2xl font-bold mb-4 mt-10">Popular Use Cases for {{ data.tool_a }}</h3>
-                <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-lg mb-8">
-                    <ul class="list-none space-y-3 text-gray-700">
-                        <li class="flex items-start">
-                            <span class="text-blue-500 mr-2">✓</span>
-                            Create a new item in {{ data.tool_b }} every time a trigger happens in {{ data.tool_a }}.
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-blue-500 mr-2">✓</span>
-                            Update existing records in {{ data.tool_b }} automatically without leaving {{ data.tool_a }}.
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-blue-500 mr-2">✓</span>
-                            Send real-time notifications to your team.
-                        </li>
-                    </ul>
-                </div>
-            </div>
 
-            <!-- Right Column: Sticky Sidebar -->
-            <div class="md:col-span-1">
-                <div class="bg-gray-50 border border-gray-200 p-6 rounded-xl sticky top-6">
-                    <h4 class="font-bold text-lg mb-4 text-center">Quick Details</h4>
-                    <div class="space-y-4 text-sm text-gray-600">
-                        <div class="flex justify-between border-b pb-2">
-                            <span>App 1:</span>
-                            <span class="font-semibold text-gray-800">{{ data.tool_a }}</span>
-                        </div>
-                        <div class="flex justify-between border-b pb-2">
-                            <span>App 2:</span>
-                            <span class="font-semibold text-gray-800">{{ data.tool_b }}</span>
-                        </div>
-                        <div class="flex justify-between border-b pb-2">
-                            <span>Difficulty:</span>
-                            <span class="text-green-600 font-semibold bg-green-100 px-2 rounded">Beginner</span>
-                        </div>
+                <!-- Savings stats row -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-green-50 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-green-600">{{ data.hours_saved_per_month | default('5') }}h</div>
+                        <div class="text-xs text-gray-500 mt-1">Saved per month</div>
                     </div>
-                    <!-- Dynamic Search Link to simulate an affiliate click -->
-                    <a href="https://www.make.com/en/register?pc=sampath9" target="_blank" class="block w-full text-center bg-blue-600 text-white font-bold py-3 mt-6 rounded-lg hover:bg-blue-700 transition">
-                        Connect Now
-                    </a>
+                    <div class="bg-blue-50 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-blue-600">~10 min</div>
+                        <div class="text-xs text-gray-500 mt-1">Setup time</div>
+                    </div>
+                    <div class="bg-purple-50 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-purple-600">₹0</div>
+                        <div class="text-xs text-gray-500 mt-1">Cost to start</div>
+                    </div>
+                </div>
+
+                <!-- ── PRIMARY CTA — Make.com affiliate ─────────────────── -->
+                <a href="{{ make_affiliate }}" target="_blank" rel="sponsored nofollow"
+                   class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition text-center text-lg mb-2">
+                    ⚡ Automate {{ data.tool_a }} + {{ data.tool_b }} with Make.com →
+                </a>
+                <p class="text-xs text-center text-gray-400">Free plan · 1,000 ops/month · No credit card needed</p>
+            </div>
+
+            <!-- AdSense in-article -->
+            <!--
+            <div class="mb-6 flex justify-center">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                     data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
+            -->
+
+            <!-- ── STEP BY STEP GUIDE ────────────────────────────────────── -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-6">How to set up this integration (step-by-step)</h2>
+
+                <ol class="space-y-5">
+                    <li class="flex gap-4">
+                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
+                        <div>
+                            <div class="font-semibold text-gray-800">Create a free Make.com account</div>
+                            <div class="text-sm text-gray-600 mt-1">Go to Make.com and sign up. The free plan includes 1,000 operations/month — enough for most automations.</div>
+                            <a href="{{ make_affiliate }}" target="_blank" rel="sponsored nofollow"
+                               class="inline-block mt-2 text-blue-600 text-sm font-medium hover:underline">
+                                Create free account → <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="flex gap-4">
+                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
+                        <div>
+                            <div class="font-semibold text-gray-800">Connect {{ data.tool_a }} as the trigger</div>
+                            <div class="text-sm text-gray-600 mt-1">In Make.com, create a new scenario. Search for {{ data.tool_a }} and choose your trigger event (e.g. "New row", "New message", "New record").</div>
+                        </div>
+                    </li>
+                    <li class="flex gap-4">
+                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
+                        <div>
+                            <div class="font-semibold text-gray-800">Connect {{ data.tool_b }} as the action</div>
+                            <div class="text-sm text-gray-600 mt-1">Add {{ data.tool_b }} as the next module. Map the data fields from {{ data.tool_a }} to the corresponding fields in {{ data.tool_b }}.</div>
+                        </div>
+                    </li>
+                    <li class="flex gap-4">
+                        <div class="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">✓</div>
+                        <div>
+                            <div class="font-semibold text-gray-800">Test and activate</div>
+                            <div class="text-sm text-gray-600 mt-1">Run a test with real data. Once it works, turn on the scenario. Make.com will run it automatically — no more manual work.</div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <!-- ── TOOL CTAs — direct links to both tools ────────────────── -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-4">
+                    Don't have these tools yet? Start free.
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                    <!-- Tool A CTA -->
+                    <div class="border border-gray-200 rounded-xl p-5 text-center">
+                        <div class="font-bold text-gray-800 text-lg mb-1">{{ data.tool_a }}</div>
+                        <div class="text-xs text-gray-500 mb-3">{{ tool_a_info.badge }}</div>
+                        <a href="{{ tool_a_info.url }}" target="_blank" rel="nofollow"
+                           class="block w-full bg-gray-800 text-white font-semibold py-2.5 rounded-lg hover:bg-gray-700 transition text-sm">
+                            {{ tool_a_info.label }}
+                        </a>
+                    </div>
+
+                    <!-- Tool B CTA -->
+                    <div class="border border-gray-200 rounded-xl p-5 text-center">
+                        <div class="font-bold text-gray-800 text-lg mb-1">{{ data.tool_b }}</div>
+                        <div class="text-xs text-gray-500 mb-3">{{ tool_b_info.badge }}</div>
+                        <a href="{{ tool_b_info.url }}" target="_blank" rel="nofollow"
+                           class="block w-full bg-gray-800 text-white font-semibold py-2.5 rounded-lg hover:bg-gray-700 transition text-sm">
+                            {{ tool_b_info.label }}
+                        </a>
+                    </div>
                 </div>
             </div>
-            
-        </div>
-        
-        <div class="mt-16 text-center border-t pt-8">
-            <a href="/" class="text-blue-500 hover:text-blue-700 font-medium">&larr; Back to Directory</a>
-        </div>
-    </div>
-    <!-- ROI Calculator -->
-    <div class="mt-12 p-8 bg-green-50 border border-green-200 rounded-2xl">
-        <h3 class="text-2xl font-bold text-green-800 mb-4">Savings Calculator</h3>
-        <p class="mb-6 text-green-700">How much time will you save with this {{ data.tool_a }} + {{ data.tool_b }} integration?</p>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- ── SAVINGS CALCULATOR ─────────────────────────────────────── -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-4">
+                    <i class="fa-solid fa-calculator text-blue-600 mr-2"></i>
+                    Calculate your time savings
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Minutes spent manually per day</label>
+                        <input type="number" id="manualMins" value="30" min="1"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
+                               oninput="calcSavings()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Your hourly rate (₹)</label>
+                        <input type="number" id="hourlyRate" value="500" min="1"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
+                               oninput="calcSavings()">
+                    </div>
+                </div>
+                <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                    <div class="text-sm text-gray-600 mb-1">You save approximately</div>
+                    <div id="moneySaved" class="text-3xl font-bold text-green-600">₹7,500/month</div>
+                    <div id="hoursSaved" class="text-sm text-gray-500 mt-1">15 hours/month · 180 hours/year</div>
+                </div>
+            </div>
+
+            <!-- ── AI WORKFLOW GENERATOR ──────────────────────────────────── -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-2">
+                    <i class="fa-solid fa-robot text-purple-600 mr-2"></i>
+                    Generate a custom workflow with AI
+                </h2>
+                <p class="text-sm text-gray-600 mb-4">Tell us your industry and get a personalised automation plan.</p>
+                <form action="/api/generate-workflow" method="post" id="workflowForm">
+                    <input type="hidden" name="tool_a" value="{{ data.tool_a }}">
+                    <input type="hidden" name="tool_b" value="{{ data.tool_b }}">
+                    <div class="flex gap-3">
+                        <input type="text" name="industry" placeholder="e.g., E-commerce, Healthcare, SaaS..."
+                               class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500">
+                        <button type="submit"
+                                class="bg-purple-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-purple-700 transition text-sm">
+                            Generate
+                        </button>
+                    </div>
+                </form>
+                <div id="workflowResult" class="mt-4 hidden bg-purple-50 border border-purple-200 rounded-xl p-4 text-sm text-gray-700"></div>
+            </div>
+
+            <!-- ── FAQ SECTION — schema markup target ────────────────────── -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-5">Frequently asked questions</h2>
+                <div class="space-y-5">
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-1">How do I connect {{ data.tool_a }} and {{ data.tool_b }}?</h3>
+                        <p class="text-sm text-gray-600">Use Make.com to connect them. Sign up free, create a scenario with {{ data.tool_a }} as trigger and {{ data.tool_b }} as action. Setup takes under 10 minutes.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-1">Is this integration free?</h3>
+                        <p class="text-sm text-gray-600">Yes. Make.com's free plan includes 1,000 operations/month — enough for most teams. No credit card required to start.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-1">Do I need coding skills?</h3>
+                        <p class="text-sm text-gray-600">No. Make.com is a visual drag-and-drop builder. You connect modules by clicking, not writing code.</p>
+                    </div>
+                </div>
+            </div>
+
+        </article>
+
+        <!-- ── SIDEBAR ────────────────────────────────────────────────────── -->
+        <aside class="lg:col-span-1 space-y-6">
+
+            <!-- Sticky Make.com CTA -->
+            <div class="bg-blue-600 rounded-2xl p-6 text-white sticky top-20">
+                <div class="text-center">
+                    <div class="text-3xl mb-2">⚡</div>
+                    <h3 class="font-bold text-lg mb-1">Automate this now</h3>
+                    <p class="text-blue-100 text-sm mb-4">Connect {{ data.tool_a }} + {{ data.tool_b }} in minutes with Make.com.</p>
+                    <a href="{{ make_affiliate }}" target="_blank" rel="sponsored nofollow"
+                       class="block w-full bg-white text-blue-600 font-bold py-3 rounded-xl hover:bg-blue-50 transition text-sm text-center">
+                        Start free →
+                    </a>
+                    <p class="text-blue-200 text-xs mt-2">Free plan · 1,000 ops/mo</p>
+                </div>
+            </div>
+
+            <!-- AdSense sidebar -->
+            <!--
             <div>
-                <label class="block text-sm font-medium text-green-900">Tasks per day</label>
-                <input type="number" id="tasks" value="10" oninput="calculateROI()" class="w-full p-2 rounded border-green-300">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                     data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
+            -->
+
+            <!-- Related integrations -->
+            <div class="bg-white border border-gray-200 rounded-xl p-5">
+                <h3 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Related Tools</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="/best-integrations-for/{{ data.tool_a | lower | replace(' ', '-') }}"
+                           class="text-blue-600 hover:underline">
+                        Best integrations for {{ data.tool_a }} →
+                    </a></li>
+                    <li><a href="/best-integrations-for/{{ data.tool_b | lower | replace(' ', '-') }}"
+                           class="text-blue-600 hover:underline">
+                        Best integrations for {{ data.tool_b }} →
+                    </a></li>
+                    <li><a href="/compare/make-vs-zapier"
+                           class="text-blue-600 hover:underline">
+                        Make.com vs Zapier comparison →
+                    </a></li>
+                </ul>
+            </div>
+
+            <!-- SaaS tools cross-link -->
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-5">
+                <h3 class="font-bold text-gray-800 mb-1 text-sm">🛠️ Free SaaS Tools</h3>
+                <p class="text-xs text-gray-500 mb-3">Best free tools for teams in 2026</p>
+                <a href="/gear" class="block w-full text-center border border-gray-300 text-gray-700 font-medium py-2 rounded-lg hover:bg-gray-100 transition text-xs">
+                    Browse free tools →
+                </a>
+            </div>
+
+        </aside>
+    </div>
+
+</main>
+
+<!-- ── FOOTER ──────────────────────────────────────────────────────────────── -->
+<footer class="bg-gray-900 text-gray-400 mt-16 py-10">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 text-sm">
+            <div>
+                <div class="text-white font-bold mb-3">Integration Directory</div>
+                <p class="text-xs">The #1 resource for software integration guides and automation workflows.</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-green-900">Minutes per task (Manual)</label>
-                <input type="number" id="minutes" value="5" oninput="calculateROI()" class="w-full p-2 rounded border-green-300">
+                <div class="text-white font-semibold mb-3">Explore</div>
+                <ul class="space-y-1 text-xs">
+                    <li><a href="/" class="hover:text-white">All Integrations</a></li>
+                    <li><a href="/blog" class="hover:text-white">Techie Blog</a></li>
+                    <li><a href="/news" class="hover:text-white">AI News</a></li>
+                    <li><a href="/gear" class="hover:text-white">Free SaaS Tools</a></li>
+                    <li><a href="/india-deals" class="hover:text-white">India Deals</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="text-white font-semibold mb-3">Top Integrations</div>
+                <ul class="space-y-1 text-xs">
+                    <li><a href="/best-integrations-for/slack" class="hover:text-white">Slack Integrations</a></li>
+                    <li><a href="/best-integrations-for/notion" class="hover:text-white">Notion Integrations</a></li>
+                    <li><a href="/best-integrations-for/hubspot" class="hover:text-white">HubSpot Integrations</a></li>
+                    <li><a href="/best-integrations-for/shopify" class="hover:text-white">Shopify Integrations</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="text-white font-semibold mb-3">Legal</div>
+                <ul class="space-y-1 text-xs">
+                    <li><a href="/privacy" class="hover:text-white">Privacy Policy</a></li>
+                    <li><a href="/terms" class="hover:text-white">Terms of Service</a></li>
+                </ul>
+                <p class="text-xs mt-3 text-gray-500">
+                    Affiliate disclosure: Some links on this page are affiliate links. We may earn a small commission if you sign up — at no extra cost to you.
+                </p>
             </div>
         </div>
-        
-        <div class="mt-8 text-center">
-            <p class="text-3xl font-extrabold text-green-600"><span id="hours-saved">20</span> Hours</p>
-            <p class="text-green-800 font-medium text-sm uppercase tracking-wide">Saved Per Month</p>
+        <div class="border-t border-gray-800 pt-6 text-center text-xs">
+            © 2026 Integration Directory · Helping teams automate smarter, one integration at a time.
         </div>
     </div>
-    <div class="mt-12 p-8 bg-white border border-gray-200 rounded-2xl shadow-sm">
-        <h3 class="text-2xl font-bold text-gray-800 mb-4">✨ AI Smart Workflow Generator</h3>
-        <p class="mb-6 text-gray-600">Enter your industry to see a custom automation strategy for {{ data.tool_a }} and {{ data.tool_b }}.</p>
-        
-        <form id="ai-form" class="flex gap-4 mb-6" onsubmit="generateAIWorkflow(event)">
-            <input type="hidden" id="ai-tool-a" value="{{ data.tool_a }}">
-            <input type="hidden" id="ai-tool-b" value="{{ data.tool_b }}">
-            <input type="text" id="ai-industry" placeholder="e.g., Real Estate, E-commerce, HR..." required class="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-            <button type="submit" class="bg-blue-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-blue-700 transition">Generate</button>
-        </form>
-        
-        <div id="ai-result" class="hidden p-6 bg-blue-50 border border-blue-100 rounded-lg text-gray-700">
-            </div>
-    </div>
+</footer>
 
-    <script>
-    async function generateAIWorkflow(event) {
-        event.preventDefault();
-        const resultDiv = document.getElementById('ai-result');
-        const submitBtn = event.target.querySelector('button');
-        
-        resultDiv.innerHTML = "<p class='animate-pulse'>Analyzing tools and generating workflow...</p>";
-        resultDiv.classList.remove('hidden');
-        submitBtn.disabled = true;
+<script>
+// Savings calculator
+function calcSavings() {
+    const mins = parseFloat(document.getElementById('manualMins').value) || 30;
+    const rate = parseFloat(document.getElementById('hourlyRate').value) || 500;
+    const hoursPerMonth = (mins * 22) / 60; // 22 working days
+    const moneySaved = (hoursPerMonth * rate).toFixed(0);
+    document.getElementById('moneySaved').textContent = '₹' + parseInt(moneySaved).toLocaleString('en-IN') + '/month';
+    document.getElementById('hoursSaved').textContent =
+        hoursPerMonth.toFixed(1) + ' hours/month · ' + (hoursPerMonth * 12).toFixed(0) + ' hours/year';
+}
+calcSavings();
 
-        const formData = new FormData();
-        formData.append('industry', document.getElementById('ai-industry').value);
-        formData.append('tool_a', document.getElementById('ai-tool-a').value);
-        formData.append('tool_b', document.getElementById('ai-tool-b').value);
-
-        const response = await fetch('/api/generate-workflow', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const data = await response.json();
+// Workflow generator
+document.getElementById('workflowForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    btn.textContent = 'Generating...';
+    btn.disabled = true;
+    const formData = new FormData(e.target);
+    try {
+        const resp = await fetch('/api/generate-workflow', { method: 'POST', body: formData });
+        const data = await resp.json();
+        const resultDiv = document.getElementById('workflowResult');
         resultDiv.innerHTML = data.workflow;
-        submitBtn.disabled = false;
+        resultDiv.classList.remove('hidden');
+    } catch (err) {
+        console.error(err);
     }
-    </script>
-
-    <script>
-    function calculateROI() {
-        const tasks = document.getElementById('tasks').value;
-        const mins = document.getElementById('minutes').value;
-        const monthlyMins = tasks * mins * 22; // 22 working days
-        const hours = (monthlyMins / 60).toFixed(1);
-        document.getElementById('hours-saved').innerText = hours;
-    }
-    </script>
+    btn.textContent = 'Generate';
+    btn.disabled = false;
+});
+</script>
 </body>
 </html>

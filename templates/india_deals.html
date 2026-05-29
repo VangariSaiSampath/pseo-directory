@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} | Integration Directory</title>
+    <meta name="description" content="{{ page_subtitle }}">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://integration-directory.com/india-deals">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- AdSense — replace with your real publisher ID -->
+    <!--
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    -->
+
+    <style>
+        .deal-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .deal-card { transition: all 0.2s ease; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+<!-- ── NAV ─────────────────────────────────────────────────────────────── -->
+<nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <a href="/" class="text-xl font-bold text-blue-600">⚡ Integration Directory</a>
+        <div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+            <a href="/" class="hover:text-blue-600">Directory</a>
+            <a href="/blog" class="hover:text-blue-600">Techie Blog</a>
+            <a href="/news" class="hover:text-blue-600">AI News</a>
+            <a href="/gear" class="hover:text-blue-600">SaaS Tools</a>
+            <a href="/india-deals" class="text-orange-500 font-bold">India Deals</a>
+        </div>
+        <a href="{{ make_affiliate }}" target="_blank" rel="sponsored nofollow"
+           class="bg-blue-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+            Try Make.com Free →
+        </a>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- ── HERO ──────────────────────────────────────────────────────────── -->
+    <div class="text-center mb-10">
+        <div class="text-4xl mb-3">🛍️</div>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">{{ page_title }}</h1>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">{{ page_subtitle }}</p>
+        <div class="mt-4 inline-flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-full px-4 py-2 text-sm text-orange-700">
+            <i class="fa-solid fa-tag"></i>
+            These are affiliate links — we earn a small commission when you shop (at no extra cost to you)
+        </div>
+    </div>
+
+    <!-- AdSense top banner -->
+    <!--
+    <div class="mb-8 flex justify-center">
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+             data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    -->
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+        <!-- ── MAIN CONTENT ──────────────────────────────────────────────── -->
+        <div class="lg:col-span-3">
+
+            {% if deals %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                {% for deal in deals %}
+                <div class="deal-card bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <div class="h-2 bg-{{ deal.color_theme | default('blue-500') }}"></div>
+                    <div class="p-5">
+                        <div class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-1">{{ deal.platform }}</div>
+                        <h3 class="font-semibold text-gray-800 mb-3 text-sm leading-snug">{{ deal.product_name }}</h3>
+                        <a href="{{ deal.affiliate_link }}" target="_blank" rel="sponsored nofollow"
+                           class="block w-full text-center bg-orange-500 text-white font-semibold py-2 rounded-lg hover:bg-orange-600 transition text-sm">
+                            Shop Now →
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% else %}
+            <!-- Empty state — use your Admin panel at /admin/deals to add EarnKaro links -->
+            <div class="text-center py-20 text-gray-400">
+                <div class="text-5xl mb-4">🛒</div>
+                <p class="text-lg font-medium">No deals added yet.</p>
+                <p class="text-sm mt-2">Add your EarnKaro affiliate links via the admin panel.</p>
+                <a href="/admin/deals" class="inline-block mt-4 text-blue-600 underline text-sm">Go to Admin Panel →</a>
+            </div>
+            {% endif %}
+
+            <!-- AdSense mid-page -->
+            <!--
+            <div class="my-8 flex justify-center">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                     data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
+            -->
+
+            <!-- Cross-sell: B2B tools -->
+            <div class="mt-10 bg-blue-50 border border-blue-200 rounded-xl p-6 flex flex-col md:flex-row items-center gap-4">
+                <div class="flex-1">
+                    <h2 class="font-bold text-gray-900 text-lg mb-1">Are you a developer or SaaS user?</h2>
+                    <p class="text-sm text-gray-600">Check out our free B2B SaaS tool recommendations — automation tools, CRMs, project management and more.</p>
+                </div>
+                <a href="/gear" class="bg-blue-600 text-white font-bold px-6 py-3 rounded-xl hover:bg-blue-700 transition whitespace-nowrap text-sm">
+                    View SaaS Tools →
+                </a>
+            </div>
+
+        </div>
+
+        <!-- ── SIDEBAR ────────────────────────────────────────────────────── -->
+        <aside class="lg:col-span-1 space-y-6">
+
+            <!-- Trending searches -->
+            {% if trending_searches %}
+            <div class="bg-white border border-gray-200 rounded-xl p-5">
+                <h3 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">🔥 Trending</h3>
+                <ul class="space-y-2">
+                    {% for item in trending_searches %}
+                    <li>
+                        <a href="/?q={{ item.term }}" class="flex items-center justify-between text-sm text-gray-700 hover:text-blue-600">
+                            <span>{{ item.term }}</span>
+                            <span class="text-xs bg-gray-100 px-2 py-0.5 rounded-full">{{ item.count }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Make.com CTA in sidebar -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
+                <div class="text-center">
+                    <div class="text-2xl mb-2">⚡</div>
+                    <h3 class="font-bold text-gray-900 mb-1 text-sm">Automate Your Workflow</h3>
+                    <p class="text-xs text-gray-600 mb-3">Connect your shopping tools with Make.com automation.</p>
+                    <a href="{{ make_affiliate }}" target="_blank" rel="sponsored nofollow"
+                       class="block w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition text-xs text-center">
+                        Try Make.com Free →
+                    </a>
+                </div>
+            </div>
+
+            <!-- AdSense sidebar unit -->
+            <!--
+            <div>
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                     data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
+            -->
+
+        </aside>
+    </div>
+
+</main>
+
+<!-- ── FOOTER ──────────────────────────────────────────────────────────────── -->
+<footer class="bg-gray-900 text-gray-400 mt-16 py-10">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 text-sm">
+            <div>
+                <div class="text-white font-bold mb-3">Integration Directory</div>
+                <p class="text-xs">Software integrations + India deals in one place.</p>
+            </div>
+            <div>
+                <div class="text-white font-semibold mb-3">Explore</div>
+                <ul class="space-y-1 text-xs">
+                    <li><a href="/" class="hover:text-white">Directory</a></li>
+                    <li><a href="/blog" class="hover:text-white">Techie Blog</a></li>
+                    <li><a href="/news" class="hover:text-white">AI News</a></li>
+                    <li><a href="/gear" class="hover:text-white">SaaS Tools</a></li>
+                    <li><a href="/india-deals" class="hover:text-white">India Deals</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="text-white font-semibold mb-3">Categories</div>
+                <ul class="space-y-1 text-xs">
+                    <li><a href="/india-deals" class="hover:text-white">Fashion Deals</a></li>
+                    <li><a href="/india-deals" class="hover:text-white">Electronics</a></li>
+                    <li><a href="/india-deals" class="hover:text-white">Beauty</a></li>
+                    <li><a href="/india-deals" class="hover:text-white">Home & Living</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="text-white font-semibold mb-3">Legal</div>
+                <ul class="space-y-1 text-xs">
+                    <li><a href="/privacy" class="hover:text-white">Privacy Policy</a></li>
+                    <li><a href="/terms" class="hover:text-white">Terms of Service</a></li>
+                </ul>
+                <p class="text-xs mt-3 text-gray-500">Affiliate disclosure: We earn commissions from qualifying purchases. This doesn't affect our recommendations.</p>
+            </div>
+        </div>
+        <div class="border-t border-gray-800 pt-6 text-center text-xs">
+            © 2026 Integration Directory · All affiliate links are clearly marked.
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
