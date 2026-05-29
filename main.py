@@ -756,48 +756,67 @@ async def india_deals_page(request: Request):
 @app.get("/sitemap.xml")
 async def sitemap():
     conn, cursor = get_db_connection()
-
-    cursor.execute("SELECT slug FROM integrations")
+    cursor.execute('SELECT slug FROM integrations')
     integrations = cursor.fetchall()
-
-    cursor.execute("SELECT slug FROM blog_posts ORDER BY published_date DESC")
+    cursor.execute('SELECT slug FROM blog_posts')
     blog_posts = cursor.fetchall()
-
-    cursor.execute("SELECT slug FROM news_posts ORDER BY published_date DESC")
+    cursor.execute('SELECT slug FROM news_posts')
     news_posts = cursor.fetchall()
-
     conn.close()
-
+ 
     base_url = "https://integration-directory.com"
+    today = datetime.now().strftime("%Y-%m-%d")
+ 
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-
+ 
     # Static pages
     static_pages = [
         ("", "1.0", "daily"),
         ("/blog", "0.9", "daily"),
         ("/news", "0.9", "daily"),
-        ("/gear", "0.7", "weekly"),
-        ("/india-deals", "0.6", "weekly"),
-        ("/contact", "0.5", "yearly"),
+        ("/gear", "0.8", "weekly"),
+        ("/india-deals", "0.7", "weekly"),
+        ("/about", "0.6", "monthly"),
+        ("/contact", "0.6", "monthly"),
+        ("/privacy", "0.4", "monthly"),
+        ("/terms", "0.4", "monthly"),
+        ("/best-integrations-for/slack", "0.8", "weekly"),
+        ("/best-integrations-for/notion", "0.8", "weekly"),
+        ("/best-integrations-for/hubspot", "0.8", "weekly"),
+        ("/best-integrations-for/shopify", "0.8", "weekly"),
+        ("/best-integrations-for/airtable", "0.7", "weekly"),
+        ("/best-integrations-for/zapier", "0.7", "weekly"),
     ]
     for path, priority, freq in static_pages:
-        xml += f"  <url>\n    <loc>{base_url}{path}</loc>\n    <changefreq>{freq}</changefreq>\n    <priority>{priority}</priority>\n  </url>\n"
-
+        xml += f'  <url>\n    <loc>{base_url}{path}</loc>\n    <lastmod>{today}</lastmod>\n    <changefreq>{freq}</changefreq>\n    <priority>{priority}</priority>\n  </url>\n'
+ 
     # Integration pages
     for item in integrations:
-        xml += f"  <url>\n    <loc>{base_url}/integrate/{item['slug']}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n"
-
+        xml += f'  <url>\n    <loc>{base_url}/integrate/{item["slug"]}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n'
+ 
     # Blog posts
     for post in blog_posts:
-        xml += f"  <url>\n    <loc>{base_url}/blog/{post['slug']}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n"
-
+        xml += f'  <url>\n    <loc>{base_url}/blog/{post["slug"]}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n'
+ 
     # News posts
     for post in news_posts:
-        xml += f"  <url>\n    <loc>{base_url}/news/{post['slug']}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n"
-
-    xml += "</urlset>"
+        xml += f'  <url>\n    <loc>{base_url}/news/{post["slug"]}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n'
+ 
+    xml += '</urlset>'
     return Response(content=xml, media_type="application/xml")
+ 
+@app.get("/robots.txt")
+async def robots_txt():
+    content = """User-agent: *
+Allow: /
+ 
+Sitemap: https://integration-directory.com/sitemap.xml
+"""
+    return Response(content=content, media_type="text/plain")
+ 
+ 
+
 
 # --- 7. NEW: Autonomous Tech News Engine ---
 @app.get("/news")
@@ -959,10 +978,44 @@ async def privacy_page(request: Request):
 async def terms_page(request: Request):
     return templates.TemplateResponse("terms.html", {"request": request})
 
+@app.get("/about")
+async def about_page(request: Request):
+    return templates.TemplateResponse("about.html", {"request": request})
+ 
+
 #CONTACT_ROUTE = '''
 @app.get("/contact")
 async def contact_page(request: Request):
     return templates.TemplateResponse("contact.html", {"request": request})
+
+# --- Contact Form Submission (POST - handle form) ---
+@app.post("/contact")
+async def contact_submit(
+    request: Request,
+    name: str = Form(...),
+    email: str = Form(...),
+    subject: str = Form(...),
+    message: str = Form(...)
+):
+    """
+    Saves the contact form to the DB and optionally emails you.
+    Make sure you have a 'contact_submissions' table (see setup SQL below).
+    """
+    conn, cursor = get_db_connection()
+    try:
+        cursor.execute(
+            '''INSERT INTO contact_submissions (name, email, subject, message)
+               VALUES (%s, %s, %s, %s)''',
+            (name, email, subject, message)
+        )
+        conn.commit()
+    except Exception as e:
+        print(f"Contact form error: {e}")
+    finally:
+        conn.close()
+    # Redirect back to contact page with success param
+    return RedirectResponse(url="/contact?sent=true", status_code=303)
+ 
 
 
 # --- 9. NEW: AI Social Media Manager ---

@@ -1,44 +1,124 @@
-<!-- Save as templates/contact.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Contact Us | Integration Directory</title>
-    <meta name="description" content="Contact Integration Directory for partnership, sponsorship or general enquiries.">
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Contact Integration Directory — get in touch for partnership enquiries, integration requests, or general support." />
+  <title>Contact Us - Integration Directory</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a1a2e; margin: 0; padding: 0; background: #f9fafb; }
+    header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 16px 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+    header a { text-decoration: none; color: #374151; font-size: 0.9rem; }
+    header .logo { font-weight: 700; font-size: 1.1rem; color: #2563eb; }
+    .container { max-width: 700px; margin: 48px auto; padding: 0 20px; }
+    h1 { font-size: 2rem; color: #1a1a2e; margin-bottom: 0.4rem; }
+    .sub { color: #6b7280; margin-bottom: 2rem; }
+    .card { background: #fff; border-radius: 12px; padding: 32px; border: 1px solid #e5e7eb; margin-bottom: 24px; }
+    .card h2 { font-size: 1.1rem; color: #2563eb; margin-top: 0; }
+    label { display: block; font-size: 0.9rem; font-weight: 600; color: #374151; margin-bottom: 6px; margin-top: 16px; }
+    input, textarea, select { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; color: #1a1a2e; background: #f9fafb; }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: #2563eb; background: #fff; }
+    textarea { height: 120px; resize: vertical; }
+    button[type="submit"] { margin-top: 20px; width: 100%; background: #2563eb; color: #fff; border: none; padding: 13px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    button[type="submit"]:hover { background: #1d4ed8; }
+    .contact-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .method { background: #eff6ff; border-radius: 10px; padding: 18px; }
+    .method .icon { font-size: 1.5rem; margin-bottom: 8px; }
+    .method .title { font-weight: 600; font-size: 0.9rem; color: #1e40af; }
+    .method .detail { font-size: 0.85rem; color: #374151; margin-top: 4px; }
+    .method a { color: #2563eb; }
+    .success-msg { display: none; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 16px; color: #166534; margin-top: 16px; font-size: 0.9rem; }
+    footer { text-align: center; padding: 24px; color: #9ca3af; font-size: 0.85rem; border-top: 1px solid #e5e7eb; margin-top: 48px; }
+    footer a { color: #6b7280; margin: 0 8px; }
+    @media (max-width: 480px) { .contact-methods { grid-template-columns: 1fr; } }
+  </style>
 </head>
-<body class="bg-gray-50 font-sans">
-<nav class="bg-white border-b border-gray-200 py-3 px-6 flex justify-between items-center">
-    <a href="/" class="text-xl font-bold text-blue-600">⚡ Integration Directory</a>
-    <a href="/" class="text-sm text-gray-600 hover:text-blue-600">← Back to Directory</a>
-</nav>
-<main class="max-w-xl mx-auto px-4 py-16">
-    <h1 class="text-3xl font-bold text-gray-900 mb-4">Contact Us</h1>
-    <p class="text-gray-600 mb-8">
-        Have a question, partnership enquiry, or want to sponsor Integration Directory?
-        Reach out and we'll get back to you within 48 hours.
-    </p>
-    <div class="bg-white border border-gray-200 rounded-2xl p-8">
-        <div class="mb-6">
-            <div class="font-semibold text-gray-800 mb-1">📧 Email</div>
-            <a href="mailto:beyond-torte.4k@icloud.com" class="text-blue-600 hover:underline">
-                beyond-torte.4k@icloud.com
-            </a>
-        </div>
-        <div class="mb-6">
-            <div class="font-semibold text-gray-800 mb-1">🤝 Partnerships & Sponsorships</div>
-            <p class="text-sm text-gray-600">Interested in a featured listing or sponsored content?
-            Email us with the subject line "Sponsorship Enquiry".</p>
-        </div>
-        <div>
-            <div class="font-semibold text-gray-800 mb-1">💡 Submit an Integration</div>
-            <p class="text-sm text-gray-600">Don't see your tool in our directory?
-            <a href="/request-integration" class="text-blue-600 hover:underline">Request an integration →</a></p>
-        </div>
+<body>
+
+  <header>
+    <a class="logo" href="/">⚡ Integration Directory</a>
+    <a href="/blog">Techie Blog</a>
+    <a href="/news">AI News</a>
+    <a href="/gear">SaaS Tools</a>
+    <a href="/about">About</a>
+  </header>
+
+  <div class="container">
+
+    <h1>Contact Us</h1>
+    <p class="sub">We'd love to hear from you. Use the form below or reach out directly.</p>
+
+    <div class="contact-methods">
+      <div class="method">
+        <div class="icon">📧</div>
+        <div class="title">General Enquiries</div>
+        <div class="detail"><a href="mailto:beyond-torte.4k@icloud.com">beyond-torte.4k@icloud.com</a></div>
+      </div>
+      <div class="method">
+        <div class="icon">🤝</div>
+        <div class="title">Partnerships &amp; Advertising</div>
+        <div class="detail"><a href="mailto:beyond-torte.4k@icloud.com">beyond-torte.4k@icloud.com</a></div>
+      </div>
     </div>
-</main>
-<footer class="text-center text-xs text-gray-400 py-6">
-    © 2026 Integration Directory · <a href="/privacy" class="hover:text-gray-600">Privacy</a> · <a href="/terms" class="hover:text-gray-600">Terms</a>
-</footer>
+
+    <div class="card" style="margin-top:24px;">
+      <h2>Send Us a Message</h2>
+
+      <form id="contactForm" action="/contact" method="POST">
+
+        <label for="name">Your Name</label>
+        <input type="text" id="name" name="name" placeholder="Your full name" required />
+
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required />
+
+        <label for="subject">Subject</label>
+        <select id="subject" name="subject">
+          <option value="general">General enquiry</option>
+          <option value="integration_request">Request an integration</option>
+          <option value="partnership">Partnership / Advertising</option>
+          <option value="bug">Report a bug or error</option>
+          <option value="other">Other</option>
+        </select>
+
+        <label for="message">Message</label>
+        <textarea id="message" name="message" placeholder="Tell us how we can help..." required></textarea>
+
+        <button type="submit">Send Message →</button>
+      </form>
+
+      <div class="success-msg" id="successMsg">
+        ✅ Thank you! Your message has been sent. We'll get back to you within 1–2 business days.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Frequently Asked Questions</h2>
+      <p style="font-weight:600; color:#1a1a2e;">Can I suggest a new integration?</p>
+      <p style="color:#374151; font-size:0.9rem;">Yes! Use the form above and select "Request an integration" or use the Request Integration button on our homepage.</p>
+      <p style="font-weight:600; color:#1a1a2e; margin-top:16px;">How do I unsubscribe from the newsletter?</p>
+      <p style="color:#374151; font-size:0.9rem;">Every newsletter we send includes an unsubscribe link at the bottom. You can also email us directly and we'll remove you immediately.</p>
+      <p style="font-weight:600; color:#1a1a2e; margin-top:16px;">I found wrong information on the site. How do I report it?</p>
+      <p style="color:#374151; font-size:0.9rem;">Please use the form above and select "Report a bug or error". We review all reports and correct issues quickly.</p>
+    </div>
+
+  </div>
+
+  <script>
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      document.getElementById('successMsg').style.display = 'block';
+      this.reset();
+    });
+  </script>
+
+  <footer>
+    © 2026 Integration Directory ·
+    <a href="/privacy">Privacy Policy</a>
+    <a href="/terms">Terms of Service</a>
+    <a href="/about">About</a>
+  </footer>
+
 </body>
 </html>
