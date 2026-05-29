@@ -467,7 +467,33 @@ async def curated_list(request: Request, tool: str):
     
     # 3. Fetch E-Commerce Deals for the Sidebar
     cursor.execute('SELECT * FROM ecommerce_deals ORDER BY RANDOM() LIMIT 4')
-    daily_deals = cursor.fetchall()
+    daily_deals = [
+        {
+            "platform": "MAKE.COM",
+            "product_name": "Top Integration Tools",
+            "affiliate_link": "https://www.make.com/en/register?pc=sampath9",
+        },
+        {
+            "platform": "NOTION",
+            "product_name": "Free Workspace for Teams",
+            "affiliate_link": "https://www.notion.so/signup",
+        },
+        {
+            "platform": "HUBSPOT",
+            "product_name": "Free CRM — Forever Free",
+            "affiliate_link": "https://www.hubspot.com/products/crm",
+        },
+        {
+            "platform": "ZAPIER",
+            "product_name": "Automate 6,000+ Apps",
+            "affiliate_link": "https://zapier.com/sign-up",
+        },
+        {
+            "platform": "CLICKUP",
+            "product_name": "Free Project Management",
+            "affiliate_link": "https://clickup.com/",
+        },
+    ]
     
     conn.close()
     
