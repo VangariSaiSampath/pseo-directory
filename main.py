@@ -959,6 +959,12 @@ async def privacy_page(request: Request):
 async def terms_page(request: Request):
     return templates.TemplateResponse("terms.html", {"request": request})
 
+#CONTACT_ROUTE = '''
+@app.get("/contact")
+async def contact_page(request: Request):
+    return templates.TemplateResponse("contact.html", {"request": request})
+
+
 # --- 9. NEW: AI Social Media Manager ---
 @app.get("/api/agent/draft-socials")
 async def draft_socials(secret: str):
@@ -1202,7 +1208,3 @@ async def delete_admin_deal(secret: str = Form(...), deal_id: int = Form(...)):
 
 
 
-#CONTACT_ROUTE = '''
-@app.get("/contact")
-async def contact_page(request: Request):
-    return templates.TemplateResponse("contact.html", {"request": request})
