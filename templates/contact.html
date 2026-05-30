@@ -1,128 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Contact Integration Directory — get in touch for partnership enquiries, integration requests, or general support." />
-  <title>Contact Us - Integration Directory</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a1a2e; margin: 0; padding: 0; background: #f9fafb; }
-    header { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 16px 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-    header a { text-decoration: none; color: #374151; font-size: 0.9rem; }
-    header .logo { font-weight: 700; font-size: 1.1rem; color: #2563eb; }
-    .container { max-width: 700px; margin: 48px auto; padding: 0 20px; }
-    h1 { font-size: 2rem; color: #1a1a2e; margin-bottom: 0.4rem; }
-    .sub { color: #6b7280; margin-bottom: 2rem; }
-    .card { background: #fff; border-radius: 12px; padding: 32px; border: 1px solid #e5e7eb; margin-bottom: 24px; }
-    .card h2 { font-size: 1.1rem; color: #2563eb; margin-top: 0; }
-    label { display: block; font-size: 0.9rem; font-weight: 600; color: #374151; margin-bottom: 6px; margin-top: 16px; }
-    input, textarea, select { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; color: #1a1a2e; background: #f9fafb; }
-    input:focus, textarea:focus, select:focus { outline: none; border-color: #2563eb; background: #fff; }
-    textarea { height: 120px; resize: vertical; }
-    button[type="submit"] { margin-top: 20px; width: 100%; background: #2563eb; color: #fff; border: none; padding: 13px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
-    button[type="submit"]:hover { background: #1d4ed8; }
-    .contact-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .method { background: #eff6ff; border-radius: 10px; padding: 18px; }
-    .method .icon { font-size: 1.5rem; margin-bottom: 8px; }
-    .method .title { font-weight: 600; font-size: 0.9rem; color: #1e40af; }
-    .method .detail { font-size: 0.85rem; color: #374151; margin-top: 4px; }
-    .method a { color: #2563eb; }
-    .success-msg { display: none; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 16px; color: #166534; margin-top: 16px; font-size: 0.9rem; }
-    footer { text-align: center; padding: 24px; color: #9ca3af; font-size: 0.85rem; border-top: 1px solid #e5e7eb; margin-top: 48px; }
-    footer a { color: #6b7280; margin: 0 8px; }
-    @media (max-width: 480px) { .contact-methods { grid-template-columns: 1fr; } }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contact Integration Directory — get in touch for partnership enquiries, integration requests, or general support.">
+    <title>Contact Us - Integration Directory</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; }
+        nav { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 14px 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+        nav a { text-decoration: none; color: #475569; font-size: 14px; font-weight: 500; }
+        nav a:first-child { font-weight: 700; color: #2563eb; font-size: 16px; }
+        nav a:hover { color: #2563eb; }
+        .container { max-width: 760px; margin: 40px auto; padding: 0 20px 60px; }
+        h1 { font-size: 2rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+        .subtitle { color: #64748b; margin-bottom: 32px; font-size: 1rem; }
+
+        /* Contact cards */
+        .contact-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+        .contact-card { background: #eff6ff; border-radius: 12px; padding: 20px 24px; }
+        .contact-card .icon { font-size: 1.5rem; margin-bottom: 8px; }
+        .contact-card h3 { font-size: 14px; font-weight: 600; color: #1e40af; margin-bottom: 4px; }
+        .contact-card a { color: #2563eb; font-size: 14px; text-decoration: none; }
+        .contact-card a:hover { text-decoration: underline; }
+
+        /* Success banner */
+        .success-banner {
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            color: #065f46;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Form card */
+        .form-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px; margin-bottom: 32px; }
+        .form-card h2 { font-size: 1.3rem; font-weight: 700; color: #2563eb; margin-bottom: 24px; }
+        .field { margin-bottom: 20px; }
+        .field label { display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #1e293b;
+            background: #fff;
+            transition: border-color .2s;
+            font-family: inherit;
+        }
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+        .field textarea { resize: vertical; min-height: 140px; }
+        .btn-submit {
+            width: 100%;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .btn-submit:hover { background: #1d4ed8; }
+
+        /* FAQ */
+        .faq-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px; }
+        .faq-card h2 { font-size: 1.3rem; font-weight: 700; color: #2563eb; margin-bottom: 20px; }
+        .faq-item { margin-bottom: 20px; }
+        .faq-item h3 { font-size: 15px; font-weight: 600; color: #0f172a; margin-bottom: 6px; }
+        .faq-item p { color: #475569; font-size: 14px; line-height: 1.6; }
+
+        footer { text-align: center; padding: 20px; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 40px; }
+        footer a { color: #64748b; text-decoration: none; margin: 0 6px; }
+        footer a:hover { color: #2563eb; }
+
+        @media(max-width:600px){
+            .contact-cards { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
 
-  <header>
-    <a class="logo" href="/">⚡ Integration Directory</a>
+<nav>
+    <a href="/">⚡ Integration Directory</a>
     <a href="/blog">Techie Blog</a>
     <a href="/news">AI News</a>
     <a href="/gear">SaaS Tools</a>
     <a href="/about">About</a>
-  </header>
+</nav>
 
-  <div class="container">
-
+<div class="container">
     <h1>Contact Us</h1>
-    <p class="sub">We'd love to hear from you. Use the form below or reach out directly.</p>
+    <p class="subtitle">We'd love to hear from you. Use the form below or reach out directly.</p>
 
-    <div class="contact-methods">
-      <div class="method">
-        <div class="icon">📧</div>
-        <div class="title">General Enquiries</div>
-        <div class="detail"><a href="mailto:beyond-torte.4k@icloud.com">beyond-torte.4k@icloud.com</a></div>
-      </div>
-      <div class="method">
-        <div class="icon">🤝</div>
-        <div class="title">Partnerships &amp; Advertising</div>
-        <div class="detail"><a href="mailto:beyond-torte.4k@icloud.com">beyond-torte.4k@icloud.com</a></div>
-      </div>
+    <!-- ✅ SUCCESS BANNER — shows only after redirect with ?sent=true -->
+    {% if request.query_params.get('sent') == 'true' %}
+    <div class="success-banner">
+        ✅ Thank you! Your message has been sent. We'll get back to you within 1–2 business days.
     </div>
+    {% endif %}
 
-    <div class="card" style="margin-top:24px;">
-      <h2>Send Us a Message</h2>
-
-      <form id="contactForm" action="/contact" method="POST">
-
-        <label for="name">Your Name</label>
-        <input type="text" id="name" name="name" placeholder="Your full name" required />
-
-        <label for="email">Email Address</label>
-        <input type="email" id="email" name="email" placeholder="you@example.com" required />
-
-        <label for="subject">Subject</label>
-        <select id="subject" name="subject">
-          <option value="general">General enquiry</option>
-          <option value="integration_request">Request an integration</option>
-          <option value="partnership">Partnership / Advertising</option>
-          <option value="bug">Report a bug or error</option>
-          <option value="other">Other</option>
-        </select>
-
-        <label for="message">Message</label>
-        <textarea id="message" name="message" placeholder="Tell us how we can help..." required></textarea>
-
-        <button type="submit">Send Message →</button>
-      </form>
-
-      <div class="success-msg" id="successMsg">
-        {% if request.query_params.get('sent') == 'true' %}
-        <div style="background:#d1fae5;border:1px solid #6ee7b7;padding:16px;border-radius:8px;margin-bottom:20px;color:#065f46;">
-            ✅ Thank you! Your message has been sent. We'll get back to you within 1–2 business days.
+    <!-- Contact cards -->
+    <div class="contact-cards">
+        <div class="contact-card">
+            <div class="icon">📧</div>
+            <h3>General Enquiries</h3>
+            <a href="mailto:beyond-torte.4k@icloud.com">beyond-torte.4k@icloud.com</a>
         </div>
-        {% endif %}
-      </div>
+        <div class="contact-card">
+            <div class="icon">🤝</div>
+            <h3>Partnerships &amp; Advertising</h3>
+            <a href="mailto:beyond-torte.4k@icloud.com">beyond-torte.4k@icloud.com</a>
+        </div>
     </div>
 
-    <div class="card">
-      <h2>Frequently Asked Questions</h2>
-      <p style="font-weight:600; color:#1a1a2e;">Can I suggest a new integration?</p>
-      <p style="color:#374151; font-size:0.9rem;">Yes! Use the form above and select "Request an integration" or use the Request Integration button on our homepage.</p>
-      <p style="font-weight:600; color:#1a1a2e; margin-top:16px;">How do I unsubscribe from the newsletter?</p>
-      <p style="color:#374151; font-size:0.9rem;">Every newsletter we send includes an unsubscribe link at the bottom. You can also email us directly and we'll remove you immediately.</p>
-      <p style="font-weight:600; color:#1a1a2e; margin-top:16px;">I found wrong information on the site. How do I report it?</p>
-      <p style="color:#374151; font-size:0.9rem;">Please use the form above and select "Report a bug or error". We review all reports and correct issues quickly.</p>
+    <!-- Contact Form — standard HTML POST, NO JavaScript/AJAX -->
+    <div class="form-card">
+        <h2>Send Us a Message</h2>
+        <form action="/contact" method="POST">
+            <div class="field">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" name="name" placeholder="Your full name" required>
+            </div>
+            <div class="field">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+            </div>
+            <div class="field">
+                <label for="subject">Subject</label>
+                <select id="subject" name="subject">
+                    <option value="General enquiry">General enquiry</option>
+                    <option value="Request an integration">Request an integration</option>
+                    <option value="Partnership / Advertising">Partnership / Advertising</option>
+                    <option value="Report a bug or error">Report a bug or error</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" placeholder="Tell us how we can help..." required></textarea>
+            </div>
+            <button type="submit" class="btn-submit">Send Message →</button>
+        </form>
     </div>
 
-  </div>
+    <!-- FAQ -->
+    <div class="faq-card">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-item">
+            <h3>Can I suggest a new integration?</h3>
+            <p>Yes! Use the form above and select "Request an integration" or use the Request Integration button on our homepage.</p>
+        </div>
+        <div class="faq-item">
+            <h3>How do I unsubscribe from the newsletter?</h3>
+            <p>Every newsletter we send includes an unsubscribe link at the bottom. You can also email us directly and we'll remove you immediately.</p>
+        </div>
+        <div class="faq-item">
+            <h3>I found wrong information on the site. How do I report it?</h3>
+            <p>Please use the form above and select "Report a bug or error". We review all reports and correct issues quickly.</p>
+        </div>
+    </div>
+</div>
 
-  <script>
-    document.getElementById('contactForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      document.getElementById('successMsg').style.display = 'block';
-      this.reset();
-    });
-  </script>
-
-  <footer>
+<footer>
     © 2026 Integration Directory ·
     <a href="/privacy">Privacy Policy</a>
     <a href="/terms">Terms of Service</a>
     <a href="/about">About</a>
-  </footer>
+</footer>
 
 </body>
 </html>

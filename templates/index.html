@@ -153,7 +153,14 @@
         </aside>
     </div>
 
-    <div class="max-w-4xl mx-auto mt-12 mb-12 bg-blue-600 text-white p-8 rounded-2xl shadow-lg text-center mx-4 md:mx-auto">
+    <!-- ✅ Request Integration Success Toast (shown after redirect with ?requested=true) -->
+    <div id="request-success-toast" class="hidden max-w-4xl mx-auto mt-6 px-4 md:px-0">
+        <div class="bg-green-50 border border-green-300 text-green-800 px-6 py-4 rounded-xl font-semibold text-center shadow-sm flex items-center justify-center gap-2">
+            ✅ Request received! We'll notify you when this integration is live.
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto mt-6 mb-12 bg-blue-600 text-white p-8 rounded-2xl shadow-lg text-center mx-4 md:mx-auto">
         <h2 class="text-3xl font-bold mb-4">Can't find your tools?</h2>
         <p class="mb-6 opacity-90">Tell us what you want to connect, and our automation experts will build it for you.</p>
         <form action="/request-integration" method="POST" class="flex flex-col md:flex-row gap-4 justify-center">
@@ -173,36 +180,57 @@
             at no extra cost to you. <a href="/privacy">Privacy Policy</a>
         </p>
 <script>
-        document.getElementById('newsletter-form').addEventListener('submit', async function(e) {
-            e.preventDefault(); // Stops the page from redirecting
-            
-            const emailInput = document.getElementById('newsletter-email');
-            const msgEl = document.getElementById('newsletter-msg');
-            const btn = document.getElementById('newsletter-btn');
-            
-            btn.innerText = "Subscribing...";
-            
-            try {
-                const formData = new FormData();
-                formData.append("email", emailInput.value);
-                
-                const response = await fetch('/subscribe', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                msgEl.innerText = data.message;
-                msgEl.classList.remove('hidden'); // Show the success message
-                emailInput.value = ''; // Clear the input box
-            } catch (error) {
-                msgEl.innerText = "Error. Please try again.";
-                msgEl.classList.remove('hidden');
-                msgEl.classList.replace('text-green-600', 'text-red-600');
+    // ── Newsletter subscription (AJAX — stays on page) ──────────────────────
+    document.getElementById('newsletter-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const emailInput = document.getElementById('newsletter-email');
+        const msgEl     = document.getElementById('newsletter-msg');
+        const btn       = document.getElementById('newsletter-btn');
+
+        btn.innerText = "Subscribing...";
+        btn.disabled  = true;
+
+        try {
+            const formData = new FormData();
+            formData.append("email", emailInput.value);
+
+            const response = await fetch('/subscribe', { method: 'POST', body: formData });
+            const data     = await response.json();
+
+            msgEl.innerText = data.message || "You're subscribed! ✅";
+            msgEl.classList.remove('hidden', 'text-red-600');
+            msgEl.classList.add('text-green-600');
+            emailInput.value = '';
+        } catch (error) {
+            msgEl.innerText = "Error. Please try again.";
+            msgEl.classList.remove('hidden', 'text-green-600');
+            msgEl.classList.add('text-red-600');
+        }
+
+        btn.innerText = "Subscribe";
+        btn.disabled  = false;
+    });
+
+    // ── Request Integration success toast ───────────────────────────────────
+    // After the form POSTs to /request-integration, the backend redirects back
+    // to /?requested=true — this script reads that param and shows a toast.
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('requested') === 'true') {
+            var toast = document.getElementById('request-success-toast');
+            if (toast) {
+                toast.classList.remove('hidden');
+                // Scroll to toast so user sees it
+                toast.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Clean the URL so refreshing doesn't re-show it
+                window.history.replaceState({}, '', '/');
+                // Auto-hide after 7 seconds
+                setTimeout(function() {
+                    toast.classList.add('hidden');
+                }, 7000);
             }
-            btn.innerText = "Subscribe";
-        });
-    </script>
+        }
+    })();
+</script>
 </body>
 </html>
-

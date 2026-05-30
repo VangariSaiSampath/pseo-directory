@@ -20,7 +20,6 @@ from fastapi import BackgroundTasks
 
 from fastapi.responses import RedirectResponse
 
-
 import feedparser
 import httpx
 
@@ -312,11 +311,17 @@ async def request_integration(
     background_tasks: BackgroundTasks = None
 ):
     conn, cursor = get_db_connection()
-    cursor.execute('INSERT INTO leads (email, requested_tools) VALUES (%s, %s)', (email, tools))
-    conn.commit()
-    conn.close()
-    background_tasks.add_task(send_integration_request_emails, email, tools)
-    return {"message": "Success! We will notify you when this integration is live."}
+    try:
+        cursor.execute('INSERT INTO leads (email, requested_tools) VALUES (%s, %s)', (email, tools))
+        conn.commit()
+    except Exception as e:
+        print(f"Lead capture error: {e}")
+    finally:
+        conn.close()
+    if background_tasks:
+        background_tasks.add_task(send_integration_request_emails, email, tools)
+    # Redirect back to homepage with success flag so JS can show a toast
+    return RedirectResponse(url="/?requested=true", status_code=303)
 
 
 def send_integration_request_emails(user_email: str, tools: str):
@@ -969,8 +974,6 @@ async def read_news(request: Request, slug: str):
     })
 
 
-
-# Real RSS sources — AI and automation news only
 RSS_FEEDS = [
     "https://techcrunch.com/category/artificial-intelligence/feed/",
     "https://venturebeat.com/category/ai/feed/",
@@ -1089,7 +1092,6 @@ async def about_page(request: Request):
  
 
 #CONTACT_ROUTE = '''
-
 @app.get("/contact")
 async def contact_page(request: Request):
     return templates.TemplateResponse("contact.html", {"request": request})
@@ -1102,7 +1104,7 @@ async def contact_submit(
     email: str = Form(...),
     subject: str = Form(...),
     message: str = Form(...),
-    background_tasks: BackgroundTasks = None   # ← ADD THIS
+    background_tasks: BackgroundTasks = None
 ):
     conn, cursor = get_db_connection()
     try:
@@ -1116,11 +1118,10 @@ async def contact_submit(
         print(f"Contact form DB error: {e}")
     finally:
         conn.close()
-
-    # ← ADD THIS: fire emails in background
+    # Fire emails in background
     if background_tasks:
         background_tasks.add_task(send_contact_email, name, email, subject, message)
-
+    # Redirect back to contact page with success param
     return RedirectResponse(url="/contact?sent=true", status_code=303)
 
 
@@ -1135,7 +1136,7 @@ def send_contact_email(name: str, user_email: str, subject: str, message: str):
         server.starttls()
         server.login(sender_email, sender_password)
 
-        # 1. Notify you (admin) with the full message
+        # 1. Notify admin with full message
         admin_msg = MIMEMultipart()
         admin_msg['From'] = sender_email
         admin_msg['To'] = sender_email
@@ -1148,45 +1149,11 @@ def send_contact_email(name: str, user_email: str, subject: str, message: str):
   <p><b>Subject:</b> {subject}</p>
   <hr>
   <p><b>Message:</b></p>
-  <p>{message}</p>
+  <p style="white-space:pre-wrap;">{message}</p>
 </body></html>""", 'html'))
         server.send_message(admin_msg)
 
-        # 2. Auto-reply to the user
-        user_msg = MIMEMultipart()
-        user_msg['From'] = f"Integration Directory <{sender_email}>"
-        user_msg['To'] = user_email
-        user_msg['Subject'] = "We received your message! ✅"
-        user_msg.attach(MIMEText(f"""
-<html><body style="font-family:sans-serif;padding:20px;color:#333;">
-  <h2 style="color:#2563eb;">Thanks, {name}! We got your message.</h2>
-  <p>We'll get back to you within 1–2 business days.</p>
-  <p><em>Your message: {message[:200]}{'...' if len(message) > 200 else ''}</em></p>
-  <hr>
-  <p style="font-size:12px;color:#999;">Integration Directory · beyond-torte.4k@icloud.com · Hyderabad, India</p>
-</body></html>""", 'html'))
-        server.send_message(user_msg)
-        server.quit()
-        print(f"Contact emails sent for: {user_email}")
-    except Exception as e:
-        print(f"Contact email error: {e}")
-
-        # 1. Email to you (admin) with the message
-        admin_msg = MIMEMultipart()
-        admin_msg['From'] = sender_email
-        admin_msg['To'] = sender_email
-        admin_msg['Subject'] = f"Contact Form: {subject} — from {name}"
-        admin_msg.attach(MIMEText(f"""
-<html><body>
-  <h2>New Contact Form Submission</h2>
-  <p><b>Name:</b> {name}</p>
-  <p><b>Email:</b> {user_email}</p>
-  <p><b>Subject:</b> {subject}</p>
-  <p><b>Message:</b><br>{message}</p>
-</body></html>""", 'html'))
-        server.send_message(admin_msg)
-
-        # 2. Auto-reply to the user
+        # 2. Auto-reply to user
         user_msg = MIMEMultipart()
         user_msg['From'] = f"Integration Directory <{sender_email}>"
         user_msg['To'] = user_email
@@ -1195,13 +1162,16 @@ def send_contact_email(name: str, user_email: str, subject: str, message: str):
 <html><body style="font-family:sans-serif;padding:20px;color:#333;">
   <h2 style="color:#2563eb;">Thanks, {name}! We got your message.</h2>
   <p>We'll get back to you within 1–2 business days at this email address.</p>
-  <p>Your message: <em>{message[:200]}...</em></p>
-  <p style="font-size:12px;color:#999;">Integration Directory · beyond-torte.4k@icloud.com</p>
+  <p style="background:#f3f4f6;padding:12px;border-radius:6px;font-style:italic;">{message[:300]}{'...' if len(message) > 300 else ''}</p>
+  <hr>
+  <p style="font-size:12px;color:#999;">Integration Directory · beyond-torte.4k@icloud.com · Hyderabad, India</p>
 </body></html>""", 'html'))
         server.send_message(user_msg)
         server.quit()
+        print(f"Contact emails sent for {user_email}")
     except Exception as e:
-        print(f"Contact email error: {e}") 
+        print(f"Contact email error: {e}")
+ 
 
 
 # --- 9. NEW: AI Social Media Manager ---
@@ -1298,8 +1268,6 @@ async def view_social_drafts(request: Request, secret: str = None):
     
     from fastapi.responses import HTMLResponse
     return HTMLResponse(content=html_content)
-
-from fastapi.responses import RedirectResponse
 
 # ==========================================
 # 11. SECRET AFFILIATE LINK MANAGER (CMS)
@@ -1444,6 +1412,3 @@ async def delete_admin_deal(secret: str = Form(...), deal_id: int = Form(...)):
         conn.close()
         
     return RedirectResponse(url=f"/admin/deals?secret={secret}", status_code=303)
-
-
-
