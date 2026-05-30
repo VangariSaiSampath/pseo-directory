@@ -89,7 +89,11 @@
       </form>
 
       <div class="success-msg" id="successMsg">
-        ✅ Thank you! Your message has been sent. We'll get back to you within 1–2 business days.
+        {% if request.query_params.get('sent') == 'true' %}
+        <div style="background:#d1fae5;border:1px solid #6ee7b7;padding:16px;border-radius:8px;margin-bottom:20px;color:#065f46;">
+            ✅ Thank you! Your message has been sent. We'll get back to you within 1–2 business days.
+        </div>
+        {% endif %}
       </div>
     </div>
 

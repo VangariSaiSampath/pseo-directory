@@ -20,7 +20,6 @@ from fastapi import BackgroundTasks
 
 from fastapi.responses import RedirectResponse
 
-from fastapi import BackgroundTasks
 
 import feedparser
 import httpx
@@ -970,8 +969,6 @@ async def read_news(request: Request, slug: str):
     })
 
 
-import feedparser
-import httpx
 
 # Real RSS sources — AI and automation news only
 RSS_FEEDS = [
@@ -1097,32 +1094,82 @@ async def about_page(request: Request):
 async def contact_page(request: Request):
     return templates.TemplateResponse("contact.html", {"request": request})
 
-
+# --- Contact Form Submission (POST - handle form + send emails) ---
 @app.post("/contact")
-async def handle_contact(
+async def contact_submit(
     request: Request,
     name: str = Form(...),
     email: str = Form(...),
     subject: str = Form(...),
     message: str = Form(...),
-    background_tasks: BackgroundTasks = None
+    background_tasks: BackgroundTasks = None   # ← ADD THIS
 ):
-    background_tasks.add_task(send_contact_email, name, email, subject, message)
-    return templates.TemplateResponse("contact.html", {
-        "request": request,
-        "success": True
-    })
+    conn, cursor = get_db_connection()
+    try:
+        cursor.execute(
+            '''INSERT INTO contact_submissions (name, email, subject, message)
+               VALUES (%s, %s, %s, %s)''',
+            (name, email, subject, message)
+        )
+        conn.commit()
+    except Exception as e:
+        print(f"Contact form DB error: {e}")
+    finally:
+        conn.close()
+
+    # ← ADD THIS: fire emails in background
+    if background_tasks:
+        background_tasks.add_task(send_contact_email, name, email, subject, message)
+
+    return RedirectResponse(url="/contact?sent=true", status_code=303)
 
 
 def send_contact_email(name: str, user_email: str, subject: str, message: str):
     sender_email = os.environ.get("SMTP_EMAIL")
     sender_password = os.environ.get("SMTP_PASSWORD")
     if not sender_email or not sender_password:
+        print("SMTP credentials missing — contact email not sent.")
         return
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(sender_email, sender_password)
+
+        # 1. Notify you (admin) with the full message
+        admin_msg = MIMEMultipart()
+        admin_msg['From'] = sender_email
+        admin_msg['To'] = sender_email
+        admin_msg['Subject'] = f"📬 Contact Form: {subject} — from {name}"
+        admin_msg.attach(MIMEText(f"""
+<html><body style="font-family:sans-serif;padding:20px;color:#333;">
+  <h2>New Contact Form Submission</h2>
+  <p><b>Name:</b> {name}</p>
+  <p><b>Email:</b> {user_email}</p>
+  <p><b>Subject:</b> {subject}</p>
+  <hr>
+  <p><b>Message:</b></p>
+  <p>{message}</p>
+</body></html>""", 'html'))
+        server.send_message(admin_msg)
+
+        # 2. Auto-reply to the user
+        user_msg = MIMEMultipart()
+        user_msg['From'] = f"Integration Directory <{sender_email}>"
+        user_msg['To'] = user_email
+        user_msg['Subject'] = "We received your message! ✅"
+        user_msg.attach(MIMEText(f"""
+<html><body style="font-family:sans-serif;padding:20px;color:#333;">
+  <h2 style="color:#2563eb;">Thanks, {name}! We got your message.</h2>
+  <p>We'll get back to you within 1–2 business days.</p>
+  <p><em>Your message: {message[:200]}{'...' if len(message) > 200 else ''}</em></p>
+  <hr>
+  <p style="font-size:12px;color:#999;">Integration Directory · beyond-torte.4k@icloud.com · Hyderabad, India</p>
+</body></html>""", 'html'))
+        server.send_message(user_msg)
+        server.quit()
+        print(f"Contact emails sent for: {user_email}")
+    except Exception as e:
+        print(f"Contact email error: {e}")
 
         # 1. Email to you (admin) with the message
         admin_msg = MIMEMultipart()
