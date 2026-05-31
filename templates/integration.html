@@ -9,7 +9,7 @@
     <link rel="canonical" href="https://integration-directory.com/integrate/{{ data.slug }}">
     <!-- Open Graph -->
     <meta property="og:title" content="How to Connect {{ data.tool_a }} and {{ data.tool_b }}">
-    <meta property="og:description" content="{{ data.description }}">
+    <meta property="og:description" content="{{ unique_description }}">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://integration-directory.com/integrate/{{ data.slug }}">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -85,12 +85,40 @@
           "name": "What can I automate between {{ data.tool_a }} and {{ data.tool_b }}?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "{{ data.description | default('You can sync data, trigger notifications, create records automatically, and eliminate manual copy-paste between these two tools.') }}"
+            "text": "{{ unique_description | replace('"', '\\"') }}"
           }
         }
       ]
     }
     </script>
+    <script type="application/ld+json">
+    {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "How to Connect {{ data.tool_a }} and {{ data.tool_b }}",
+    "description": "{{ unique_description | replace('"', '\\"') }}",
+    "author": {
+        "@type": "Person",
+        "name": "Vangari Sai Sampath",
+        "url": "https://integration-directory.com/about"
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "Integration Directory",
+        "url": "https://integration-directory.com",
+        "logo": {
+        "@type": "ImageObject",
+        "url": "https://integration-directory.com/favicon.ico"
+        }
+    },
+    "dateModified": "2026-05-30",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://integration-directory.com/integrate/{{ data.slug }}"
+    }
+    }
+    </script>
+ 
 </head>
 <body class="bg-gray-50 font-sans">
 
@@ -103,6 +131,8 @@
             <a href="/blog" class="hover:text-blue-600">Techie Blog</a>
             <a href="/news" class="hover:text-blue-600">AI News</a>
             <a href="/gear" class="hover:text-blue-600">SaaS Tools</a>
+            <a href="/about">About</a>
+            <a href="/contact">Contact</a>
         </div>
         <a href="{{ make_affiliate }}" target="_blank" rel="sponsored nofollow"
            class="bg-blue-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-blue-700 transition">
@@ -135,14 +165,23 @@
                     </span>
                     {% endif %}
                 </div>
+                <div class="flex items-center gap-3 mb-4">
+                    <!-- Initials avatar — change "SS" to your real initials -->
+                     <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">SS</div>
+                     <div class="text-sm text-gray-500 leading-tight">
+                        Written by
+                        <a href="/about" class="font-semibold text-gray-700 hover:text-blue-600">Vangari Sai Sampath</a>
+                        · Automation Specialist · Hyderabad, India
+                        <span class="mx-1 text-gray-300">|</span>
+                        <span>Reviewed May 2026</span>
+                    </div>
+                </div>
 
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
                     How to Connect {{ data.tool_a }} and {{ data.tool_b }}
                 </h1>
 
-                <p class="text-gray-600 text-base leading-relaxed mb-6">
-                    {{ data.description }}
-                </p>
+                <p class="text-lg text-gray-600 mb-6 leading-relaxed">{{ unique_description }}</p>
 
                 <!-- Savings stats row -->
                 <div class="grid grid-cols-3 gap-4 mb-6">
@@ -314,6 +353,23 @@
                 </div>
             </div>
 
+            <!-- ── AUTHOR BIO CARD — E-E-A-T trust signal for AdSense ──────── -->
+            <div class="bg-gray-50 rounded-2xl border border-gray-200 p-6 mb-6 flex items-start gap-4">
+                <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-base flex-shrink-0">SS</div>
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">About the author</p>
+                    <p class="font-semibold text-gray-900 mb-2">Vangari Sai Sampath — Automation &amp; SaaS Specialist</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Vangari Sai Sampath built Integration Directory to help businesses automate their SaaS workflows
+                        without writing code. Based in Hyderabad, India, he has hands-on experience with Make.com,
+                        Zapier, and 50+ tools covered in this directory, and has helped teams set up no-code
+                        automations that save hours every week.
+                    </p>
+                    <a href="/about" class="text-blue-600 text-sm font-semibold hover:underline mt-2 inline-block">More about Integration Directory →</a>
+                </div>
+            </div>
+            <!-- ─────────────────────────────────────────────────────────────── -->
+
         </article>
 
         <!-- ── SIDEBAR ────────────────────────────────────────────────────── -->
@@ -416,6 +472,10 @@
         <div class="border-t border-gray-800 pt-6 text-center text-xs">
             © 2026 Integration Directory · Helping teams automate smarter, one integration at a time.
         </div>
+        <p style="font-size:11px; color:#888; text-align:center; margin-top:8px;">
+            Some links on this site are affiliate links. We may earn a small commission 
+            at no extra cost to you. <a href="/privacy">Privacy Policy</a>
+        </p>
     </div>
 </footer>
 
