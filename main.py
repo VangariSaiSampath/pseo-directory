@@ -20,8 +20,6 @@ from fastapi import BackgroundTasks
 
 from fastapi.responses import RedirectResponse
 
-from fastapi import BackgroundTasks
-
 import feedparser
 import httpx
 
@@ -207,102 +205,123 @@ async def read_blog(request: Request, slug: str):
     })
 
 # --- 2. THE AI AGENT ENDPOINT (The Automated Writer) ---
+# Posts up to 4 blog posts per call. Rate limit: 4 per 6-hour window.
+# Schedule this cron 4x/day: 06:00, 10:00, 14:00, 18:00 IST
 
 @app.get("/api/agent/daily-blog")
-async def run_ai_agent(secret: str, background_tasks: BackgroundTasks):
+async def run_ai_agent(secret: str, background_tasks: BackgroundTasks, count: int = 4):
     if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
         return {"error": "Unauthorized Access"}
 
+    count = max(1, min(count, 4))
+
     conn, cursor = get_db_connection()
 
-    # ── RATE LIMIT: only one blog post per day ─────────────────────────────
+    # Rate limit: max 4 blog posts per 6-hour window
     cursor.execute(
-        "SELECT COUNT(*) as count FROM blog_posts WHERE published_date >= NOW() - INTERVAL '24 hours'"
+        "SELECT COUNT(*) as c FROM blog_posts WHERE published_date >= NOW() - INTERVAL '6 hours'"
     )
-    posts_today = cursor.fetchone()["count"]
-    if posts_today >= 1:
+    posts_recent = cursor.fetchone()["c"]
+    if posts_recent >= 4:
         conn.close()
-        return {"status": "Skipped", "reason": "Already posted a blog today. Cron will run again tomorrow."}
-    # ───────────────────────────────────────────────────────────────────────
+        return {"status": "Skipped", "reason": f"Already posted {posts_recent} blog posts in the last 6 hours."}
 
-    # Pick a random integration pair
-    cursor.execute("SELECT tool_a, tool_b FROM integrations")
-    integrations = cursor.fetchall()
-    if not integrations:
-        conn.close()
-        return {"error": "No integrations found in database."}
+    slots_remaining = 4 - posts_recent
+    to_post = min(count, slots_remaining)
 
-    random_pair = random.choice(integrations)
-    tool_a, tool_b = random_pair["tool_a"], random_pair["tool_b"]
+    # Get existing titles to avoid duplicates
+    cursor.execute("SELECT title FROM blog_posts")
+    existing = {row["title"].lower() for row in cursor.fetchall()}
 
-    # ── IMPROVED PROMPT: SEO-optimised, no clickbait ───────────────────────
-    prompt = f"""
-You are a B2B tech writer for integration-directory.com, a software integration directory.
-Write an 900-word SEO blog post about connecting {tool_a} and {tool_b} using Make.com automation.
+    # Topic pool — covers popular SaaS integrations and automation tutorials
+    BLOG_TOPICS = [
+        "5 Make.com automations every Shopify store owner should set up",
+        "How to connect HubSpot and Slack automatically — no-code guide",
+        "The best free Zapier alternatives for Indian startups in 2026",
+        "How to automate your Google Sheets with Make.com step by step",
+        "Notion + Slack integration: the complete 2026 setup guide",
+        "How to send automatic WhatsApp messages using Make.com",
+        "Top 7 automations to save 5 hours per week for remote teams",
+        "How to build a no-code lead capture pipeline with Airtable and Gmail",
+        "Make.com vs Zapier: which is better for Indian businesses in 2026?",
+        "How to automate Trello card creation from Gmail emails",
+        "The complete guide to automating customer onboarding with SaaS tools",
+        "How to sync WooCommerce orders to Google Sheets automatically",
+        "5 automations every freelancer should set up on Make.com",
+        "How to build an AI-powered email responder using Make.com",
+        "Automate your invoicing: connect Stripe, Notion and Gmail in one workflow",
+        "How to create automatic Jira tickets from Slack messages",
+        "How to auto-post new blog content to LinkedIn using Make.com",
+        "The best Make.com templates for e-commerce businesses in 2026",
+        "How to automate Salesforce data entry from Google Forms",
+        "Setting up a no-code CRM pipeline: HubSpot + Notion + Gmail guide",
+    ]
+    available = [t for t in BLOG_TOPICS if t.lower() not in existing]
+    if len(available) < to_post:
+        # Pull random integration pairs from DB for extra variety
+        cursor.execute("SELECT tool_a, tool_b FROM integrations ORDER BY RANDOM() LIMIT 10")
+        pairs = cursor.fetchall()
+        available += [f"How to Connect {r['tool_a']} and {r['tool_b']}: Step-by-Step Guide (2026)" for r in pairs]
+    random.shuffle(available)
 
-TITLE FORMAT (mandatory):
-"How to Connect {tool_a} and {tool_b}: Step-by-Step Guide (2026)"
-Wrap it in an <h1> tag.
+    posted = []
+    errors = []
 
-STRUCTURE (use these exact H2 headings):
-<h2>Why connect {tool_a} and {tool_b}?</h2>
-<h2>What you need before you start</h2>
-<h2>Step-by-step: How to integrate {tool_a} and {tool_b} using Make.com</h2>
-  → Write 3 numbered steps inside this section as <ol><li> tags
-<h2>Popular use cases</h2>
-  → 3 bullet points, realistic business scenarios
-<h2>How much time will this save?</h2>
-  → 1 short paragraph with realistic time savings estimate
+    for i in range(to_post):
+        topic = available[i]
 
-COM CTA (insert after the step-by-step section, exact HTML):
+        # Check if it's an integration pair topic or a tutorial topic
+        is_pair = topic.startswith("How to Connect ") and " and " in topic
+        if is_pair:
+            parts = topic.replace("How to Connect ", "").split(": ")[0]
+            tool_a, tool_b = parts.split(" and ")[0], parts.split(" and ")[1]
+            prompt = f"""You are a B2B tech writer for integration-directory.com.
+Write a 900-word SEO blog post: "How to Connect {tool_a} and {tool_b}: Step-by-Step Guide (2026)"
+Wrap the title in <h1>. Use <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <div> HTML only. No markdown.
+Structure: Why connect → What you need → Step-by-step (numbered) → Popular use cases (3 bullets) → Time savings estimate.
+Include this CTA after the steps:
 <div style="background:#eff6ff;border-left:4px solid #2563eb;padding:16px;border-radius:6px;margin:24px 0;">
-<strong>Ready to set this up?</strong> Build this automation for free on Make.com — no coding needed.<br>
+<strong>Ready to set this up?</strong> Build this automation free on Make.com.<br>
 <a href="https://www.make.com/en/register?pc=sampath9" rel="sponsored" style="color:#2563eb;font-weight:bold;">Start free on Make.com →</a>
 </div>
+End with FAQ: 3 questions in <h3> and answers in <p>.
+Add author line at the end: <p style="font-size:13px;color:#6b7280;margin-top:32px;border-top:1px solid #e5e7eb;padding-top:12px;">Written by <strong>Vangari Sai Sampath</strong>, Automation Specialist · Integration Directory · Hyderabad, India</p>
+NO hype words: unleash, nexus, supercharge, revolutionize, game-changer. Plain business language only."""
+        else:
+            prompt = f"""You are an expert automation consultant writing practical tutorials for integration-directory.com.
+Write a comprehensive 800-word tutorial blog post on this topic: "{topic}"
+The audience is non-technical business owners, freelancers, and operations managers in India and globally.
+Wrap the title in <h1>. Use <h2>, <h3>, <p>, <ul>, <ol>, <li>, <strong>, <div> HTML only. No markdown.
+Structure: Introduction (2 paragraphs) → Why this matters → Step-by-step guide (numbered) → Pro tips → CTA → FAQ (3 questions).
+Include this exact CTA:
+<div style="background:#f0f4ff;padding:16px;border-radius:8px;margin:20px 0;">
+<strong>Try this automation free →</strong> <a href="https://www.make.com/en/register?pc=sampath9" rel="sponsored">Start on Make.com</a> — 1,000 free operations/month, no credit card needed.
+</div>
+Add author line at the end: <p style="font-size:13px;color:#6b7280;margin-top:32px;border-top:1px solid #e5e7eb;padding-top:12px;">Written by <strong>Vangari Sai Sampath</strong>, Automation Specialist · Integration Directory · Hyderabad, India</p>
+Be specific, practical, action-oriented. NO hype words. Plain language."""
 
-FAQ SECTION (at the end, mandatory for Google rich snippets):
-<h2>Frequently asked questions</h2>
-Write exactly 3 questions and answers about this integration using <h3> for questions and <p> for answers.
+        try:
+            response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+            html_content = response.text.replace("```html", "").replace("```", "").strip()
+            title_match = re.search(r"<h1>(.*?)</h1>", html_content)
+            title = title_match.group(1) if title_match else topic
+            slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")[:80]
 
-STRICT RULES:
-- DO NOT use words: unleash, nexus, supercharge, revolutionize, game-changer, hyper-productivity
-- DO NOT invent product features
-- Use plain business language, not marketing hype
-- Format entire output in HTML only (<h1> <h2> <h3> <p> <ul> <ol> <li> <strong> <div>)
-- Do not include greetings or sign-offs
-"""
-    # ───────────────────────────────────────────────────────────────────────
+            cursor.execute(
+                "INSERT INTO blog_posts (title, slug, content) VALUES (%s, %s, %s) ON CONFLICT (slug) DO NOTHING",
+                (title, slug, html_content),
+            )
+            conn.commit()
+            posted.append(title)
+            # Send newsletter only for the first post of the batch
+            if i == 0:
+                background_tasks.add_task(send_newsletter, title, html_content)
+        except Exception as e:
+            errors.append(str(e))
+            print(f"Blog Agent Error (post {i+1}): {e}")
 
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-        )
-        html_content = response.text
-        html_content = html_content.replace("```html", "").replace("```", "").strip()
-
-        title_match = re.search(r"<h1>(.*?)</h1>", html_content)
-        title = title_match.group(1) if title_match else f"{tool_a} and {tool_b} Automation Guide"
-        slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
-
-        cursor.execute(
-            """
-            INSERT INTO blog_posts (title, slug, content)
-            VALUES (%s, %s, %s)
-            ON CONFLICT (slug) DO NOTHING
-            """,
-            (title, slug, html_content),
-        )
-        conn.commit()
-        conn.close()
-
-        background_tasks.add_task(send_newsletter, title, html_content)
-        return {"status": "Success", "posted": title}
-
-    except Exception as e:
-        print(f"Agent Error: {e}")
-        conn.close()
-        return {"status": "Failed", "error": str(e)}
+    conn.close()
+    return {"status": "Success", "posted_count": len(posted), "posted": posted, "errors": errors or None}
 
 # --- 3. Lead Capture Route ---
 
@@ -616,64 +635,6 @@ async def curated_list(request: Request, tool: str):
     })
 
 
-# =============================================================================
-# POINT 2 — Unique page descriptions (fixes AdSense duplicate-content issue)
-# 10 structurally different templates so no two pages share identical wording.
-# Uses hash(slug) as a stable seed: same page = same template every time,
-# but adjacent pages in the directory will nearly always pick different ones.
-# =============================================================================
-_DESC_TEMPLATES = [
-    # 0
-    "Most teams that use both {a} and {b} waste time moving data by hand between the two tools. "
-    "This guide shows you the fastest way to automate that handoff using Make.com's visual builder — no code, no CSV exports.",
-
-    # 1
-    "When {a} and {b} talk to each other automatically, your team stops being the middleman. "
-    "Follow these steps to build a live sync in under 10 minutes on Make.com's free plan.",
-
-    # 2
-    "If you manage work across {a} and {b}, automation cuts the busywork. "
-    "Set up a Make.com scenario once and updates in one tool instantly appear in the other — no manual copying.",
-
-    # 3
-    "{a} handles one part of your workflow. {b} handles another. "
-    "This integration closes the gap between them and keeps both tools in sync without any manual effort.",
-
-    # 4
-    "Building a bridge between {a} and {b} takes about 10 minutes on Make.com. "
-    "Once active, the automation runs silently in the background — syncing records, triggering alerts, and saving hours every week.",
-
-    # 5
-    "Teams that connect {a} with {b} typically save several hours a week on data entry alone. "
-    "This guide shows exactly which Make.com modules to use and how to configure them correctly.",
-
-    # 6
-    "Automating the handoff between {a} and {b} removes one of the most common sources of human error in SaaS workflows. "
-    "Here's the step-by-step setup using Make.com — free plan is enough to get started.",
-
-    # 7
-    "Whether you want to push data from {a} into {b}, or trigger actions in both tools simultaneously, "
-    "Make.com makes it straightforward. This guide covers setup, testing, and the most common use cases.",
-
-    # 8
-    "Connecting {a} and {b} is one of the most-requested automations in our directory. "
-    "This guide gives you a clear, tested process to get it running today — at no cost on Make.com's free plan.",
-
-    # 9
-    "The manual work of copying data between {a} and {b} is exactly what automation was built to eliminate. "
-    "Follow this guide to set up a reliable, code-free sync using Make.com in under 10 minutes.",
-]
-
-def _unique_desc(tool_a: str, tool_b: str, slug: str) -> str:
-    """
-    Picks one of the 10 templates based on the page slug.
-    Deterministic (same slug → same template) but varied across pages.
-    """
-    idx = abs(hash(slug)) % len(_DESC_TEMPLATES)
-    return _DESC_TEMPLATES[idx].format(a=tool_a, b=tool_b)
-# =============================================================================
-
-
 @app.get("/integrate/{slug}")
 async def integration_page(request: Request, slug: str):
     conn, cursor = get_db_connection()
@@ -687,11 +648,6 @@ async def integration_page(request: Request, slug: str):
     # Get direct links for both tools
     tool_a_info = get_tool_link(integration["tool_a"])
     tool_b_info = get_tool_link(integration["tool_b"])
-
-    # Point 2 — generate a unique description for this specific tool pair
-    unique_description = _unique_desc(
-        integration["tool_a"], integration["tool_b"], slug
-    )
  
     return templates.TemplateResponse("integration.html", {
         "request": request,
@@ -699,7 +655,6 @@ async def integration_page(request: Request, slug: str):
         "make_affiliate": MAKE_AFFILIATE,
         "tool_a_info": tool_a_info,
         "tool_b_info": tool_b_info,
-        "unique_description": unique_description,   # ← NEW — used in template
     })
 
 
@@ -1034,9 +989,6 @@ async def read_news(request: Request, slug: str):
     })
 
 
-import feedparser
-import httpx
-
 # Real RSS sources — AI and automation news only
 RSS_FEEDS = [
     "https://techcrunch.com/category/artificial-intelligence/feed/",
@@ -1044,29 +996,47 @@ RSS_FEEDS = [
     "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
 ]
 
+# Different angle templates so each article has a unique editorial angle
+NEWS_ANGLES = [
+    "What It Means for Your Automation Workflows",
+    "How SaaS Teams Should Respond",
+    "The Impact on No-Code and Low-Code Tools",
+    "A Practical Guide for Operations Teams",
+]
+
 @app.get("/api/agent/daily-news")
-async def run_news_agent(secret: str, background_tasks: BackgroundTasks):
+async def run_news_agent(secret: str, background_tasks: BackgroundTasks, count: int = 4):
+    """
+    Cron job endpoint — posts up to `count` news articles per call (default 4).
+    Call 4x/day via cron to publish up to 16 articles/day, or call once with ?count=4.
+    Rate limit: max 4 posts per 6-hour window to avoid spam.
+    """
     if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
         return {"error": "Unauthorized Access"}
 
+    # Clamp between 1 and 4
+    count = max(1, min(count, 4))
+
     conn, cursor = get_db_connection()
 
-    # ── RATE LIMIT: only one post per day ──────────────────────────────────
+    # Rate limit: max 4 posts in the last 6 hours
     cursor.execute(
-        "SELECT COUNT(*) as count FROM news_posts WHERE published_date >= NOW() - INTERVAL '24 hours'"
+        "SELECT COUNT(*) as c FROM news_posts WHERE published_date >= NOW() - INTERVAL '6 hours'"
     )
-    posts_today = cursor.fetchone()["count"]
-    if posts_today >= 1:
+    posts_recent = cursor.fetchone()["c"]
+    if posts_recent >= 4:
         conn.close()
-        return {"status": "Skipped", "reason": "Already posted news today. Cron will run again tomorrow."}
-    # ───────────────────────────────────────────────────────────────────────
+        return {"status": "Skipped", "reason": f"Already posted {posts_recent} news articles in the last 6 hours."}
 
-    # ── FETCH REAL NEWS FROM RSS ────────────────────────────────────────────
+    slots_remaining = 4 - posts_recent
+    to_post = min(count, slots_remaining)
+
+    # Fetch real articles from RSS
     real_articles = []
     for feed_url in RSS_FEEDS:
         try:
             feed = feedparser.parse(feed_url)
-            for entry in feed.entries[:5]:  # top 5 from each feed
+            for entry in feed.entries[:8]:
                 real_articles.append({
                     "title": entry.get("title", ""),
                     "summary": entry.get("summary", entry.get("description", ""))[:600],
@@ -1079,68 +1049,74 @@ async def run_news_agent(secret: str, background_tasks: BackgroundTasks):
 
     if not real_articles:
         conn.close()
-        return {"status": "Failed", "error": "Could not fetch any RSS articles. Check feed URLs."}
+        return {"status": "Failed", "error": "Could not fetch any RSS articles."}
 
-    # Pick one random real article to base the post on
-    source_article = random.choice(real_articles)
-    # ───────────────────────────────────────────────────────────────────────
+    # Shuffle to get variety
+    random.shuffle(real_articles)
 
-    # ── GEMINI: Write an original analysis based on the REAL article ────────
-    prompt = f"""
-You are a senior tech journalist writing for integration-directory.com, a site about software automation and AI tools.
+    posted = []
+    errors = []
+
+    for i in range(to_post):
+        source_article = real_articles[i % len(real_articles)]
+        angle = NEWS_ANGLES[i % len(NEWS_ANGLES)]
+
+        prompt = f"""You are a senior tech journalist writing for integration-directory.com, a site about software automation and AI tools.
 
 A real news article was just published:
 - Source: {source_article['source']}
 - Headline: {source_article['title']}
 - Summary: {source_article['summary']}
 
-Write a 700-word original analysis article inspired by this REAL news. Do not invent company names or fake products.
+Write a 600-word original analysis article from this angle: "{angle}"
+Inspired by the REAL news above. Do not invent company names or fake products.
 Focus on: what this means for software integrations, workflow automation, and SaaS teams.
 
 STRICT INSTRUCTIONS:
-- Title must follow this format: "[Real Topic]: What It Means for Your Automation Workflows"
-- Start the title in an <h1> tag.
-- Use <h2>, <p>, <ul>, <li>, <strong> HTML only.
-- Do NOT use hype words like "unleash", "nexus", "revolutionizing", "cognitive engine".
-- Add a "How to automate this with Make.com" section near the end with this exact CTA:
+- Title must be: "[Real Topic]: {angle}" — use an <h1> tag.
+- Use <h2>, <p>, <ul>, <li>, <strong> HTML only. No markdown.
+- Do NOT use hype words like "unleash", "nexus", "revolutionizing".
+- Include a "How to automate this with Make.com" section with this exact CTA:
   <div style="background:#f0f4ff;padding:16px;border-radius:8px;margin:20px 0;">
   <strong>Automate this workflow today →</strong> <a href="https://www.make.com/en/register?pc=sampath9" rel="sponsored">Start free on Make.com</a> — no code required.
   </div>
-- End with a 3-question FAQ section using <h3> for questions and <p> for answers.
-- Do NOT invent statistics, company names, or product features that are not in the source article.
+- End with a 3-question FAQ using <h3> for questions and <p> for answers.
+- Do NOT invent statistics or product features not in the source article.
 """
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+            )
+            html_content = response.text.replace("```html", "").replace("```", "").strip()
+            title_match = re.search(r"<h1>(.*?)</h1>", html_content)
+            title = title_match.group(1) if title_match else f"{source_article['title']}: {angle}"
+            slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")[:80]
 
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-        )
-        html_content = response.text
-        html_content = html_content.replace("```html", "").replace("```", "").strip()
+            cursor.execute(
+                "INSERT INTO news_posts (title, slug, content) VALUES (%s, %s, %s) ON CONFLICT (slug) DO NOTHING",
+                (title, slug, html_content),
+            )
+            conn.commit()
+            posted.append(title)
 
-        title_match = re.search(r"<h1>(.*?)</h1>", html_content)
-        title = title_match.group(1) if title_match else source_article["title"]
-        slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+            # Only send newsletter for the FIRST post in batch (avoid spamming subscribers)
+            if i == 0:
+                background_tasks.add_task(send_newsletter, title, html_content)
 
-        cursor.execute(
-            """
-            INSERT INTO news_posts (title, slug, content)
-            VALUES (%s, %s, %s)
-            ON CONFLICT (slug) DO NOTHING
-            """,
-            (title, slug, html_content),
-        )
-        conn.commit()
-        conn.close()
+        except Exception as e:
+            errors.append(str(e))
+            print(f"News Agent Error (article {i+1}): {e}")
 
-        background_tasks.add_task(send_newsletter, title, html_content)
-        return {"status": "Success", "posted": title, "based_on": source_article["title"]}
+    conn.close()
+    return {
+        "status": "Success",
+        "posted_count": len(posted),
+        "posted": posted,
+        "errors": errors if errors else None
+    }
 
-    except Exception as e:
-        print(f"News Agent Error: {e}")
-        conn.close()
-        return {"status": "Failed", "error": str(e)}
-    
+
 # --- 8. Legal Pages (AdSense Compliance) ---
 @app.get("/privacy")
 async def privacy_page(request: Request):
@@ -1160,19 +1136,16 @@ async def about_page(request: Request):
 async def contact_page(request: Request):
     return templates.TemplateResponse("contact.html", {"request": request})
 
-# --- Contact Form Submission (POST - handle form) ---
+# --- Contact Form Submission (POST - handle form + send emails) ---
 @app.post("/contact")
 async def contact_submit(
     request: Request,
     name: str = Form(...),
     email: str = Form(...),
     subject: str = Form(...),
-    message: str = Form(...)
+    message: str = Form(...),
+    background_tasks: BackgroundTasks = None
 ):
-    """
-    Saves the contact form to the DB and optionally emails you.
-    Make sure you have a 'contact_submissions' table (see setup SQL below).
-    """
     conn, cursor = get_db_connection()
     try:
         cursor.execute(
@@ -1185,8 +1158,47 @@ async def contact_submit(
         print(f"Contact form error: {e}")
     finally:
         conn.close()
-    # Redirect back to contact page with success param
+    if background_tasks:
+        background_tasks.add_task(send_contact_email, name, email, subject, message)
     return RedirectResponse(url="/contact?sent=true", status_code=303)
+
+
+def send_contact_email(name: str, user_email: str, subject: str, message: str):
+    sender_email = os.environ.get("SMTP_EMAIL")
+    sender_password = os.environ.get("SMTP_PASSWORD")
+    if not sender_email or not sender_password:
+        print("SMTP credentials missing — contact email not sent.")
+        return
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        admin_msg = MIMEMultipart()
+        admin_msg['From'] = sender_email
+        admin_msg['To'] = sender_email
+        admin_msg['Subject'] = f"📬 Contact Form: {subject} — from {name}"
+        admin_msg.attach(MIMEText(f"""<html><body style="font-family:sans-serif;padding:20px;">
+  <h2>New Contact Form Submission</h2>
+  <p><b>Name:</b> {name}</p><p><b>Email:</b> {user_email}</p>
+  <p><b>Subject:</b> {subject}</p><hr>
+  <p><b>Message:</b></p><p style="white-space:pre-wrap;">{message}</p>
+</body></html>""", 'html'))
+        server.send_message(admin_msg)
+        user_msg = MIMEMultipart()
+        user_msg['From'] = f"Integration Directory <{sender_email}>"
+        user_msg['To'] = user_email
+        user_msg['Subject'] = "We received your message! ✅"
+        user_msg.attach(MIMEText(f"""<html><body style="font-family:sans-serif;padding:20px;color:#333;">
+  <h2 style="color:#2563eb;">Thanks, {name}! We got your message.</h2>
+  <p>We'll get back to you within 1–2 business days.</p>
+  <p style="background:#f3f4f6;padding:12px;border-radius:6px;font-style:italic;">{message[:300]}{'...' if len(message)>300 else ''}</p>
+  <hr><p style="font-size:12px;color:#999;">Integration Directory · beyond-torte.4k@icloud.com</p>
+</body></html>""", 'html'))
+        server.send_message(user_msg)
+        server.quit()
+        print(f"Contact emails sent for {user_email}")
+    except Exception as e:
+        print(f"Contact email error: {e}")
  
 
 
@@ -1285,7 +1297,6 @@ async def view_social_drafts(request: Request, secret: str = None):
     from fastapi.responses import HTMLResponse
     return HTMLResponse(content=html_content)
 
-from fastapi.responses import RedirectResponse
 
 # ==========================================
 # 11. SECRET AFFILIATE LINK MANAGER (CMS)
