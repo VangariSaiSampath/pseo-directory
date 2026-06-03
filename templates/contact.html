@@ -105,7 +105,7 @@
     <p class="subtitle">We'd love to hear from you. Use the form below or reach out directly.</p>
 
     <!-- ✅ SUCCESS BANNER — shows only after redirect with ?sent=true -->
-    {% if request.query_params.get('sent') == 'true' %}
+    {% if sent %}
     <div class="success-banner">
         ✅ Thank you! Your message has been sent. We'll get back to you within 1–2 business days.
     </div>
@@ -116,12 +116,12 @@
         <div class="contact-card">
             <div class="icon">📧</div>
             <h3>General Enquiries</h3>
-            <a href="mailto:beyond-torte.4k@icloud.com">beyond-torte.4k@icloud.com</a>
+            <a href="mailto:contact@integration-directory.com">contact@integration-directory.com</a>
         </div>
         <div class="contact-card">
             <div class="icon">🤝</div>
             <h3>Partnerships &amp; Advertising</h3>
-            <a href="mailto:beyond-torte.4k@icloud.com">beyond-torte.4k@icloud.com</a>
+            <a href="mailto:contact@integration-directory.com">contact@integration-directory.com</a>
         </div>
     </div>
 
@@ -172,7 +172,6 @@
         </div>
     </div>
 </div>
-
 <footer>
     © 2026 Integration Directory ·
     <a href="/privacy">Privacy Policy</a>

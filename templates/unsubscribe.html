@@ -1,9 +1,78 @@
 <!DOCTYPE html>
-<html>
-<head><title>Unsubscribed - Integration Directory</title></head>
-<body style="font-family: sans-serif; text-align:center; padding: 60px 20px;">
-  <h1>You've been unsubscribed ✅</h1>
-  <p>{{ email }} has been removed from The Techie Newsletter.</p>
-  <p>Changed your mind? <a href="https://integration-directory.com">Re-subscribe on our homepage</a>.</p>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unsubscribe - Integration Directory Newsletter</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 40px 32px; max-width: 480px; width: 100%; text-align: center; }
+    .icon { font-size: 2.5rem; margin-bottom: 16px; }
+    h1 { font-size: 1.4rem; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+    p { font-size: 0.9rem; color: #475569; margin-bottom: 20px; line-height: 1.6; }
+    .email-display { background: #f1f5f9; border-radius: 8px; padding: 10px 16px; font-weight: 600; color: #0f172a; font-size: 0.9rem; margin-bottom: 24px; word-break: break-all; }
+    button, .btn { background: #ef4444; color: #fff; border: none; padding: 12px 28px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
+    button:hover { background: #dc2626; }
+    .btn-secondary { background: #f1f5f9; color: #374151; margin-left: 12px; }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .success-box { background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+    .success-box .icon { font-size: 2rem; }
+    .error-box { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 10px; padding: 16px; margin-bottom: 20px; font-size: 0.875rem; color: #991b1b; }
+    .home-link { display: inline-block; margin-top: 20px; color: #2563eb; text-decoration: none; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    {% if success %}
+      <!-- ✅ Successfully unsubscribed -->
+      <div class="success-box">
+        <div class="icon">✅</div>
+        <h1>You've been unsubscribed</h1>
+        <p>
+          <strong>{{ email }}</strong> has been removed from the Techie Newsletter.
+          You won't receive any more emails from us.
+        </p>
+      </div>
+      <p>Changed your mind? You can re-subscribe from our homepage anytime.</p>
+      <a class="btn btn-secondary" href="/">Back to Homepage</a>
+
+    {% elif error %}
+      <!-- ❌ Invalid token -->
+      <div class="error-box">
+        <strong>Invalid unsubscribe link.</strong><br />
+        {{ error }}
+      </div>
+      <a class="btn btn-secondary" href="/">Back to Homepage</a>
+
+    {% elif valid %}
+      <!-- ⚠️ Confirm unsubscribe -->
+      <div class="icon">📧</div>
+      <h1>Unsubscribe from Newsletter</h1>
+      <p>Are you sure you want to unsubscribe?</p>
+      <div class="email-display">{{ email }}</div>
+      <p>You will no longer receive the Techie Newsletter from Integration Directory.</p>
+
+      <form method="POST" action="/unsubscribe">
+        <input type="hidden" name="email" value="{{ email }}" />
+        <input type="hidden" name="token" value="{{ token }}" />
+        <button type="submit">Yes, Unsubscribe Me</button>
+        <a class="btn btn-secondary" href="/">Cancel</a>
+      </form>
+
+    {% else %}
+      <!-- No valid email/token -->
+      <div class="icon">⚠️</div>
+      <h1>Invalid Unsubscribe Link</h1>
+      <p>This unsubscribe link is invalid or has expired. Please contact us directly to be removed.</p>
+      <a class="btn" href="mailto:contact@integration-directory.com" style="background:#2563eb;">
+        Email Us to Unsubscribe
+      </a>
+      <a class="home-link" href="/">← Back to Homepage</a>
+    {% endif %}
+
+  </div>
 </body>
 </html>

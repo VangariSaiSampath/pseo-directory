@@ -3,6 +3,7 @@ import math
 import random
 import re
 from datetime import datetime
+from pathlib import Path
 
 from fastapi import FastAPI, Request, HTTPException, Response, Form
 from fastapi.templating import Jinja2Templates
@@ -23,6 +24,588 @@ from fastapi.responses import RedirectResponse
 import feedparser
 import httpx
 
+# ================================================================
+# TOOL DESCRIPTIONS DATA
+# Paste this dictionary into main.py (at the top, after imports)
+# Then update your integration route to pass these to the template
+# ================================================================
+
+TOOL_DATA = {
+    "slack": {
+        "name": "Slack",
+        "emoji": "💬",
+        "category": "Team Communication",
+        "plan": "Free plan available",
+        "url": "https://slack.com/get-started",
+        "description": (
+            "Slack is the world's most popular team messaging platform, used by over "
+            "10 million people daily. It organises conversations into channels, threads, "
+            "and direct messages, making it easy for teams of any size to collaborate "
+            "in real time — whether in the same office or across the globe."
+        ),
+        "features": [
+            "Organised channels for every project and team",
+            "Instant direct messaging and group chats",
+            "File sharing, search, and message history",
+            "1,000+ app integrations including Make.com",
+            "Audio and video huddles built-in",
+        ],
+        "short": "Team messaging platform used by 10M+ people daily.",
+    },
+    "notion": {
+        "name": "Notion",
+        "emoji": "📝",
+        "category": "Productivity & Docs",
+        "plan": "Free for personal use",
+        "url": "https://www.notion.so/signup",
+        "description": (
+            "Notion is an all-in-one workspace that replaces your notes, docs, wikis, "
+            "and project management tools. Teams use it to write, plan, collaborate, and "
+            "organise everything in one place. Its flexible database system lets you build "
+            "custom workflows, CRMs, and content trackers without writing any code."
+        ),
+        "features": [
+            "Notes, wikis, and rich-text documents",
+            "Flexible databases and table views",
+            "Kanban boards and Gantt-style timelines",
+            "Team collaboration with real-time editing",
+            "AI assistant built in (Notion AI)",
+        ],
+        "short": "All-in-one workspace for notes, docs, and project management.",
+    },
+    "hubspot": {
+        "name": "HubSpot",
+        "emoji": "🧲",
+        "category": "CRM & Marketing",
+        "plan": "Free forever",
+        "url": "https://www.hubspot.com/products/crm",
+        "description": (
+            "HubSpot is the most widely used free CRM in the world, trusted by over "
+            "200,000 companies. It combines contact management, deal tracking, email "
+            "marketing, and customer support into a single platform. The free tier is "
+            "genuinely powerful — unlimited contacts, a full deals pipeline, and email "
+            "tracking are all included at no cost."
+        ),
+        "features": [
+            "Unlimited contacts and companies — free forever",
+            "Visual deals pipeline and sales tracking",
+            "Email tracking and meeting scheduler",
+            "Marketing emails and landing pages",
+            "Live chat and ticketing support tools",
+        ],
+        "short": "The world's most popular free CRM with unlimited contacts.",
+    },
+    "salesforce": {
+        "name": "Salesforce",
+        "emoji": "☁️",
+        "category": "Enterprise CRM",
+        "plan": "30-day free trial",
+        "url": "https://www.salesforce.com/form/signup/freetrial-sales/",
+        "description": (
+            "Salesforce is the world's #1 enterprise CRM platform, used by over 150,000 "
+            "companies globally. It provides advanced tools for sales forecasting, "
+            "pipeline management, customer service, and marketing automation. Salesforce "
+            "is highly customisable and integrates with virtually every major business "
+            "application via its AppExchange marketplace."
+        ),
+        "features": [
+            "Advanced sales pipeline and opportunity tracking",
+            "AI-powered forecasting with Salesforce Einstein",
+            "AppExchange with 3,000+ integrations",
+            "Custom reports and real-time dashboards",
+            "Enterprise-grade security and compliance",
+        ],
+        "short": "The world's #1 enterprise CRM used by 150,000+ companies.",
+    },
+    "trello": {
+        "name": "Trello",
+        "emoji": "📋",
+        "category": "Project Management",
+        "plan": "Free forever",
+        "url": "https://trello.com/signup",
+        "description": (
+            "Trello is a visual project management tool built around the Kanban board "
+            "methodology. Teams use it to organise tasks into lists and drag them through "
+            "stages — To Do, In Progress, Done. It is simple enough for personal use but "
+            "powerful enough for teams of 100+, with automation via Butler and over 200 "
+            "Power-Up integrations."
+        ),
+        "features": [
+            "Drag-and-drop Kanban boards",
+            "Cards with checklists, due dates, and attachments",
+            "Butler automation for recurring tasks",
+            "200+ Power-Up integrations",
+            "Timeline and calendar views on paid plans",
+        ],
+        "short": "Visual Kanban boards for organising any project or team.",
+    },
+    "asana": {
+        "name": "Asana",
+        "emoji": "✅",
+        "category": "Project Management",
+        "plan": "Free for up to 10 users",
+        "url": "https://asana.com/create-account",
+        "description": (
+            "Asana is a leading work management platform that helps teams organise, "
+            "track, and manage their projects in one place. It offers tasks, subtasks, "
+            "projects, portfolios, and workload management. Over 131,000 paying "
+            "organisations use Asana to coordinate work across departments and reduce "
+            "the need for status update meetings."
+        ),
+        "features": [
+            "Tasks, subtasks, and project templates",
+            "Multiple views: list, board, timeline, calendar",
+            "Portfolio and workload management",
+            "Goal tracking and OKR management",
+            "300+ integrations including Slack, Zoom, and Make.com",
+        ],
+        "short": "Work management for teams to coordinate projects at scale.",
+    },
+    "jira": {
+        "name": "Jira",
+        "emoji": "🔵",
+        "category": "Dev Project Management",
+        "plan": "Free for up to 10 users",
+        "url": "https://www.atlassian.com/software/jira",
+        "description": (
+            "Jira is the industry-standard project management tool for software development "
+            "teams. Built by Atlassian, it supports agile methodologies including Scrum "
+            "and Kanban. Engineering teams use Jira to plan sprints, track bugs, manage "
+            "releases, and report on velocity. It integrates tightly with GitHub, "
+            "Bitbucket, Confluence, and 3,000+ other tools."
+        ),
+        "features": [
+            "Scrum and Kanban boards for agile teams",
+            "Bug tracking and issue management",
+            "Sprint planning and velocity reporting",
+            "Roadmaps and release management",
+            "3,000+ integrations via the Atlassian Marketplace",
+        ],
+        "short": "The industry-standard project tracker for software dev teams.",
+    },
+    "zoom": {
+        "name": "Zoom",
+        "emoji": "📹",
+        "category": "Video Conferencing",
+        "plan": "Free plan available",
+        "url": "https://zoom.us/freesignup/",
+        "description": (
+            "Zoom is the world's most widely used video conferencing platform, with over "
+            "350 million daily meeting participants. It powers remote meetings, webinars, "
+            "online events, and team collaboration. The free plan allows unlimited 1:1 "
+            "meetings and group calls up to 40 minutes, making it the go-to solution "
+            "for distributed teams."
+        ),
+        "features": [
+            "HD video and audio meetings",
+            "Screen sharing and whiteboard",
+            "Breakout rooms and webinar hosting",
+            "Meeting recordings to cloud or local",
+            "1,000+ app integrations via Zoom App Marketplace",
+        ],
+        "short": "World's leading video conferencing with 350M+ daily users.",
+    },
+    "mailchimp": {
+        "name": "Mailchimp",
+        "emoji": "📧",
+        "category": "Email Marketing",
+        "plan": "Free up to 500 contacts",
+        "url": "https://mailchimp.com/",
+        "description": (
+            "Mailchimp is the world's most popular email marketing platform, trusted by "
+            "over 11 million businesses. It lets you design professional emails, build "
+            "automated campaigns, and analyse performance — all from a drag-and-drop "
+            "editor. The free plan includes 500 contacts and 1,000 emails per month, "
+            "making it perfect for growing businesses."
+        ),
+        "features": [
+            "Drag-and-drop email designer",
+            "Automated email sequences and drip campaigns",
+            "Audience segmentation and personalisation",
+            "A/B testing and campaign analytics",
+            "Landing pages and signup forms",
+        ],
+        "short": "Email marketing platform trusted by 11 million businesses.",
+    },
+    "stripe": {
+        "name": "Stripe",
+        "emoji": "💳",
+        "category": "Payments",
+        "plan": "No monthly fee",
+        "url": "https://dashboard.stripe.com/register",
+        "description": (
+            "Stripe is the world's most developer-friendly payment processing platform, "
+            "powering payments for millions of businesses from startups to Fortune 500 "
+            "companies. It handles online payments, subscriptions, invoicing, and fraud "
+            "prevention. With no monthly fees — just a small per-transaction fee — it "
+            "is ideal for businesses of any size."
+        ),
+        "features": [
+            "Accept cards, UPI, wallets, and bank transfers",
+            "Subscription billing and recurring payments",
+            "Invoicing and automated payment collection",
+            "Advanced fraud detection (Radar)",
+            "Real-time payment analytics dashboard",
+        ],
+        "short": "The world's most developer-friendly payment processing platform.",
+    },
+    "shopify": {
+        "name": "Shopify",
+        "emoji": "🛍️",
+        "category": "E-Commerce",
+        "plan": "3-day free trial",
+        "url": "https://www.shopify.com/",
+        "description": (
+            "Shopify is the leading e-commerce platform powering over 1.7 million "
+            "businesses in 175 countries. It lets you build a professional online store "
+            "in minutes, manage inventory, process payments, and fulfil orders — all "
+            "from one dashboard. With thousands of apps and Make.com integrations, "
+            "Shopify stores can be fully automated."
+        ),
+        "features": [
+            "Professional online store builder",
+            "Inventory management and order fulfilment",
+            "Built-in payment processing (Shopify Payments)",
+            "Shopify App Store with 8,000+ apps",
+            "Analytics, reports, and customer insights",
+        ],
+        "short": "The leading e-commerce platform powering 1.7M+ businesses.",
+    },
+    "zapier": {
+        "name": "Zapier",
+        "emoji": "⚡",
+        "category": "Automation",
+        "plan": "Free up to 100 tasks/month",
+        "url": "https://zapier.com/sign-up",
+        "description": (
+            "Zapier is the world's most popular no-code automation tool, connecting "
+            "6,000+ apps without writing a single line of code. Each automation (called "
+            "a 'Zap') follows a simple trigger-action format. It is the easiest automation "
+            "tool for beginners, and its massive app library means you can connect almost "
+            "any two tools you already use."
+        ),
+        "features": [
+            "6,000+ app integrations — the largest library",
+            "Simple trigger-action automation format",
+            "Multi-step Zaps with filters and conditions",
+            "Pre-built Zap templates for popular workflows",
+            "No coding required — beginner friendly",
+        ],
+        "short": "No-code automation connecting 6,000+ apps. Largest app library.",
+    },
+    "google-sheets": {
+        "name": "Google Sheets",
+        "emoji": "📊",
+        "category": "Spreadsheets",
+        "plan": "Free with Google account",
+        "url": "https://sheets.google.com",
+        "description": (
+            "Google Sheets is Google's free, cloud-based spreadsheet application used "
+            "by over 1 billion people. It combines the power of Excel with real-time "
+            "collaboration, making it ideal for teams managing data, tracking KPIs, or "
+            "running automated reporting. As a Make.com integration target, Sheets is "
+            "one of the most versatile data destinations available."
+        ),
+        "features": [
+            "Real-time collaborative editing",
+            "Powerful formulas and pivot tables",
+            "Google Apps Script for custom automation",
+            "Charts, dashboards, and conditional formatting",
+            "Connects to Make.com as a trigger or action",
+        ],
+        "short": "Google's free cloud spreadsheet used by 1 billion people.",
+    },
+    "google-drive": {
+        "name": "Google Drive",
+        "emoji": "📁",
+        "category": "Cloud Storage",
+        "plan": "15 GB free",
+        "url": "https://drive.google.com",
+        "description": (
+            "Google Drive is Google's cloud storage and file management service, offering "
+            "15 GB free for every Google account. Teams use it to store, share, and "
+            "collaborate on documents, spreadsheets, and presentations in real time. "
+            "With Make.com, you can automate file creation, organisation, sharing, and "
+            "notifications based on Drive activity."
+        ),
+        "features": [
+            "15 GB free cloud storage",
+            "Real-time collaboration on Docs, Sheets, Slides",
+            "File sharing with granular permission controls",
+            "Search across all file types including PDFs",
+            "Integrates with Make.com for file automation",
+        ],
+        "short": "Google's cloud storage with 15 GB free and real-time collaboration.",
+    },
+    "airtable": {
+        "name": "Airtable",
+        "emoji": "🗂️",
+        "category": "Database & Spreadsheet",
+        "plan": "Free plan available",
+        "url": "https://airtable.com/signup",
+        "description": (
+            "Airtable is a flexible database-spreadsheet hybrid that teams use to manage "
+            "almost anything — from content calendars and CRMs to project trackers and "
+            "product roadmaps. Its visual interface combines the familiarity of a "
+            "spreadsheet with the power of a relational database, making it ideal for "
+            "non-technical teams who need structured data management."
+        ),
+        "features": [
+            "Spreadsheet-style rows with database power",
+            "Multiple views: grid, gallery, kanban, calendar",
+            "Linked records across tables (relational data)",
+            "Automations and scripting built in",
+            "Rich field types: attachments, ratings, formulas",
+        ],
+        "short": "Flexible database-spreadsheet hybrid for any business data.",
+    },
+    "clickup": {
+        "name": "ClickUp",
+        "emoji": "🎯",
+        "category": "Project Management",
+        "plan": "Free forever",
+        "url": "https://clickup.com/",
+        "description": (
+            "ClickUp is an all-in-one productivity platform designed to replace multiple "
+            "separate tools with a single workspace. It combines tasks, docs, goals, chat, "
+            "whiteboards, and time tracking in one place. With a generous free forever "
+            "plan and 1,000+ integrations, ClickUp is one of the fastest-growing "
+            "productivity tools among startups and agencies."
+        ),
+        "features": [
+            "Tasks, subtasks, and checklists",
+            "Docs, wikis, and collaborative notes",
+            "Goals, OKRs, and time tracking",
+            "15+ view types including timeline and mind map",
+            "1,000+ integrations including Make.com",
+        ],
+        "short": "All-in-one productivity replacing tasks, docs, goals, and chat.",
+    },
+    "make": {
+        "name": "Make.com",
+        "emoji": "⚙️",
+        "category": "Automation Platform",
+        "plan": "1,000 ops/month free",
+        "url": "https://www.make.com/en/register?pc=sampath9",
+        "description": (
+            "Make.com (formerly Integromat) is the most powerful visual automation "
+            "platform available. Unlike linear tools, Make uses a canvas where you can "
+            "build complex multi-step scenarios with branches, loops, filters, and data "
+            "transformations. With 1,500+ app integrations and a free plan that includes "
+            "1,000 operations per month, it is the best value automation tool in 2026."
+        ),
+        "features": [
+            "1,500+ app integrations",
+            "Visual drag-and-drop scenario builder",
+            "Advanced: loops, branches, error handling",
+            "1,000 free operations per month",
+            "Real-time monitoring and execution history",
+        ],
+        "short": "The most powerful visual automation platform with 1,500+ integrations.",
+    },
+    "freshdesk": {
+        "name": "Freshdesk",
+        "emoji": "🎧",
+        "category": "Customer Support",
+        "plan": "Free for up to 10 agents",
+        "url": "https://freshdesk.com/",
+        "description": (
+            "Freshdesk is a cloud-based customer support platform used by over 50,000 "
+            "businesses. It centralises customer queries from email, chat, phone, and "
+            "social media into a single ticketing system. The free Sprout plan supports "
+            "up to 10 agents with unlimited tickets, making it one of the most generous "
+            "free support tools available."
+        ),
+        "features": [
+            "Unified ticket inbox from all channels",
+            "Automated ticket routing and SLAs",
+            "Knowledge base and self-service portal",
+            "Canned responses and collision detection",
+            "Reports and customer satisfaction surveys",
+        ],
+        "short": "Cloud helpdesk unifying support tickets from all channels.",
+    },
+    "zendesk": {
+        "name": "Zendesk",
+        "emoji": "💬",
+        "category": "Customer Support",
+        "plan": "14-day free trial",
+        "url": "https://www.zendesk.com/register/",
+        "description": (
+            "Zendesk is the enterprise-grade customer support platform used by some of "
+            "the world's largest companies including Airbnb, Uber, and Shopify. It offers "
+            "ticketing, live chat, a knowledge base, and an AI-powered bot — all in one "
+            "platform. Zendesk's integration with Make.com allows you to automate ticket "
+            "workflows, escalations, and customer notifications."
+        ),
+        "features": [
+            "Multi-channel ticketing (email, chat, social)",
+            "AI-powered chatbot (Zendesk Bot)",
+            "Self-service knowledge base",
+            "SLA management and escalation rules",
+            "1,000+ marketplace integrations",
+        ],
+        "short": "Enterprise support platform used by Airbnb, Uber, and Shopify.",
+    },
+    "mailerlite": {
+        "name": "MailerLite",
+        "emoji": "📨",
+        "category": "Email Marketing",
+        "plan": "Free up to 1,000 subscribers",
+        "url": "https://www.mailerlite.com/",
+        "description": (
+            "MailerLite is a clean, modern email marketing platform known for its ease "
+            "of use and generous free plan. With 1,000 free subscribers and 12,000 "
+            "emails per month, it offers better value than most competitors. Teams use "
+            "it for newsletters, automated sequences, landing pages, and pop-up forms."
+        ),
+        "features": [
+            "1,000 free subscribers, 12,000 emails/month",
+            "Drag-and-drop email editor",
+            "Automation workflows and drip sequences",
+            "Landing pages and pop-up forms",
+            "Detailed analytics and A/B testing",
+        ],
+        "short": "Email marketing with the most generous free plan — 1,000 subscribers.",
+    },
+}
+
+# ================================================================
+# HELPER FUNCTION — get tool data by slug name
+# Add this function to main.py
+# ================================================================
+
+def get_tool_info(tool_name_raw: str) -> dict:
+    """
+    Given a raw tool name from the DB (e.g. 'Slack', 'HubSpot', 'Google Sheets'),
+    return the tool description dict from TOOL_DATA.
+    Falls back to a generic dict if tool not found.
+    """
+    key = tool_name_raw.lower().replace(" ", "-").replace(".", "")
+    data = TOOL_DATA.get(key)
+    if data:
+        return data
+    # Generic fallback for any tool not in the dict
+    return {
+        "name": tool_name_raw,
+        "emoji": "🔧",
+        "category": "SaaS Tool",
+        "plan": "Free plan available",
+        "url": f"https://www.google.com/search?q={tool_name_raw.replace(' ', '+')}+pricing",
+        "description": (
+            f"{tool_name_raw} is a popular SaaS tool used by thousands of teams "
+            f"to improve productivity and automate workflows. Connect it with other tools "
+            f"using Make.com to save time and reduce manual work."
+        ),
+        "features": [
+            f"Core {tool_name_raw} features",
+            "Integrates with Make.com for automation",
+            "Cloud-based — access from anywhere",
+            "Free plan or trial available",
+        ],
+        "short": f"Connect {tool_name_raw} with Make.com to automate your workflows.",
+    }
+
+
+def get_together_description(tool_a: str, tool_b: str) -> str:
+    """
+    Returns a 'better together' description for tool pair.
+    Extend this dict with more pairs as needed.
+    """
+    pair_key = f"{tool_a.lower()}-{tool_b.lower()}"
+    pairs = {
+        "slack-notion": (
+            "When Slack messages are automatically saved to Notion, your team's best "
+            "ideas stop getting lost in threads. Connect them to auto-create Notion pages "
+            "from Slack messages, send Notion task updates to Slack channels, and run "
+            "daily standup summaries — all without switching tabs."
+        ),
+        "slack-hubspot": (
+            "Sales teams using both Slack and HubSpot can close deals faster by "
+            "automating their handoffs. Get instant Slack notifications when a HubSpot "
+            "deal moves stage, auto-log Slack conversations to HubSpot contact records, "
+            "or alert your sales channel whenever a new lead comes in."
+        ),
+        "slack-salesforce": (
+            "Enterprise sales teams win more by connecting Slack's speed with "
+            "Salesforce's depth. Auto-post Salesforce opportunity updates to Slack, "
+            "alert your team on high-value leads, or log Slack discussions directly "
+            "to Salesforce activity records — keeping everyone aligned without manual updates."
+        ),
+        "slack-jira": (
+            "Engineering teams using Slack and Jira can eliminate status meetings "
+            "by automating their updates. Get Slack notifications for new Jira bugs, "
+            "post sprint progress to channels, or let developers update Jira tickets "
+            "directly from Slack — no context switching needed."
+        ),
+        "slack-trello": (
+            "Keep your whole team aligned by connecting Slack and Trello. Automatically "
+            "post Trello card updates to Slack channels, create Trello cards from Slack "
+            "messages, or get daily board summaries delivered to your team channel."
+        ),
+        "slack-asana": (
+            "Stop asking 'what's the status?' Connect Slack and Asana to get automatic "
+            "Slack notifications when Asana tasks are completed, create Asana tasks "
+            "from Slack messages, and send daily work summaries to your team channel."
+        ),
+        "slack-zoom": (
+            "Automate your meeting workflows by connecting Slack and Zoom. Start Zoom "
+            "meetings from Slack with a slash command, post meeting summaries and "
+            "recordings back to Slack channels, and send automatic reminders before "
+            "upcoming calls."
+        ),
+        "slack-mailchimp": (
+            "Marketing teams using Slack and Mailchimp can stay on top of campaign "
+            "performance without logging into dashboards. Get Slack alerts when "
+            "campaigns are sent, when open rates cross a threshold, or when new "
+            "subscribers sign up — all automatically."
+        ),
+        "slack-shopify": (
+            "E-commerce teams love connecting Slack and Shopify for real-time order "
+            "visibility. Get instant Slack notifications for new orders, refund requests, "
+            "and low-stock alerts — so your team can respond fast without constantly "
+            "checking the Shopify dashboard."
+        ),
+        "slack-stripe": (
+            "Get real-time payment visibility by connecting Slack and Stripe. Receive "
+            "instant Slack notifications for new payments, failed charges, and new "
+            "customer subscriptions — keeping your team informed without manually "
+            "monitoring the Stripe dashboard."
+        ),
+        "notion-hubspot": (
+            "Content and sales teams working across Notion and HubSpot can keep their "
+            "data perfectly synced. Auto-create Notion pages from new HubSpot contacts, "
+            "update your Notion CRM tracker when deal stages change, or log meeting "
+            "notes from Notion directly into HubSpot contact records."
+        ),
+        "hubspot-salesforce": (
+            "Connecting HubSpot and Salesforce ensures your marketing and sales data "
+            "stays perfectly in sync. Automatically sync contacts, deals, and "
+            "company data between both platforms — eliminating duplicate entries, "
+            "reducing manual work, and giving every team a single source of truth."
+        ),
+        "shopify-mailchimp": (
+            "Every new Shopify customer can automatically join your Mailchimp list, "
+            "tagged by product category and purchase history. This means your "
+            "post-purchase email flows, abandoned cart sequences, and VIP campaigns "
+            "start working the moment someone buys — zero manual work required."
+        ),
+        "shopify-stripe": (
+            "For stores using both Shopify and Stripe, automation keeps your payment "
+            "data perfectly reconciled. Auto-create Stripe invoices for Shopify orders, "
+            "sync refund data across both platforms, and get instant notifications "
+            "for failed payment attempts."
+        ),
+    }
+    result = pairs.get(pair_key) or pairs.get(f"{tool_b.lower()}-{tool_a.lower()}")
+    if result:
+        return result
+    return (
+        f"Connecting {tool_a} and {tool_b} with Make.com eliminates the manual work "
+        f"of copying data between the two tools. Automate data syncing, trigger actions "
+        f"in {tool_b} when events happen in {tool_a}, and build workflows that save "
+        f"your team hours every week — all without writing any code."
+    )
 
 # Load environment variables
 load_dotenv()
@@ -92,7 +675,8 @@ def get_tool_link(tool_name: str) -> dict:
 
 # Initialize FastAPI and Templates
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
+BASE_DIR = Path(__file__).resolve().parent
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 # Configure Gemini API
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
@@ -145,7 +729,8 @@ def send_newsletter(subject: str, content: str):
                 <p><a href="https://integration-directory.com" style="color: #2563eb; font-weight: bold;">View more on the website &rarr;</a></p>
                 <p style="font-size:12px;color:#999;text-align:center;margin-top:30px;">
                 You're receiving this because you subscribed at integration-directory.com.<br>
-                <a href="https://integration-directory.com/unsubscribe?email={sub['email']}" style="color:#999;">Unsubscribe</a>
+                <a href="https://integration-directory.com/unsubscribe?email={sub['email']}&token={generate_unsubscribe_token(sub['email'])}" style="color:#999;">Unsubscribe</a>
+                · Integration Directory · contact@integration-directory.com
                 </p>
             </div>
             </body></html>
@@ -406,6 +991,8 @@ def send_welcome_email(email: str):
     if not sender_email or not sender_password:
         print("SMTP credentials missing.")
         return
+    token = generate_unsubscribe_token(email)
+    unsubscribe_url = f"https://integration-directory.com/unsubscribe?email={email}&token={token}"
     try:
         msg = MIMEMultipart()
         msg['From'] = f"Integration Directory <{sender_email}>"
@@ -423,8 +1010,9 @@ def send_welcome_email(email: str):
   <a href="https://integration-directory.com" style="background:#2563eb;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;">Browse Integrations →</a>
   <hr style="border: 1px solid #eee; margin: 20px 0;">
   <p style="font-size:12px;color:#999;">
-    You subscribed at integration-directory.com. To unsubscribe, 
-    <a href="https://integration-directory.com/unsubscribe?email={email}" style="color:#999;">click here</a>.
+    You subscribed at integration-directory.com. To unsubscribe,
+    <a href="{unsubscribe_url}" style="color:#999;">click here</a>.
+    <br>Integration Directory · contact@integration-directory.com · Hyderabad, India
   </p>
 </div>
 </body></html>
@@ -440,17 +1028,58 @@ def send_welcome_email(email: str):
         print(f"Welcome email failed: {e}")
 
 
+import hashlib
+
+def generate_unsubscribe_token(email: str) -> str:
+    secret = os.environ.get("UNSUBSCRIBE_SECRET", "integration-directory-secret-2026")
+    return hashlib.sha256(f"{email}{secret}".encode()).hexdigest()[:32]
+
 @app.get("/unsubscribe")
-async def unsubscribe(email: str, request: Request):
+async def unsubscribe_page(request: Request, email: str = "", token: str = ""):
+    """Show confirmation page — does NOT delete yet, just confirms intent."""
+    if not email:
+        return templates.TemplateResponse("unsubscribe.html", {
+            "request": request, "email": "", "token": "",
+            "valid": False, "success": False, "error": ""
+        })
+    valid = bool(token) and token == generate_unsubscribe_token(email)
+    return templates.TemplateResponse("unsubscribe.html", {
+        "request": request,
+        "email": email,
+        "token": token,
+        "valid": valid,
+        "success": False,
+        "error": ""
+    })
+
+@app.post("/unsubscribe")
+async def unsubscribe_confirm(
+    request: Request,
+    email: str = Form(...),
+    token: str = Form(...)
+):
+    """Actually removes subscriber only after confirmation button is clicked."""
+    if token != generate_unsubscribe_token(email):
+        return templates.TemplateResponse("unsubscribe.html", {
+            "request": request, "email": email, "token": token,
+            "valid": False, "success": False,
+            "error": "Invalid unsubscribe link. Please contact contact@integration-directory.com"
+        })
     conn, cursor = get_db_connection()
     try:
-        cursor.execute("DELETE FROM newsletter_subscribers WHERE email = %s", (email.strip().lower(),))
+        cursor.execute(
+            "DELETE FROM newsletter_subscribers WHERE email = %s",
+            (email.strip().lower(),)
+        )
         conn.commit()
     except Exception as e:
         print(f"Unsubscribe error: {e}")
     finally:
         conn.close()
-    return templates.TemplateResponse("unsubscribe.html", {"request": request, "email": email})
+    return templates.TemplateResponse("unsubscribe.html", {
+        "request": request, "email": email, "token": token,
+        "valid": True, "success": True, "error": ""
+    })
 
 # --- 4. AI Workflow Generator ---
 @app.post("/api/generate-workflow")
@@ -638,25 +1267,53 @@ async def curated_list(request: Request, tool: str):
 @app.get("/integrate/{slug}")
 async def integration_page(request: Request, slug: str):
     conn, cursor = get_db_connection()
-    cursor.execute("SELECT * FROM integrations WHERE slug = %s", (slug,))
+    cursor.execute('SELECT * FROM integrations WHERE slug = %s', (slug,))
     integration = cursor.fetchone()
     conn.close()
  
-    if integration is None:
+    if not integration:
         raise HTTPException(status_code=404, detail="Integration not found")
  
-    # Get direct links for both tools
-    tool_a_info = get_tool_link(integration["tool_a"])
-    tool_b_info = get_tool_link(integration["tool_b"])
+    tool_a_name = integration["tool_a"]
+    tool_b_name = integration["tool_b"]
+ 
+    # Get rich descriptions for both tools
+    tool_a_info = get_tool_info(tool_a_name)
+    tool_b_info = get_tool_info(tool_b_name)
+    together_desc = get_together_description(tool_a_name, tool_b_name)
  
     return templates.TemplateResponse("integration.html", {
         "request": request,
         "data": integration,
-        "make_affiliate": MAKE_AFFILIATE,
-        "tool_a_info": tool_a_info,
-        "tool_b_info": tool_b_info,
+        "integration": integration,
+        "slug": slug,
+        "tool_a": tool_a_name,
+        "tool_b": tool_b_name,
+        "hours_saved": integration.get("hours_saved", 5),
+        "review_date": "May 2026",
+ 
+        # Tool A details
+        "tool_a_emoji":       tool_a_info["emoji"],
+        "tool_a_category":    tool_a_info["category"],
+        "tool_a_description": tool_a_info["description"],
+        "tool_a_features":    tool_a_info["features"],
+        "tool_a_plan":        tool_a_info["plan"],
+        "tool_a_url":         tool_a_info["url"],
+        "tool_a_short":       tool_a_info["short"],
+ 
+        # Tool B details
+        "tool_b_emoji":       tool_b_info["emoji"],
+        "tool_b_category":    tool_b_info["category"],
+        "tool_b_description": tool_b_info["description"],
+        "tool_b_features":    tool_b_info["features"],
+        "tool_b_plan":        tool_b_info["plan"],
+        "tool_b_url":         tool_b_info["url"],
+        "tool_b_short":       tool_b_info["short"],
+ 
+        # "Better together" paragraph
+        "together_description": together_desc,
     })
-
+ 
 
 
 # --- Dedicated Affiliate Landing Page (Generalized) ---
@@ -1134,7 +1791,8 @@ async def about_page(request: Request):
 #CONTACT_ROUTE = '''
 @app.get("/contact")
 async def contact_page(request: Request):
-    return templates.TemplateResponse("contact.html", {"request": request})
+    sent = request.query_params.get("sent", "false") == "true"
+    return templates.TemplateResponse("contact.html", {"request": request, "sent": sent})
 
 # --- Contact Form Submission (POST - handle form + send emails) ---
 @app.post("/contact")
@@ -1192,7 +1850,7 @@ def send_contact_email(name: str, user_email: str, subject: str, message: str):
   <h2 style="color:#2563eb;">Thanks, {name}! We got your message.</h2>
   <p>We'll get back to you within 1–2 business days.</p>
   <p style="background:#f3f4f6;padding:12px;border-radius:6px;font-style:italic;">{message[:300]}{'...' if len(message)>300 else ''}</p>
-  <hr><p style="font-size:12px;color:#999;">Integration Directory · beyond-torte.4k@icloud.com</p>
+  <hr><p style="font-size:12px;color:#999;">Integration Directory · contact@integration-directory.com</p>
 </body></html>""", 'html'))
         server.send_message(user_msg)
         server.quit()

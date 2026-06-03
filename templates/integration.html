@@ -1,516 +1,528 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How to Connect {{ data.tool_a }} and {{ data.tool_b }} | Integration Directory</title>
-    <meta name="description" content="Step-by-step guide: Connect {{ data.tool_a }} and {{ data.tool_b }} using Make.com. Save {{ data.hours_saved_per_month | default('5') }} hours/month with automation.">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://integration-directory.com/integrate/{{ data.slug }}">
-    <!-- Open Graph -->
-    <meta property="og:title" content="How to Connect {{ data.tool_a }} and {{ data.tool_b }}">
-    <meta property="og:description" content="{{ unique_description }}">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="https://integration-directory.com/integrate/{{ data.slug }}">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- ── AdSense — replace with your real publisher ID when approved ───── -->
-    <!--
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
-    -->
-
-    <!-- ══ HowTo + FAQPage Schema Markup — boosts Google rich snippets ══ -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "HowTo",
-      "name": "How to Connect {{ data.tool_a }} and {{ data.tool_b }}",
-      "description": "Step-by-step guide to integrate {{ data.tool_a }} and {{ data.tool_b }} using Make.com automation.",
-      "totalTime": "PT10M",
-      "estimatedCost": {
-        "@type": "MonetaryAmount",
-        "currency": "USD",
-        "value": "0"
-      },
-      "step": [
-        {
-          "@type": "HowToStep",
-          "name": "Sign up for Make.com",
-          "text": "Create a free Make.com account at make.com. No credit card required.",
-          "url": "https://www.make.com/en/register?pc=sampath9"
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Connect {{ data.tool_a }}",
-          "text": "In Make.com, create a new scenario and add {{ data.tool_a }} as the trigger app."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Connect {{ data.tool_b }}",
-          "text": "Add {{ data.tool_b }} as the action app and configure the data mapping."
-        },
-        {
-          "@type": "HowToStep",
-          "name": "Turn on the automation",
-          "text": "Test your scenario and activate it. Make.com runs it automatically on schedule."
-        }
-      ]
-    }
-    </script>
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "How do I connect {{ data.tool_a }} and {{ data.tool_b }}?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Use Make.com to connect {{ data.tool_a }} and {{ data.tool_b }}. Create a free account, add {{ data.tool_a }} as a trigger and {{ data.tool_b }} as an action, then activate the automation. It takes under 10 minutes."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is {{ data.tool_a }} and {{ data.tool_b }} integration free?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Make.com offers a free plan with 1,000 operations per month, which is enough for most small teams to run this automation."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What can I automate between {{ data.tool_a }} and {{ data.tool_b }}?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "{{ unique_description | replace('"', '\\"') }}"
-          }
-        }
-      ]
-    }
-    </script>
-    <script type="application/ld+json">
-    {
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to Connect {{ tool_a }} and {{ tool_b }} | Integration Directory</title>
+  <meta name="description" content="Step-by-step guide: Connect {{ tool_a }} and {{ tool_b }} using Make.com. Save {{ hours_saved }}h/month with automation. Free to start, no coding needed." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://integration-directory.com/integrate/{{ slug }}" />
+  <meta property="og:title" content="How to Connect {{ tool_a }} and {{ tool_b }} | Integration Directory" />
+  <meta property="og:description" content="Connect {{ tool_a }} and {{ tool_b }} with Make.com. Save {{ hours_saved }} hours/month. Free plan available." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://integration-directory.com/integrate/{{ slug }}" />
+  <!-- Schema.org structured data -->
+  <script type="application/ld+json">
+  {
     "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "How to Connect {{ data.tool_a }} and {{ data.tool_b }}",
-    "description": "{{ unique_description | replace('"', '\\"') }}",
-    "author": {
-        "@type": "Person",
-        "name": "Vangari Sai Sampath",
-        "url": "https://integration-directory.com/about"
-    },
-    "publisher": {
-        "@type": "Organization",
-        "name": "Integration Directory",
-        "url": "https://integration-directory.com",
-        "logo": {
-        "@type": "ImageObject",
-        "url": "https://integration-directory.com/favicon.ico"
-        }
-    },
-    "dateModified": "2026-05-30",
-    "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": "https://integration-directory.com/integrate/{{ data.slug }}"
+    "@type": "HowTo",
+    "name": "How to Connect {{ tool_a }} and {{ tool_b }}",
+    "description": "Step-by-step guide to automate {{ tool_a }} and {{ tool_b }} using Make.com",
+    "step": [
+      {"@type": "HowToStep", "name": "Create a Make.com account", "text": "Sign up free at Make.com. Free plan includes 1,000 operations/month."},
+      {"@type": "HowToStep", "name": "Connect {{ tool_a }} as trigger", "text": "In Make.com, add {{ tool_a }} as your trigger module."},
+      {"@type": "HowToStep", "name": "Connect {{ tool_b }} as action", "text": "Add {{ tool_b }} as the action and map your data fields."},
+      {"@type": "HowToStep", "name": "Test and activate", "text": "Run a test and turn on your automation scenario."}
+    ]
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+
+    /* Header */
+    header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+    .logo { font-weight: 800; font-size: 1.05rem; color: #2563eb; text-decoration: none; }
+    nav { display: flex; align-items: center; gap: 20px; }
+    nav a { text-decoration: none; color: #475569; font-size: 0.875rem; font-weight: 500; }
+    nav a:hover { color: #2563eb; }
+    .btn-cta { background: #2563eb; color: #fff !important; padding: 8px 18px; border-radius: 8px; font-weight: 600 !important; white-space: nowrap; }
+    .btn-cta:hover { background: #1d4ed8 !important; }
+
+    /* Layout */
+    .wrap { max-width: 1140px; margin: 0 auto; padding: 28px 20px; display: grid; grid-template-columns: 1fr 296px; gap: 24px; align-items: start; }
+    .main { min-width: 0; }
+    .sidebar { position: sticky; top: 72px; display: flex; flex-direction: column; gap: 16px; }
+
+    /* Breadcrumb */
+    .bc { font-size: 0.8rem; color: #94a3b8; margin-bottom: 18px; }
+    .bc a { color: #64748b; text-decoration: none; }
+    .bc a:hover { color: #2563eb; }
+
+    /* Cards */
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 28px; margin-bottom: 20px; }
+    .card h2 { font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-bottom: 20px; }
+
+    /* Hero */
+    .badge { display: inline-block; background: #eff6ff; color: #2563eb; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+    .author-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .av { width: 34px; height: 34px; border-radius: 50%; background: #2563eb; color: #fff; font-size: 0.78rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .author-row span { font-size: 0.8rem; color: #64748b; }
+    .author-row strong { color: #1e293b; }
+    h1 { font-size: 1.85rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin-bottom: 22px; }
+    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 22px; }
+    .stat { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; text-align: center; }
+    .stat .v { font-size: 1.7rem; font-weight: 800; }
+    .stat .v.g { color: #16a34a; }
+    .stat .v.b { color: #2563eb; }
+    .stat .v.p { color: #7c3aed; }
+    .stat .l { font-size: 0.76rem; color: #64748b; margin-top: 2px; }
+    .btn-main { display: block; background: #1d40b0; color: #fff; text-align: center; padding: 15px; border-radius: 10px; font-size: 1rem; font-weight: 700; text-decoration: none; margin-bottom: 8px; }
+    .btn-main:hover { background: #1e3a8a; }
+    .btn-note { font-size: 0.76rem; color: #94a3b8; text-align: center; margin-bottom: 6px; }
+
+    /* ═══════════════════════════════════════════
+       TOOL DESCRIPTIONS — the new section
+       ═══════════════════════════════════════════ */
+    .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+    .tool-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background: #fafbfc; }
+    .tool-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .tool-ico { width: 46px; height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+    .tool-ico.a { background: #fef9c3; }
+    .tool-ico.b { background: #ede9fe; }
+    .tool-card h3 { font-size: 1.05rem; font-weight: 700; color: #0f172a; }
+    .tool-tag { display: inline-block; font-size: 0.72rem; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 5px; font-weight: 600; margin-bottom: 8px; }
+    .tool-card p { font-size: 0.86rem; color: #475569; line-height: 1.65; margin-bottom: 10px; }
+    .tool-card ul { list-style: none; padding: 0; margin-bottom: 12px; }
+    .tool-card ul li { font-size: 0.83rem; color: #475569; padding: 3px 0 3px 1.3em; position: relative; }
+    .tool-card ul li::before { content: "✓"; position: absolute; left: 0; color: #16a34a; font-weight: 700; font-size: 0.8rem; }
+    .free-pill { display: inline-block; background: #dcfce7; color: #15803d; font-size: 0.73rem; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+    .try-link { display: inline-block; margin-top: 10px; font-size: 0.82rem; color: #2563eb; text-decoration: none; font-weight: 600; }
+    .together-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 18px; }
+    .together-box h3 { font-size: 0.95rem; font-weight: 700; color: #1e40af; margin-bottom: 8px; }
+    .together-box p { font-size: 0.86rem; color: #1e40af; line-height: 1.65; }
+    /* ═══════════════════════════════════════════ */
+
+    /* Steps */
+    .steps { display: flex; flex-direction: column; gap: 18px; }
+    .step { display: flex; gap: 14px; }
+    .sn { width: 34px; height: 34px; border-radius: 50%; background: #2563eb; color: #fff; font-weight: 700; font-size: 0.88rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sn.done { background: #16a34a; }
+    .sb h3 { font-size: 0.94rem; font-weight: 700; color: #0f172a; margin-bottom: 5px; }
+    .sb p { font-size: 0.86rem; color: #475569; }
+    .sb a { color: #2563eb; font-weight: 600; text-decoration: none; font-size: 0.83rem; }
+
+    /* Free tools */
+    .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .tool-item { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; }
+    .tool-item h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
+    .plan-pill { display: inline-block; background: #dcfce7; color: #15803d; font-size: 0.72rem; padding: 2px 8px; border-radius: 20px; font-weight: 600; margin-bottom: 8px; }
+    .tool-item p { font-size: 0.83rem; color: #64748b; }
+    .tool-item a { display: block; margin-top: 10px; background: #eff6ff; color: #2563eb; text-align: center; padding: 8px; border-radius: 8px; text-decoration: none; font-size: 0.83rem; font-weight: 600; }
+
+    /* Calculator */
+    .calc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .cf label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+    .cf input[type=range] { width: 100%; accent-color: #2563eb; }
+    .rv { font-weight: 700; color: #2563eb; }
+    .calc-out { background: #eff6ff; border-radius: 10px; padding: 18px; text-align: center; }
+    .calc-out .big { font-size: 2rem; font-weight: 800; color: #2563eb; }
+    .calc-out .sub { font-size: 0.84rem; color: #475569; margin-top: 4px; }
+
+    /* AI generator */
+    .ai-wrap input { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; margin-bottom: 10px; }
+    .ai-wrap input:focus { outline: none; border-color: #2563eb; }
+    .ai-wrap button { background: #7c3aed; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; width: 100%; }
+    .ai-wrap button:hover { background: #6d28d9; }
+    .ai-out { display: none; margin-top: 14px; background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 10px; padding: 16px; font-size: 0.875rem; color: #374151; line-height: 1.7; }
+
+    /* FAQ */
+    .faq { display: flex; flex-direction: column; gap: 10px; }
+    .fq { border: 1px solid #e2e8f0; border-radius: 10px; }
+    .fq-q { padding: 14px 16px; font-size: 0.9rem; font-weight: 600; color: #0f172a; cursor: pointer; display: flex; justify-content: space-between; user-select: none; }
+    .fq-q::after { content: "+"; font-size: 1.2rem; color: #94a3b8; margin-left: 10px; }
+    .fq-q.open::after { content: "−"; }
+    .fq-a { display: none; padding: 0 16px 14px; font-size: 0.875rem; color: #475569; line-height: 1.65; }
+    .fq-a.open { display: block; }
+
+    /* Author bio */
+    .bio { display: flex; gap: 14px; align-items: flex-start; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .bio .av2 { width: 46px; height: 46px; border-radius: 50%; background: #2563eb; color: #fff; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .bio h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
+    .bio p { font-size: 0.82rem; color: #64748b; line-height: 1.6; }
+    .bio a { color: #2563eb; font-size: 0.82rem; }
+
+    /* Sidebar */
+    .sc { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; }
+    .sc-blue { background: #2563eb; border-color: #2563eb; }
+    .sc-blue h3 { color: #fff; font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+    .sc-blue p { color: rgba(255,255,255,.82); font-size: 0.84rem; margin-bottom: 14px; }
+    .sc-blue a.start { display: block; background: #fff; color: #2563eb; text-align: center; padding: 10px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.9rem; }
+    .sc-blue .sc-note { color: rgba(255,255,255,.6); font-size: 0.74rem; text-align: center; margin-top: 8px; }
+    .sc h3 { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
+    .sc ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .sc ul li a { font-size: 0.875rem; color: #2563eb; text-decoration: none; font-weight: 500; }
+    .sc ul li a:hover { text-decoration: underline; }
+    .sc .browse { display: block; background: #f1f5f9; color: #374151; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-size: 0.875rem; font-weight: 600; margin-top: 12px; }
+
+    /* Footer */
+    footer { background: #1e293b; color: #94a3b8; padding: 44px 24px 24px; margin-top: 48px; }
+    .fg { max-width: 1140px; margin: 0 auto 28px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 28px; }
+    .fb p { font-size: 0.83rem; margin-top: 10px; line-height: 1.6; }
+    .fc h4 { color: #e2e8f0; font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .fc ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    .fc ul li a { color: #94a3b8; text-decoration: none; font-size: 0.83rem; }
+    .fc ul li a:hover { color: #e2e8f0; }
+    .fbot { max-width: 1140px; margin: 0 auto; border-top: 1px solid #334155; padding-top: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 0.79rem; }
+    .fbot a { color: #64748b; }
+
+    @media(max-width:768px){
+      .wrap { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      h1 { font-size: 1.45rem; }
+      nav { display: none; }
+      .tool-grid { grid-template-columns: 1fr; }
+      .tools-grid { grid-template-columns: 1fr; }
+      .calc-row { grid-template-columns: 1fr; }
+      .fg { grid-template-columns: 1fr 1fr; }
     }
-    }
-    </script>
- 
+  </style>
 </head>
-<body class="bg-gray-50 font-sans">
+<body>
 
-<!-- ── NAV ─────────────────────────────────────────────────────────────── -->
-<nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <a href="/" class="text-xl font-bold text-blue-600">⚡ Integration Directory</a>
-        <div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-            <a href="/" class="hover:text-blue-600">Directory</a>
-            <a href="/blog" class="hover:text-blue-600">Techie Blog</a>
-            <a href="/news" class="hover:text-blue-600">AI News</a>
-            <a href="/gear" class="hover:text-blue-600">SaaS Tools</a>
-            <a href="/about">About</a>
-            <a href="/contact">Contact</a>
+<header>
+  <a class="logo" href="/">⚡ Integration Directory</a>
+  <nav>
+    <a href="/">Directory</a>
+    <a href="/blog">Techie Blog</a>
+    <a href="/news">AI News</a>
+    <a href="/gear">SaaS Tools</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+    <a class="btn-cta" href="https://www.make.com/en/register?pc=sampath9" target="_blank" rel="noopener sponsored">Automate with Make.com →</a>
+  </nav>
+</header>
+
+<div class="wrap">
+<main class="main">
+
+  <!-- Breadcrumb -->
+  <div class="bc"><a href="/">Home</a> › <strong>{{ tool_a }} + {{ tool_b }}</strong></div>
+
+  <!-- ── Hero card ── -->
+  <div class="card">
+    <span class="badge">Integration Guide</span>
+    <div class="author-row">
+      <div class="av">SS</div>
+      <span>Written by <strong><a href="/about" style="color:#1e293b;text-decoration:none;">Vangari Sai Sampath</a></strong> · Automation Specialist · Hyderabad, India &nbsp;|&nbsp; Reviewed {{ review_date }}</span>
+    </div>
+    <h1>How to Connect {{ tool_a }} and {{ tool_b }}</h1>
+    <div class="stats">
+      <div class="stat"><div class="v g">{{ hours_saved }}h</div><div class="l">Saved per month</div></div>
+      <div class="stat"><div class="v b">~10 min</div><div class="l">Setup time</div></div>
+      <div class="stat"><div class="v p">₹0</div><div class="l">Cost to start</div></div>
+    </div>
+    <a class="btn-main" href="https://www.make.com/en/register?pc=sampath9" target="_blank" rel="noopener sponsored">
+      ⚡ Automate {{ tool_a }} + {{ tool_b }} with Make.com →
+    </a>
+    <p class="btn-note">Free plan · 1,000 ops/month · No credit card needed</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       TOOL DESCRIPTIONS SECTION — new section added here
+       ═══════════════════════════════════════════════════════ -->
+  <div class="card">
+    <h2>About {{ tool_a }} and {{ tool_b }}</h2>
+    <div class="tool-grid">
+
+      <!-- Tool A -->
+      <div class="tool-card">
+        <div class="tool-head">
+          <div class="tool-ico a">{{ tool_a_emoji }}</div>
+          <div>
+            <h3>{{ tool_a }}</h3>
+            <span class="tool-tag">{{ tool_a_category }}</span>
+          </div>
         </div>
-        <a href="{{ make_affiliate }}" target="_blank" rel="sponsored nofollow"
-           class="bg-blue-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-            Automate with Make.com →
-        </a>
+        <p>{{ tool_a_description }}</p>
+        <ul>
+          {% for f in tool_a_features %}<li>{{ f }}</li>{% endfor %}
+        </ul>
+        <span class="free-pill">{{ tool_a_plan }}</span>
+        <a class="try-link" href="{{ tool_a_url }}" target="_blank" rel="noopener">Try {{ tool_a }} free →</a>
+      </div>
+
+      <!-- Tool B -->
+      <div class="tool-card">
+        <div class="tool-head">
+          <div class="tool-ico b">{{ tool_b_emoji }}</div>
+          <div>
+            <h3>{{ tool_b }}</h3>
+            <span class="tool-tag">{{ tool_b_category }}</span>
+          </div>
+        </div>
+        <p>{{ tool_b_description }}</p>
+        <ul>
+          {% for f in tool_b_features %}<li>{{ f }}</li>{% endfor %}
+        </ul>
+        <span class="free-pill">{{ tool_b_plan }}</span>
+        <a class="try-link" href="{{ tool_b_url }}" target="_blank" rel="noopener">Try {{ tool_b }} free →</a>
+      </div>
+
     </div>
-</nav>
 
-<main class="max-w-7xl mx-auto px-4 py-8">
-
-    <!-- Breadcrumb -->
-    <nav class="text-sm text-gray-500 mb-6" aria-label="breadcrumb">
-        <a href="/" class="hover:text-blue-600">Home</a>
-        <span class="mx-2">›</span>
-        <span class="text-gray-800 font-medium">{{ data.tool_a }} + {{ data.tool_b }}</span>
-    </nav>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        <!-- ── MAIN CONTENT ──────────────────────────────────────────────── -->
-        <article class="lg:col-span-2">
-
-            <!-- Page header -->
-            <div class="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
-                <div class="flex items-center gap-3 mb-4">
-                    <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase">Integration Guide</span>
-                    {% if data.monthly_searches %}
-                    <span class="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
-                        <i class="fa-solid fa-magnifying-glass mr-1"></i>{{ data.monthly_searches | int | string }} searches/mo
-                    </span>
-                    {% endif %}
-                </div>
-                <div class="flex items-center gap-3 mb-4">
-                    <!-- Initials avatar — change "SS" to your real initials -->
-                     <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">SS</div>
-                     <div class="text-sm text-gray-500 leading-tight">
-                        Written by
-                        <a href="/about" class="font-semibold text-gray-700 hover:text-blue-600">Vangari Sai Sampath</a>
-                        · Automation Specialist · Hyderabad, India
-                        <span class="mx-1 text-gray-300">|</span>
-                        <span>Reviewed May 2026</span>
-                    </div>
-                </div>
-
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-                    How to Connect {{ data.tool_a }} and {{ data.tool_b }}
-                </h1>
-
-                <p class="text-lg text-gray-600 mb-6 leading-relaxed">{{ unique_description }}</p>
-
-                <!-- Savings stats row -->
-                <div class="grid grid-cols-3 gap-4 mb-6">
-                    <div class="bg-green-50 rounded-xl p-4 text-center">
-                        <div class="text-2xl font-bold text-green-600">{{ data.hours_saved_per_month | default('5') }}h</div>
-                        <div class="text-xs text-gray-500 mt-1">Saved per month</div>
-                    </div>
-                    <div class="bg-blue-50 rounded-xl p-4 text-center">
-                        <div class="text-2xl font-bold text-blue-600">~10 min</div>
-                        <div class="text-xs text-gray-500 mt-1">Setup time</div>
-                    </div>
-                    <div class="bg-purple-50 rounded-xl p-4 text-center">
-                        <div class="text-2xl font-bold text-purple-600">₹0</div>
-                        <div class="text-xs text-gray-500 mt-1">Cost to start</div>
-                    </div>
-                </div>
-
-                <!-- ── PRIMARY CTA — Make.com affiliate ─────────────────── -->
-                <a href="{{ make_affiliate }}" target="_blank" rel="sponsored nofollow"
-                   class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition text-center text-lg mb-2">
-                    ⚡ Automate {{ data.tool_a }} + {{ data.tool_b }} with Make.com →
-                </a>
-                <p class="text-xs text-center text-gray-400">Free plan · 1,000 ops/month · No credit card needed</p>
-            </div>
-
-            <!-- AdSense in-article -->
-            <!--
-            <div class="mb-6 flex justify-center">
-                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </div>
-            -->
-
-            <!-- ── STEP BY STEP GUIDE ────────────────────────────────────── -->
-            <div class="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-6">How to set up this integration (step-by-step)</h2>
-
-                <ol class="space-y-5">
-                    <li class="flex gap-4">
-                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
-                        <div>
-                            <div class="font-semibold text-gray-800">Create a free Make.com account</div>
-                            <div class="text-sm text-gray-600 mt-1">Go to Make.com and sign up. The free plan includes 1,000 operations/month — enough for most automations.</div>
-                            <a href="{{ make_affiliate }}" target="_blank" rel="sponsored nofollow"
-                               class="inline-block mt-2 text-blue-600 text-sm font-medium hover:underline">
-                                Create free account → <i class="fa-solid fa-arrow-right text-xs"></i>
-                            </a>
-                        </div>
-                    </li>
-                    <li class="flex gap-4">
-                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
-                        <div>
-                            <div class="font-semibold text-gray-800">Connect {{ data.tool_a }} as the trigger</div>
-                            <div class="text-sm text-gray-600 mt-1">In Make.com, create a new scenario. Search for {{ data.tool_a }} and choose your trigger event (e.g. "New row", "New message", "New record").</div>
-                        </div>
-                    </li>
-                    <li class="flex gap-4">
-                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
-                        <div>
-                            <div class="font-semibold text-gray-800">Connect {{ data.tool_b }} as the action</div>
-                            <div class="text-sm text-gray-600 mt-1">Add {{ data.tool_b }} as the next module. Map the data fields from {{ data.tool_a }} to the corresponding fields in {{ data.tool_b }}.</div>
-                        </div>
-                    </li>
-                    <li class="flex gap-4">
-                        <div class="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">✓</div>
-                        <div>
-                            <div class="font-semibold text-gray-800">Test and activate</div>
-                            <div class="text-sm text-gray-600 mt-1">Run a test with real data. Once it works, turn on the scenario. Make.com will run it automatically — no more manual work.</div>
-                        </div>
-                    </li>
-                </ol>
-            </div>
-
-            <!-- ── TOOL CTAs — direct links to both tools ────────────────── -->
-            <div class="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-4">
-                    Don't have these tools yet? Start free.
-                </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                    <!-- Tool A CTA -->
-                    <div class="border border-gray-200 rounded-xl p-5 text-center">
-                        <div class="font-bold text-gray-800 text-lg mb-1">{{ data.tool_a }}</div>
-                        <div class="text-xs text-gray-500 mb-3">{{ tool_a_info.badge }}</div>
-                        <a href="{{ tool_a_info.url }}" target="_blank" rel="nofollow"
-                           class="block w-full bg-gray-800 text-white font-semibold py-2.5 rounded-lg hover:bg-gray-700 transition text-sm">
-                            {{ tool_a_info.label }}
-                        </a>
-                    </div>
-
-                    <!-- Tool B CTA -->
-                    <div class="border border-gray-200 rounded-xl p-5 text-center">
-                        <div class="font-bold text-gray-800 text-lg mb-1">{{ data.tool_b }}</div>
-                        <div class="text-xs text-gray-500 mb-3">{{ tool_b_info.badge }}</div>
-                        <a href="{{ tool_b_info.url }}" target="_blank" rel="nofollow"
-                           class="block w-full bg-gray-800 text-white font-semibold py-2.5 rounded-lg hover:bg-gray-700 transition text-sm">
-                            {{ tool_b_info.label }}
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ── SAVINGS CALCULATOR ─────────────────────────────────────── -->
-            <div class="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-4">
-                    <i class="fa-solid fa-calculator text-blue-600 mr-2"></i>
-                    Calculate your time savings
-                </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Minutes spent manually per day</label>
-                        <input type="number" id="manualMins" value="30" min="1"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
-                               oninput="calcSavings()">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Your hourly rate (₹)</label>
-                        <input type="number" id="hourlyRate" value="500" min="1"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
-                               oninput="calcSavings()">
-                    </div>
-                </div>
-                <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                    <div class="text-sm text-gray-600 mb-1">You save approximately</div>
-                    <div id="moneySaved" class="text-3xl font-bold text-green-600">₹7,500/month</div>
-                    <div id="hoursSaved" class="text-sm text-gray-500 mt-1">15 hours/month · 180 hours/year</div>
-                </div>
-            </div>
-
-            <!-- ── AI WORKFLOW GENERATOR ──────────────────────────────────── -->
-            <div class="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-2">
-                    <i class="fa-solid fa-robot text-purple-600 mr-2"></i>
-                    Generate a custom workflow with AI
-                </h2>
-                <p class="text-sm text-gray-600 mb-4">Tell us your industry and get a personalised automation plan.</p>
-                <form action="/api/generate-workflow" method="post" id="workflowForm">
-                    <input type="hidden" name="tool_a" value="{{ data.tool_a }}">
-                    <input type="hidden" name="tool_b" value="{{ data.tool_b }}">
-                    <div class="flex gap-3">
-                        <input type="text" name="industry" placeholder="e.g., E-commerce, Healthcare, SaaS..."
-                               class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500">
-                        <button type="submit"
-                                class="bg-purple-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-purple-700 transition text-sm">
-                            Generate
-                        </button>
-                    </div>
-                </form>
-                <div id="workflowResult" class="mt-4 hidden bg-purple-50 border border-purple-200 rounded-xl p-4 text-sm text-gray-700"></div>
-            </div>
-
-            <!-- ── FAQ SECTION — schema markup target ────────────────────── -->
-            <div class="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-5">Frequently asked questions</h2>
-                <div class="space-y-5">
-                    <div>
-                        <h3 class="font-semibold text-gray-800 mb-1">How do I connect {{ data.tool_a }} and {{ data.tool_b }}?</h3>
-                        <p class="text-sm text-gray-600">Use Make.com to connect them. Sign up free, create a scenario with {{ data.tool_a }} as trigger and {{ data.tool_b }} as action. Setup takes under 10 minutes.</p>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-gray-800 mb-1">Is this integration free?</h3>
-                        <p class="text-sm text-gray-600">Yes. Make.com's free plan includes 1,000 operations/month — enough for most teams. No credit card required to start.</p>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-gray-800 mb-1">Do I need coding skills?</h3>
-                        <p class="text-sm text-gray-600">No. Make.com is a visual drag-and-drop builder. You connect modules by clicking, not writing code.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ── AUTHOR BIO CARD — E-E-A-T trust signal for AdSense ──────── -->
-            <div class="bg-gray-50 rounded-2xl border border-gray-200 p-6 mb-6 flex items-start gap-4">
-                <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-base flex-shrink-0">SS</div>
-                <div>
-                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">About the author</p>
-                    <p class="font-semibold text-gray-900 mb-2">Vangari Sai Sampath — Automation &amp; SaaS Specialist</p>
-                    <p class="text-gray-600 text-sm leading-relaxed">
-                        Vangari Sai Sampath built Integration Directory to help businesses automate their SaaS workflows
-                        without writing code. Based in Hyderabad, India, he has hands-on experience with Make.com,
-                        Zapier, and 50+ tools covered in this directory, and has helped teams set up no-code
-                        automations that save hours every week.
-                    </p>
-                    <a href="/about" class="text-blue-600 text-sm font-semibold hover:underline mt-2 inline-block">More about Integration Directory →</a>
-                </div>
-            </div>
-            <!-- ─────────────────────────────────────────────────────────────── -->
-
-        </article>
-
-        <!-- ── SIDEBAR ────────────────────────────────────────────────────── -->
-        <aside class="lg:col-span-1 space-y-6">
-
-            <!-- Sticky Make.com CTA -->
-            <div class="bg-blue-600 rounded-2xl p-6 text-white sticky top-20">
-                <div class="text-center">
-                    <div class="text-3xl mb-2">⚡</div>
-                    <h3 class="font-bold text-lg mb-1">Automate this now</h3>
-                    <p class="text-blue-100 text-sm mb-4">Connect {{ data.tool_a }} + {{ data.tool_b }} in minutes with Make.com.</p>
-                    <a href="{{ make_affiliate }}" target="_blank" rel="sponsored nofollow"
-                       class="block w-full bg-white text-blue-600 font-bold py-3 rounded-xl hover:bg-blue-50 transition text-sm text-center">
-                        Start free →
-                    </a>
-                    <p class="text-blue-200 text-xs mt-2">Free plan · 1,000 ops/mo</p>
-                </div>
-            </div>
-
-            <!-- AdSense sidebar -->
-            <!--
-            <div>
-                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-                     data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-            </div>
-            -->
-
-            <!-- Related integrations -->
-            <div class="bg-white border border-gray-200 rounded-xl p-5">
-                <h3 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">Related Tools</h3>
-                <ul class="space-y-2 text-sm">
-                    <li><a href="/best-integrations-for/{{ data.tool_a | lower | replace(' ', '-') }}"
-                           class="text-blue-600 hover:underline">
-                        Best integrations for {{ data.tool_a }} →
-                    </a></li>
-                    <li><a href="/best-integrations-for/{{ data.tool_b | lower | replace(' ', '-') }}"
-                           class="text-blue-600 hover:underline">
-                        Best integrations for {{ data.tool_b }} →
-                    </a></li>
-                    <li><a href="/compare/make-vs-zapier"
-                           class="text-blue-600 hover:underline">
-                        Make.com vs Zapier comparison →
-                    </a></li>
-                </ul>
-            </div>
-
-            <!-- SaaS tools cross-link -->
-            <div class="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                <h3 class="font-bold text-gray-800 mb-1 text-sm">🛠️ Free SaaS Tools</h3>
-                <p class="text-xs text-gray-500 mb-3">Best free tools for teams in 2026</p>
-                <a href="/gear" class="block w-full text-center border border-gray-300 text-gray-700 font-medium py-2 rounded-lg hover:bg-gray-100 transition text-xs">
-                    Browse free tools →
-                </a>
-            </div>
-
-        </aside>
+    <!-- Better together -->
+    <div class="together-box">
+      <h3>⚡ Why connect {{ tool_a }} + {{ tool_b }}?</h3>
+      <p>{{ together_description }}</p>
     </div>
+  </div>
+  <!-- ═══════════════════════════════════════════════════════ -->
+
+  <!-- Step-by-step guide -->
+  <div class="card">
+    <h2>How to set up this integration (step-by-step)</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="sn">1</div>
+        <div class="sb">
+          <h3>Create a free Make.com account</h3>
+          <p>Go to Make.com and sign up. The free plan includes 1,000 operations/month — enough for most automations.</p>
+          <a href="https://www.make.com/en/register?pc=sampath9" target="_blank" rel="noopener sponsored">Create free account →</a>
+        </div>
+      </div>
+      <div class="step">
+        <div class="sn">2</div>
+        <div class="sb">
+          <h3>Connect {{ tool_a }} as the trigger</h3>
+          <p>In Make.com, create a new scenario. Search for {{ tool_a }} and choose your trigger event (e.g. "New message", "New record", "New row").</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="sn">3</div>
+        <div class="sb">
+          <h3>Connect {{ tool_b }} as the action</h3>
+          <p>Add {{ tool_b }} as the next module. Map the data fields from {{ tool_a }} to the corresponding fields in {{ tool_b }}.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="sn done">✓</div>
+        <div class="sb">
+          <h3>Test and activate</h3>
+          <p>Run a test with real data. Once it works, turn on the scenario. Make.com will run it automatically — no more manual work.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Don't have these tools? -->
+  <div class="card">
+    <h2>Don't have these tools yet? Start free.</h2>
+    <div class="tools-grid">
+      <div class="tool-item">
+        <h3>{{ tool_a }}</h3>
+        <span class="plan-pill">{{ tool_a_plan }}</span>
+        <p>{{ tool_a_short }}</p>
+        <a href="{{ tool_a_url }}" target="_blank" rel="noopener">Try {{ tool_a }} free →</a>
+      </div>
+      <div class="tool-item">
+        <h3>{{ tool_b }}</h3>
+        <span class="plan-pill">{{ tool_b_plan }}</span>
+        <p>{{ tool_b_short }}</p>
+        <a href="{{ tool_b_url }}" target="_blank" rel="noopener">Try {{ tool_b }} free →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Time savings calculator -->
+  <div class="card">
+    <h2>Calculate your time savings</h2>
+    <div class="calc-row">
+      <div class="cf">
+        <label>Tasks per day: <span class="rv" id="tasksVal">10</span></label>
+        <input type="range" id="tasks" min="1" max="100" value="10" />
+      </div>
+      <div class="cf">
+        <label>Minutes per task: <span class="rv" id="minsVal">5</span></label>
+        <input type="range" id="mins" min="1" max="60" value="5" />
+      </div>
+    </div>
+    <div class="calc-out">
+      <div class="big" id="calcResult">18.3 Hours</div>
+      <div class="sub" id="calcSub">Saved Per Month</div>
+    </div>
+  </div>
+
+  <!-- AI Workflow Generator -->
+  <div class="card">
+    <h2>✨ Generate a custom workflow with AI</h2>
+    <p style="font-size:.875rem;color:#475569;margin-bottom:14px;">Tell us your industry and get a personalised automation plan for {{ tool_a }} + {{ tool_b }}.</p>
+    <div class="ai-wrap">
+      <input type="text" id="industryInput" placeholder="e.g. E-commerce, Marketing Agency, SaaS Startup…" />
+      <button onclick="generateWorkflow()">Generate →</button>
+      <div class="ai-out" id="aiOut"></div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="card">
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      <div class="fq">
+        <div class="fq-q" onclick="toggleFaq(this)">How do I connect {{ tool_a }} and {{ tool_b }}?</div>
+        <div class="fq-a">Use Make.com to connect them without code. Sign up free, create a scenario with {{ tool_a }} as trigger and {{ tool_b }} as action. Setup takes under 10 minutes.</div>
+      </div>
+      <div class="fq">
+        <div class="fq-q" onclick="toggleFaq(this)">Is this integration free?</div>
+        <div class="fq-a">Yes. Make.com's free plan includes 1,000 operations/month — enough for most small teams. No credit card required to start.</div>
+      </div>
+      <div class="fq">
+        <div class="fq-q" onclick="toggleFaq(this)">Do I need coding skills?</div>
+        <div class="fq-a">No. Make.com is a visual drag-and-drop builder. You connect modules by clicking, not writing code.</div>
+      </div>
+      <div class="fq">
+        <div class="fq-q" onclick="toggleFaq(this)">What can I automate between {{ tool_a }} and {{ tool_b }}?</div>
+        <div class="fq-a">{{ together_description }}</div>
+      </div>
+      <div class="fq">
+        <div class="fq-q" onclick="toggleFaq(this)">What is {{ tool_a }} used for?</div>
+        <div class="fq-a">{{ tool_a_description }}</div>
+      </div>
+      <div class="fq">
+        <div class="fq-q" onclick="toggleFaq(this)">What is {{ tool_b }} used for?</div>
+        <div class="fq-a">{{ tool_b_description }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Author bio -->
+  <div class="bio">
+    <div class="av2">SS</div>
+    <div>
+      <h3>About the author — Vangari Sai Sampath · Automation &amp; SaaS Specialist</h3>
+      <p>Vangari Sai Sampath built Integration Directory to help businesses automate their SaaS workflows without writing code. Based in Hyderabad, India, he has hands-on experience with Make.com, Zapier, and 50+ tools covered in this directory, helping teams set up no-code automations that save hours every week.</p>
+      <a href="/about">More about Integration Directory →</a>
+    </div>
+  </div>
 
 </main>
 
-<!-- ── FOOTER ──────────────────────────────────────────────────────────────── -->
-<footer class="bg-gray-900 text-gray-400 mt-16 py-10">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 text-sm">
-            <div>
-                <div class="text-white font-bold mb-3">Integration Directory</div>
-                <p class="text-xs">The #1 resource for software integration guides and automation workflows.</p>
-            </div>
-            <div>
-                <div class="text-white font-semibold mb-3">Explore</div>
-                <ul class="space-y-1 text-xs">
-                    <li><a href="/" class="hover:text-white">All Integrations</a></li>
-                    <li><a href="/blog" class="hover:text-white">Techie Blog</a></li>
-                    <li><a href="/news" class="hover:text-white">AI News</a></li>
-                    <li><a href="/gear" class="hover:text-white">Free SaaS Tools</a></li>
-                    <li><a href="/india-deals" class="hover:text-white">India Deals</a></li>
-                </ul>
-            </div>
-            <div>
-                <div class="text-white font-semibold mb-3">Top Integrations</div>
-                <ul class="space-y-1 text-xs">
-                    <li><a href="/best-integrations-for/slack" class="hover:text-white">Slack Integrations</a></li>
-                    <li><a href="/best-integrations-for/notion" class="hover:text-white">Notion Integrations</a></li>
-                    <li><a href="/best-integrations-for/hubspot" class="hover:text-white">HubSpot Integrations</a></li>
-                    <li><a href="/best-integrations-for/shopify" class="hover:text-white">Shopify Integrations</a></li>
-                </ul>
-            </div>
-            <div>
-                <div class="text-white font-semibold mb-3">Legal</div>
-                <ul class="space-y-1 text-xs">
-                    <li><a href="/privacy" class="hover:text-white">Privacy Policy</a></li>
-                    <li><a href="/terms" class="hover:text-white">Terms of Service</a></li>
-                </ul>
-                <p class="text-xs mt-3 text-gray-500">
-                    Affiliate disclosure: Some links on this page are affiliate links. We may earn a small commission if you sign up — at no extra cost to you.
-                </p>
-            </div>
-        </div>
-        <div class="border-t border-gray-800 pt-6 text-center text-xs">
-            © 2026 Integration Directory · Helping teams automate smarter, one integration at a time.
-        </div>
-        <p style="font-size:11px; color:#888; text-align:center; margin-top:8px;">
-            Some links on this site are affiliate links. We may earn a small commission 
-            at no extra cost to you. <a href="/privacy">Privacy Policy</a>
-        </p>
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sc sc-blue">
+    <h3>⚡ Automate this now</h3>
+    <p>Connect {{ tool_a }} + {{ tool_b }} in minutes with Make.com.</p>
+    <a class="start" href="https://www.make.com/en/register?pc=sampath9" target="_blank" rel="noopener sponsored">Start free →</a>
+    <p class="sc-note">Free plan · 1,000 ops/mo</p>
+  </div>
+  <div class="sc">
+    <h3>Related Tools</h3>
+    <ul>
+      <li><a href="/best-integrations-for/{{ tool_a | lower | replace(' ', '-') }}">Best integrations for {{ tool_a }} →</a></li>
+      <li><a href="/best-integrations-for/{{ tool_b | lower | replace(' ', '-') }}">Best integrations for {{ tool_b }} →</a></li>
+      <li><a href="/compare/make-vs-zapier">Make.com vs Zapier →</a></li>
+    </ul>
+  </div>
+  <div class="sc">
+    <h3>🛠️ Free SaaS Tools</h3>
+    <p style="font-size:.83rem;color:#64748b;margin-bottom:12px;">Best free tools for teams in 2026</p>
+    <a class="browse" href="/gear">Browse free tools →</a>
+  </div>
+</aside>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="fg">
+    <div class="fb">
+      <div style="font-weight:700;color:#e2e8f0;font-size:1rem;">⚡ Integration Directory</div>
+      <p>The #1 resource for software integration guides and automation workflows.</p>
+      <p style="margin-top:8px;font-size:.77rem;color:#475569;">Affiliate disclosure: Some links are affiliate links. We may earn a commission at no extra cost to you.</p>
     </div>
+    <div class="fc">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="/">All Integrations</a></li>
+        <li><a href="/blog">Techie Blog</a></li>
+        <li><a href="/news">AI News</a></li>
+        <li><a href="/gear">Free SaaS Tools</a></li>
+        <li><a href="/india-deals">India Deals</a></li>
+      </ul>
+    </div>
+    <div class="fc">
+      <h4>Top Integrations</h4>
+      <ul>
+        <li><a href="/best-integrations-for/slack">Slack Integrations</a></li>
+        <li><a href="/best-integrations-for/notion">Notion Integrations</a></li>
+        <li><a href="/best-integrations-for/hubspot">HubSpot Integrations</a></li>
+        <li><a href="/best-integrations-for/shopify">Shopify Integrations</a></li>
+      </ul>
+    </div>
+    <div class="fc">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="/privacy">Privacy Policy</a></li>
+        <li><a href="/terms">Terms of Service</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="fbot">
+    <p>© 2026 Integration Directory · Helping teams automate smarter.</p>
+    <p><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/contact">Contact</a></p>
+  </div>
 </footer>
 
 <script>
-// Savings calculator
-function calcSavings() {
-    const mins = parseFloat(document.getElementById('manualMins').value) || 30;
-    const rate = parseFloat(document.getElementById('hourlyRate').value) || 500;
-    const hoursPerMonth = (mins * 22) / 60; // 22 working days
-    const moneySaved = (hoursPerMonth * rate).toFixed(0);
-    document.getElementById('moneySaved').textContent = '₹' + parseInt(moneySaved).toLocaleString('en-IN') + '/month';
-    document.getElementById('hoursSaved').textContent =
-        hoursPerMonth.toFixed(1) + ' hours/month · ' + (hoursPerMonth * 12).toFixed(0) + ' hours/year';
-}
-calcSavings();
+  // Calculator
+  const tasks = document.getElementById('tasks');
+  const mins  = document.getElementById('mins');
+  function updateCalc() {
+    const t = +tasks.value, m = +mins.value;
+    document.getElementById('tasksVal').textContent = t;
+    document.getElementById('minsVal').textContent  = m;
+    const hrs = (t * m * 22) / 60;
+    document.getElementById('calcResult').textContent = hrs.toFixed(1) + ' Hours';
+    document.getElementById('calcSub').textContent    = 'Saved Per Month (' + (hrs * 12).toFixed(0) + ' hrs/year)';
+  }
+  tasks.addEventListener('input', updateCalc);
+  mins.addEventListener('input', updateCalc);
+  updateCalc();
 
-// Workflow generator
-document.getElementById('workflowForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = e.target.querySelector('button');
-    btn.textContent = 'Generating...';
-    btn.disabled = true;
-    const formData = new FormData(e.target);
+  // FAQ toggle
+  function toggleFaq(el) {
+    el.classList.toggle('open');
+    el.nextElementSibling.classList.toggle('open');
+  }
+
+  // AI Workflow Generator
+  async function generateWorkflow() {
+    const industry = document.getElementById('industryInput').value.trim();
+    if (!industry) { alert('Please enter your industry first.'); return; }
+    const btn = document.querySelector('.ai-wrap button');
+    const out  = document.getElementById('aiOut');
+    btn.textContent = 'Generating…'; btn.disabled = true; out.style.display = 'none';
     try {
-        const resp = await fetch('/api/generate-workflow', { method: 'POST', body: formData });
-        const data = await resp.json();
-        const resultDiv = document.getElementById('workflowResult');
-        resultDiv.innerHTML = data.workflow;
-        resultDiv.classList.remove('hidden');
-    } catch (err) {
-        console.error(err);
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: `You are an automation expert. A user in the "${industry}" industry wants to automate between {{ tool_a }} and {{ tool_b }}.
+
+Write a concise, practical automation plan with:
+1. Best trigger to use in {{ tool_a }}
+2. Best action to perform in {{ tool_b }}  
+3. One specific real-world example for ${industry}
+4. Estimated time saved per week
+
+Keep it under 120 words. Use plain text, no markdown.`
+          }]
+        })
+      });
+      const data = await res.json();
+      out.textContent = data.content?.[0]?.text || 'Unable to generate. Please try again.';
+      out.style.display = 'block';
+    } catch(e) {
+      out.textContent = 'Error generating workflow. Please try again.';
+      out.style.display = 'block';
     }
-    btn.textContent = 'Generate';
-    btn.disabled = false;
-});
+    btn.textContent = 'Generate →'; btn.disabled = false;
+  }
 </script>
 </body>
 </html>
