@@ -9,6 +9,8 @@ from fastapi import FastAPI, Request, HTTPException, Response, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse
 
+app = FastAPI()
+
 from google import genai
 from dotenv import load_dotenv
 import psycopg2
@@ -23,6 +25,14 @@ from fastapi.responses import RedirectResponse
 
 import feedparser
 import httpx
+
+from fastapi.responses import PlainTextResponse
+
+@app.get("/ads.txt", response_class=PlainTextResponse)
+async def ads_txt():
+    # Replace with your actual AdSense publisher ID once approved
+    # Format: google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+    return "google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0"
 
 # ================================================================
 # TOOL DESCRIPTIONS DATA
@@ -673,8 +683,7 @@ def get_tool_link(tool_name: str) -> dict:
     })
  
 
-# Initialize FastAPI and Templates
-app = FastAPI()
+# Initialize Templates
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
@@ -1183,6 +1192,7 @@ async def home(request: Request, q: str = "", page: int = 1):
         "trending_searches": trending_searches,
         "daily_deals": daily_deals,
     })
+
 
 @app.get("/glossary")
 async def glossary(request: Request):   

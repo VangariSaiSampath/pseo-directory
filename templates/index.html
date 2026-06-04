@@ -68,6 +68,15 @@
                 {% endfor %}
             </div>
 
+            {% if not integrations %}
+            <div class="text-center py-12 bg-white rounded-2xl border border-gray-100 max-w-2xl mx-auto mt-6">
+                <p class="text-gray-500 font-medium mb-4">We couldn't find a direct integration match for your query yet.</p>
+                <a href="/request-integration" class="inline-block bg-blue-600 text-white text-sm font-bold px-5 py-2.5 rounded-lg hover:bg-blue-700 transition">
+                    Request this integration &rarr;
+                </a>
+            </div>
+            {% endif %}
+
             {% if total_pages is defined and total_pages > 1 %}
             <div class="mt-12 flex justify-center items-center space-x-4">
                 {% if page > 1 %}
