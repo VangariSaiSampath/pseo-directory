@@ -478,6 +478,283 @@ TOOL_DATA = {
         ],
         "short": "Email marketing with the most generous free plan — 1,000 subscribers.",
     },
+    # ── NEW TOOLS ADDED ─────────────────────────────────────────
+ 
+    "jasper": {
+        "name": "Jasper",
+        "emoji": "✍️",
+        "category": "AI Writing",
+        "plan": "7-day free trial",
+        "url": "https://www.jasper.ai/",
+        "description": (
+            "Jasper is the world's leading AI writing assistant, used by over 100,000 "
+            "marketing teams and content creators. It generates high-quality blog posts, "
+            "ad copy, social media content, and email sequences in seconds. Jasper is "
+            "trained on best-practice copywriting frameworks and integrates with popular "
+            "marketing and project management tools to streamline content workflows."
+        ),
+        "features": [
+            "AI-generated blog posts, ads, and social copy",
+            "50+ content templates for every use case",
+            "Brand voice training for consistent output",
+            "Chrome extension for writing anywhere",
+            "Integrates with Surfer SEO for optimised content",
+        ],
+        "short": "AI writing assistant used by 100,000+ marketing teams.",
+    },
+ 
+    "monday.com": {
+        "name": "Monday.com",
+        "emoji": "📅",
+        "category": "Project Management",
+        "plan": "Free for up to 2 seats",
+        "url": "https://monday.com/",
+        "description": (
+            "Monday.com is a visual work operating system used by over 186,000 "
+            "companies to manage projects, processes, and everyday work. Its colourful, "
+            "flexible boards let teams build custom workflows without code. From simple "
+            "task lists to complex project timelines, Monday.com adapts to how your team "
+            "works — and connects to 200+ tools via Make.com automation."
+        ),
+        "features": [
+            "Visual boards, timelines, and Gantt charts",
+            "Custom automations and status notifications",
+            "200+ integrations including Slack and HubSpot",
+            "Dashboards with real-time reporting",
+            "Templates for every industry and team size",
+        ],
+        "short": "Visual work OS used by 186,000+ companies to manage everything.",
+    },
+ 
+    "clickup": {
+        "name": "ClickUp",
+        "emoji": "🎯",
+        "category": "Project Management",
+        "plan": "Free forever",
+        "url": "https://clickup.com/",
+        "description": (
+            "ClickUp is an all-in-one productivity platform designed to replace multiple "
+            "separate tools with a single workspace. It combines tasks, docs, goals, chat, "
+            "whiteboards, and time tracking in one place. With a generous free forever "
+            "plan and 1,000+ integrations, ClickUp is one of the fastest-growing "
+            "productivity tools among startups and agencies."
+        ),
+        "features": [
+            "Tasks, subtasks, and checklists",
+            "Docs, wikis, and collaborative notes",
+            "Goals, OKRs, and time tracking",
+            "15+ view types including timeline and mind map",
+            "1,000+ integrations including Make.com",
+        ],
+        "short": "All-in-one productivity replacing tasks, docs, goals, and chat.",
+    },
+ 
+    "linear": {
+        "name": "Linear",
+        "emoji": "📐",
+        "category": "Dev Project Management",
+        "plan": "Free for up to 250 issues",
+        "url": "https://linear.app/",
+        "description": (
+            "Linear is the project management tool built specifically for software "
+            "engineering teams who demand speed and elegance. Unlike Jira, Linear is "
+            "designed to be fast — keyboard-first, minimal, and opinionated. It is used "
+            "by leading tech companies including Vercel, Raycast, and Retool for sprint "
+            "planning, bug tracking, and roadmap management."
+        ),
+        "features": [
+            "Blazing-fast keyboard-first interface",
+            "Cycles (sprints) and roadmap planning",
+            "GitHub and GitLab native integration",
+            "Automatic issue creation from git commits",
+            "SLAs, priorities, and triage workflows",
+        ],
+        "short": "The fast, elegant project tracker loved by top engineering teams.",
+    },
+ 
+    "typeform": {
+        "name": "Typeform",
+        "emoji": "📋",
+        "category": "Forms & Surveys",
+        "plan": "Free up to 10 responses/month",
+        "url": "https://www.typeform.com/",
+        "description": (
+            "Typeform is the most beautiful online form and survey builder, used by "
+            "over 150,000 businesses. Its conversational one-question-at-a-time format "
+            "achieves completion rates up to 3× higher than traditional forms. It is "
+            "the go-to choice for lead generation forms, NPS surveys, quizzes, and "
+            "job applications — and connects to HubSpot, Mailchimp, and Make.com natively."
+        ),
+        "features": [
+            "Conversational, one-question-at-a-time forms",
+            "Logic jumps and conditional branching",
+            "Native integrations with HubSpot, Mailchimp, Slack",
+            "Custom branding and embed anywhere",
+            "Analytics on completion rates and drop-offs",
+        ],
+        "short": "Beautiful forms with 3× higher completion rates than traditional forms.",
+    },
+ 
+    "calendly": {
+        "name": "Calendly",
+        "emoji": "📆",
+        "category": "Scheduling",
+        "plan": "Free plan available",
+        "url": "https://calendly.com/",
+        "description": (
+            "Calendly is the world's most widely used online scheduling tool, with over "
+            "20 million users. It eliminates back-and-forth emails by letting contacts "
+            "book available time slots directly in your calendar. Sales teams use it "
+            "for demos, recruiters for interviews, and consultants for client calls — "
+            "all with automatic Zoom link generation and reminder emails."
+        ),
+        "features": [
+            "Shareable booking links with availability rules",
+            "Automatic Zoom and Google Meet link generation",
+            "Round-robin and collective meeting types",
+            "Automatic reminder and follow-up emails",
+            "Connects to Salesforce, HubSpot, and Make.com",
+        ],
+        "short": "Online scheduling used by 20M+ users to eliminate booking back-and-forth.",
+    },
+ 
+    "chatgpt": {
+        "name": "ChatGPT",
+        "emoji": "🤖",
+        "category": "AI Assistant",
+        "plan": "Free plan available",
+        "url": "https://chat.openai.com/",
+        "description": (
+            "ChatGPT by OpenAI is the world's most widely used AI assistant, with over "
+            "100 million weekly active users. It can write, code, analyse, summarise, "
+            "and reason across virtually any task. Via the OpenAI API, it connects to "
+            "Make.com and other automation tools to power AI-driven workflows — from "
+            "auto-generating Slack responses to summarising emails to enriching CRM records."
+        ),
+        "features": [
+            "Conversational AI for any task",
+            "GPT-4o with vision, code, and analysis",
+            "OpenAI API for integration into any workflow",
+            "Custom GPTs for specific business use cases",
+            "Connects to Make.com via OpenAI API module",
+        ],
+        "short": "The world's most used AI assistant with 100M+ weekly users.",
+    },
+ 
+    "github": {
+        "name": "GitHub",
+        "emoji": "🐙",
+        "category": "Dev & Code",
+        "plan": "Free for public repos",
+        "url": "https://github.com/signup",
+        "description": (
+            "GitHub is the world's largest developer platform, used by over 100 million "
+            "developers to host, review, and collaborate on code. It is the centre of "
+            "the open-source ecosystem and integrates tightly with Jira, Linear, Slack, "
+            "and Asana to create fully automated software development pipelines — from "
+            "commit to deployment to notification."
+        ),
+        "features": [
+            "Code hosting with unlimited public repositories",
+            "Pull requests, code reviews, and branch protection",
+            "GitHub Actions for CI/CD automation",
+            "Issues and project boards built in",
+            "Connects to Jira, Slack, Linear, and Make.com",
+        ],
+        "short": "The world's largest developer platform used by 100M+ developers.",
+    },
+ 
+    "google-drive": {
+        "name": "Google Drive",
+        "emoji": "📁",
+        "category": "Cloud Storage",
+        "plan": "15 GB free",
+        "url": "https://drive.google.com",
+        "description": (
+            "Google Drive is Google's cloud storage and file management service, offering "
+            "15 GB free for every Google account. Teams use it to store, share, and "
+            "collaborate on documents, spreadsheets, and presentations in real time. "
+            "With Make.com, you can automate file creation, organisation, sharing, and "
+            "notifications based on Drive activity."
+        ),
+        "features": [
+            "15 GB free cloud storage",
+            "Real-time collaboration on Docs, Sheets, Slides",
+            "File sharing with granular permission controls",
+            "Search across all file types including PDFs",
+            "Integrates with Make.com for file automation",
+        ],
+        "short": "Google's cloud storage with 15 GB free and real-time collaboration.",
+    },
+ 
+    "activecampaign": {
+        "name": "ActiveCampaign",
+        "emoji": "📣",
+        "category": "Email Marketing & CRM",
+        "plan": "14-day free trial",
+        "url": "https://www.activecampaign.com/",
+        "description": (
+            "ActiveCampaign is the leading customer experience automation platform, "
+            "combining email marketing, marketing automation, and CRM in one tool. "
+            "Used by 180,000+ businesses, it is especially powerful for e-commerce "
+            "and B2B teams who want to build sophisticated automated customer journeys "
+            "triggered by behaviour, tags, and lifecycle stage."
+        ),
+        "features": [
+            "Email marketing with behaviour-based triggers",
+            "Built-in CRM with deal pipeline",
+            "Advanced automation with 500+ recipes",
+            "Site tracking and event-based automation",
+            "Integrates with Shopify, Stripe, and Make.com",
+        ],
+        "short": "Email automation + CRM used by 180,000+ businesses.",
+    },
+ 
+    "webflow": {
+        "name": "Webflow",
+        "emoji": "🌐",
+        "category": "No-Code Web Builder",
+        "plan": "Free starter plan",
+        "url": "https://webflow.com/",
+        "description": (
+            "Webflow is the most powerful no-code website builder for designers and "
+            "marketing teams. Unlike Wix or Squarespace, Webflow generates clean, "
+            "production-ready code and supports full CMS capabilities. With Make.com "
+            "integration, you can automate form submissions to your CRM, send Slack "
+            "alerts for new leads, or trigger email campaigns from Webflow events."
+        ),
+        "features": [
+            "Visual drag-and-drop design with clean HTML/CSS output",
+            "Built-in CMS for blogs, portfolios, and directories",
+            "Form builder with custom logic",
+            "Hosting with global CDN included",
+            "Connects to HubSpot, Mailchimp, and Make.com",
+        ],
+        "short": "No-code web builder that generates production-ready code.",
+    },
+ 
+    "notion-ai": {
+        "name": "Notion AI",
+        "emoji": "🧠",
+        "category": "AI Productivity",
+        "plan": "Add-on to Notion free plan",
+        "url": "https://www.notion.so/product/ai",
+        "description": (
+            "Notion AI is the built-in AI assistant inside Notion, allowing teams to "
+            "generate content, summarise documents, translate text, and extract action "
+            "items — all without leaving their workspace. Unlike standalone AI tools, "
+            "Notion AI has full context of your team's notes, projects, and databases, "
+            "making it uniquely powerful for internal knowledge work."
+        ),
+        "features": [
+            "AI writing and editing inside Notion pages",
+            "Summarise meeting notes and documents instantly",
+            "Auto-fill database properties with AI",
+            "Translate content into 15+ languages",
+            "Ask AI questions about your workspace content",
+        ],
+        "short": "AI assistant built into Notion with full workspace context.",
+    },
 }
 
 # ================================================================
@@ -605,6 +882,247 @@ def get_together_description(tool_a: str, tool_b: str) -> str:
             "data perfectly reconciled. Auto-create Stripe invoices for Shopify orders, "
             "sync refund data across both platforms, and get instant notifications "
             "for failed payment attempts."
+        ),
+        # ── Jasper pairs ──────────────────────────────────────────
+        "slack-jasper": (
+            "Content teams using Slack and Jasper can build a fully automated content "
+            "pipeline. When a content brief is approved in Slack, trigger Jasper to "
+            "generate the first draft automatically. Or post Jasper's AI-generated "
+            "content suggestions directly into a Slack channel for team review — "
+            "cutting your content production time in half."
+        ),
+        "notion-jasper": (
+            "Connecting Notion and Jasper creates a seamless AI-powered content workspace. "
+            "Auto-save Jasper-generated drafts as new Notion pages, trigger Jasper to "
+            "expand Notion bullet points into full articles, or use Notion as your "
+            "content calendar with Jasper automatically populating drafts on schedule."
+        ),
+        "hubspot-jasper": (
+            "Marketing teams can supercharge HubSpot with Jasper's AI writing. "
+            "Auto-generate personalised email sequences for new HubSpot contacts, "
+            "create Jasper blog drafts from HubSpot campaign briefs, or trigger "
+            "Jasper to write follow-up sequences when HubSpot deals reach a new stage."
+        ),
+ 
+        # ── Monday.com pairs ──────────────────────────────────────
+        "slack-monday.com": (
+            "Keep your Slack team and Monday.com boards perfectly in sync. Get instant "
+            "Slack notifications when Monday tasks change status, create Monday items "
+            "from Slack messages with a single emoji reaction, or post daily Monday "
+            "board summaries to your team channel automatically."
+        ),
+        "asana-monday.com": (
+            "Teams migrating between Asana and Monday.com, or using both simultaneously, "
+            "can sync tasks across platforms automatically. New Asana tasks can create "
+            "Monday items, status updates can flow both ways, and completion in one "
+            "platform can trigger updates in the other — zero duplication."
+        ),
+        "hubspot-monday.com": (
+            "Sales and marketing teams using HubSpot and Monday.com can automate their "
+            "entire client lifecycle. New HubSpot deals automatically create Monday "
+            "project boards, deal stage changes update Monday task statuses, and won "
+            "deals trigger Monday onboarding workflows instantly."
+        ),
+ 
+        # ── ClickUp pairs ─────────────────────────────────────────
+        "slack-clickup": (
+            "Connect Slack and ClickUp to eliminate status update meetings. Get instant "
+            "Slack notifications when ClickUp tasks are completed or overdue, create "
+            "ClickUp tasks from Slack messages with a single command, and send daily "
+            "ClickUp sprint summaries to your team channel automatically."
+        ),
+        "asana-clickup": (
+            "Teams running both Asana and ClickUp can sync work across both platforms "
+            "without manual copying. New Asana projects create ClickUp lists, task "
+            "completions sync both ways, and due date changes update in real time — "
+            "so every team member sees the same status regardless of which tool they use."
+        ),
+ 
+        # ── Linear pairs ──────────────────────────────────────────
+        "slack-linear": (
+            "Engineering teams using Slack and Linear can run fully automated sprint "
+            "workflows. Get Slack notifications for new Linear bugs, post daily issue "
+            "summaries to engineering channels, and allow developers to create or update "
+            "Linear issues directly from Slack — no context switching required."
+        ),
+        "jira-linear": (
+            "Teams migrating from Jira to Linear, or using both tools across departments, "
+            "can sync issues automatically. New Jira epics create Linear projects, "
+            "bug reports flow both ways, and sprint completions update status in both "
+            "systems — keeping engineering and product always aligned."
+        ),
+        "github-linear": (
+            "Connecting GitHub and Linear creates a fully automated development workflow. "
+            "New GitHub pull requests automatically create or update Linear issues, "
+            "merged PRs mark Linear tickets as done, and git commit messages reference "
+            "Linear issue IDs to keep everything traceable and in sync."
+        ),
+ 
+        # ── Typeform pairs ────────────────────────────────────────
+        "slack-typeform": (
+            "When a new Typeform response comes in, instantly notify your Slack channel "
+            "with the key details. Perfect for lead capture forms, NPS surveys, and "
+            "support requests — your team sees responses in real time without logging "
+            "into Typeform, so they can act fast on every submission."
+        ),
+        "hubspot-typeform": (
+            "The most powerful use of Typeform and HubSpot together: every form "
+            "submission automatically creates or updates a HubSpot contact, tags them "
+            "with their survey answers, and triggers the right email nurture sequence. "
+            "Your lead capture becomes a fully automated CRM pipeline."
+        ),
+        "google-sheets-typeform": (
+            "Automatically log every Typeform response into a Google Sheet for easy "
+            "analysis, reporting, and sharing with stakeholders. Set up once and every "
+            "new response appears instantly as a new row — no exports, no manual work, "
+            "always up to date."
+        ),
+        "activecampaign-typeform": (
+            "When someone completes a Typeform survey, automatically add them to an "
+            "ActiveCampaign list, tag them based on their answers, and trigger the "
+            "right automation sequence. Build highly personalised email journeys based "
+            "on exactly what your leads told you — without any manual segmentation."
+        ),
+ 
+        # ── Calendly pairs ────────────────────────────────────────
+        "slack-calendly": (
+            "Get instant Slack notifications when someone books a meeting via Calendly. "
+            "Alert the right Slack channel or DM the assigned team member with the "
+            "booking details, so your team is always prepared — no more missed "
+            "meetings or last-minute scrambles to check the calendar."
+        ),
+        "hubspot-calendly": (
+            "The ultimate sales workflow: when a prospect books a Calendly call, "
+            "automatically create or update a HubSpot contact, log the meeting activity, "
+            "and enrol them in a pre-meeting email sequence. Your CRM is always current "
+            "without a single click from your sales team."
+        ),
+        "zoom-calendly": (
+            "Calendly and Zoom are already connected natively, but with Make.com you "
+            "can go further. Auto-send personalised prep materials before the meeting, "
+            "save the Zoom recording link to your CRM after the call, and trigger "
+            "follow-up emails based on whether the meeting actually happened."
+        ),
+        "salesforce-calendly": (
+            "Enterprise sales teams using Salesforce and Calendly can automate their "
+            "entire booking-to-pipeline workflow. Calendly bookings automatically create "
+            "Salesforce leads, meeting notes sync to contact activity logs, and no-shows "
+            "trigger automated re-engagement sequences — all without manual data entry."
+        ),
+ 
+        # ── ChatGPT pairs ─────────────────────────────────────────
+        "slack-chatgpt": (
+            "Build an AI assistant inside Slack using ChatGPT and Make.com. Messages "
+            "sent to a specific channel or with a trigger word are automatically processed "
+            "by ChatGPT, which generates intelligent replies, summaries, or action items "
+            "— posted back to Slack in seconds. Your team gets AI superpowers without "
+            "leaving their daily workflow."
+        ),
+        "notion-chatgpt": (
+            "Connect Notion and ChatGPT to build an AI-powered knowledge system. "
+            "Auto-generate Notion page summaries with ChatGPT, expand bullet-point "
+            "meeting notes into full action plans, or trigger ChatGPT to research and "
+            "enrich new Notion database entries automatically."
+        ),
+        "hubspot-chatgpt": (
+            "Marketing and sales teams can use ChatGPT to enrich every HubSpot contact. "
+            "When a new lead comes in, ChatGPT researches their company, generates a "
+            "personalised outreach draft, and adds both to HubSpot automatically — "
+            "giving your sales team a head start on every new prospect."
+        ),
+        "google-sheets-chatgpt": (
+            "Use ChatGPT to process, classify, and enrich Google Sheets data automatically. "
+            "New rows trigger ChatGPT to categorise entries, generate summaries, or "
+            "translate content — with the AI's output written back to the sheet "
+            "instantly. Turn static spreadsheets into intelligent, self-updating documents."
+        ),
+        "shopify-chatgpt": (
+            "E-commerce stores can use ChatGPT to automate customer communication at "
+            "scale. New Shopify orders trigger ChatGPT to generate personalised thank-you "
+            "emails, refund requests get AI-drafted resolution responses, and product "
+            "reviews are automatically analysed for sentiment and key themes."
+        ),
+ 
+        # ── GitHub pairs ──────────────────────────────────────────
+        "slack-github": (
+            "Engineering teams using Slack and GitHub can automate their entire "
+            "development communication pipeline. Get Slack notifications for new pull "
+            "requests, failed CI checks, and merged branches — tagged to the right "
+            "channel. Developers stay informed without constantly checking GitHub."
+        ),
+        "jira-github": (
+            "Connect Jira and GitHub to create a single source of truth for your "
+            "engineering workflow. New GitHub pull requests automatically update linked "
+            "Jira tickets, merged PRs move tickets to Done, and failed builds create "
+            "new Jira bug reports — all automatically, no manual status updates needed."
+        ),
+        "notion-github": (
+            "Use Notion as your engineering wiki and GitHub as your code repository — "
+            "then connect them. New GitHub releases auto-create Notion changelog entries, "
+            "open issues create Notion task cards, and merged PRs update your Notion "
+            "project tracker. Documentation and code stay in sync effortlessly."
+        ),
+ 
+        # ── Google Drive pairs ─────────────────────────────────────
+        "slack-google-drive": (
+            "When a new file is added to a Google Drive folder, automatically notify "
+            "the relevant Slack channel with a direct link. Perfect for shared client "
+            "folders, design assets, and reporting dashboards — your team always knows "
+            "when new files are ready without manually checking Drive."
+        ),
+        "notion-google-drive": (
+            "Keep your Notion workspace and Google Drive perfectly aligned. New Notion "
+            "pages can create corresponding Drive folders, Google Doc links can be "
+            "auto-embedded in Notion databases, and Drive file updates can trigger "
+            "Notion status changes — one seamless document management system."
+        ),
+        "zoom-google-drive": (
+            "Automatically save Zoom meeting recordings to a specific Google Drive folder "
+            "organised by date, team, or client. Every recording gets a Drive link that "
+            "is automatically shared with the meeting participants — no more hunting "
+            "through email for recording links."
+        ),
+ 
+        # ── ActiveCampaign pairs ───────────────────────────────────
+        "hubspot-activecampaign": (
+            "Teams using both HubSpot and ActiveCampaign can sync their contacts and "
+            "campaign data automatically. New HubSpot leads are added to ActiveCampaign "
+            "with their lifecycle stage and tags, email engagement from ActiveCampaign "
+            "updates HubSpot contact scores, and deal stage changes trigger new "
+            "ActiveCampaign automation sequences."
+        ),
+        "shopify-activecampaign": (
+            "E-commerce brands using Shopify and ActiveCampaign can automate their "
+            "entire customer lifecycle. New Shopify customers join the right "
+            "ActiveCampaign list, abandoned carts trigger recovery sequences, repeat "
+            "buyers get VIP tag and upgrade automation, and post-purchase review "
+            "requests go out automatically — all hands-free."
+        ),
+        "stripe-activecampaign": (
+            "SaaS and subscription businesses using Stripe and ActiveCampaign can "
+            "automate every billing event. New Stripe subscribers trigger onboarding "
+            "sequences, failed payments send dunning emails, and cancellations start "
+            "win-back campaigns — all automatically based on real payment data."
+        ),
+ 
+        # ── Webflow pairs ──────────────────────────────────────────
+        "hubspot-webflow": (
+            "Connect your Webflow site to HubSpot to turn every form submission into "
+            "a CRM contact instantly. Webflow form responses create HubSpot contacts, "
+            "trigger lead nurture sequences, and notify your sales team via Slack — "
+            "building a complete inbound marketing pipeline from your website."
+        ),
+        "mailchimp-webflow": (
+            "Every visitor who fills out a Webflow form can automatically join the "
+            "right Mailchimp audience, tagged with the page they came from. This means "
+            "your email campaigns are always sending to properly segmented, up-to-date "
+            "lists — with zero manual list management required."
+        ),
+        "slack-webflow": (
+            "Get a Slack notification every time someone submits a form on your Webflow "
+            "site. New contact requests, job applications, and demo bookings appear "
+            "instantly in the right Slack channel — so your team can respond within "
+            "minutes, not hours."
         ),
     }
     result = pairs.get(pair_key) or pairs.get(f"{tool_b.lower()}-{tool_a.lower()}")
