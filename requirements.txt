@@ -8,3 +8,4 @@ psycopg2-binary
 sqlalchemy
 feedparser
 httpx
+requests==2.31.0

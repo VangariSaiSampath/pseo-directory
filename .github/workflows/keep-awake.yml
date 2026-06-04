@@ -1,0 +1,25 @@
+name: Keep Render Site Awake
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  # Automatically runs every 10 minutes
+  workflow_dispatch:      # Allows you to click a button to test it manually
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          
+      - name: Run Pinger Script
+        run: python pinger.py
