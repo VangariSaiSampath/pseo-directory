@@ -207,55 +207,45 @@
       <span>Written by <strong><a href="/about" style="color:#1e293b;text-decoration:none;">Vangari Sai Sampath</a></strong> · Automation Specialist · Hyderabad, India &nbsp;|&nbsp; Reviewed {{ review_date }}</span>
     </div>
     <h1>How to Connect {{ tool_a }} and {{ tool_b }}</h1>
-    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-8">
-    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-        🛠️ Step-by-Step Connection Guide
-    </h2>
-    
-    <div class="space-y-6 relative before:absolute before:inset-0 before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
-        
-        <div class="relative flex items-start gap-4">
-            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-blue-600 font-bold border border-blue-200 shrink-0 relative z-10">
-                
-            </div>
-            <div>
-                <h4 class="font-semibold text-gray-900 mb-1">Set up Trigger Module</h4>
-                <p class="text-gray-600 text-sm leading-relaxed">{{ step_1 }}</p>
-            </div>
-        </div>
 
-        <div class="relative flex items-start gap-4">
-            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-blue-600 font-bold border border-blue-200 shrink-0 relative z-10">
-                
-            </div>
-            <div>
-                <h4 class="font-semibold text-gray-900 mb-1">Authorize Platform Access</h4>
-                <p class="text-gray-600 text-sm leading-relaxed">{{ step_2 }}</p>
-            </div>
+    <!-- Step-by-step guide -->
+  <div class="card">
+    <h2>How to set up this integration (step-by-step)</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="sn">1</div>
+        <div class="sb">
+          <h3>Create a free Make.com account</h3>
+          <p>Go to Make.com and sign up. The free plan includes 1,000 operations/month — enough for most automations.</p>
+          <a href="https://www.make.com/en/register?pc=sampath9" target="_blank" rel="noopener sponsored">Create free account →</a>
         </div>
-
-        <div class="relative flex items-start gap-4">
-            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-blue-600 font-bold border border-blue-200 shrink-0 relative z-10">
-                
-            </div>
-            <div>
-                <h4 class="font-semibold text-gray-900 mb-1">Establish Action Target</h4>
-                <p class="text-gray-600 text-sm leading-relaxed">{{ step_3 }}</p>
-            </div>
+      </div>
+      <div class="step">
+        <div class="sn">2</div>
+        <div class="sb">
+          <h3>Connect {{ tool_a }} as the trigger</h3>
+          <p>In Make.com, create a new scenario. Search for {{ tool_a }} and choose your trigger event (e.g. "New message", "New record", "New row").</p>
         </div>
-
-        <div class="relative flex items-start gap-4">
-            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-blue-600 font-bold border border-blue-200 shrink-0 relative z-10">
-                
-            </div>
-            <div>
-                <h4 class="font-semibold text-gray-900 mb-1">Map & Test JSON Fields</h4>
-                <p class="text-gray-600 text-sm leading-relaxed">{{ step_4 }}</p>
-            </div>
+      </div>
+      <div class="step">
+        <div class="sn">3</div>
+        <div class="sb">
+          <h3>Connect {{ tool_b }} as the action</h3>
+          <p>Add {{ tool_b }} as the next module. Map the data fields from {{ tool_a }} to the corresponding fields in {{ tool_b }}.</p>
         </div>
+      </div>
+      <div class="step">
+        <div class="sn done">✓</div>
+        <div class="sb">
+          <h3>Test and activate</h3>
+          <p>Run a test with real data. Once it works, turn on the scenario. Make.com will run it automatically — no more manual work.</p>
+        </div>
+      </div>
     </div>
-    
-</div>
+  </div>
+
+
+  <!-- CTA -->
     <a class="btn-main" href="https://www.make.com/en/register?pc=sampath9" target="_blank" rel="noopener sponsored">
       ⚡ Automate {{ tool_a }} + {{ tool_b }} with Make.com →
     </a>
@@ -313,41 +303,7 @@
   </div>
   <!-- ═══════════════════════════════════════════════════════ -->
 
-  <!-- Step-by-step guide -->
-  <div class="card">
-    <h2>How to set up this integration (step-by-step)</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="sn">1</div>
-        <div class="sb">
-          <h3>Create a free Make.com account</h3>
-          <p>Go to Make.com and sign up. The free plan includes 1,000 operations/month — enough for most automations.</p>
-          <a href="https://www.make.com/en/register?pc=sampath9" target="_blank" rel="noopener sponsored">Create free account →</a>
-        </div>
-      </div>
-      <div class="step">
-        <div class="sn">2</div>
-        <div class="sb">
-          <h3>Connect {{ tool_a }} as the trigger</h3>
-          <p>In Make.com, create a new scenario. Search for {{ tool_a }} and choose your trigger event (e.g. "New message", "New record", "New row").</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="sn">3</div>
-        <div class="sb">
-          <h3>Connect {{ tool_b }} as the action</h3>
-          <p>Add {{ tool_b }} as the next module. Map the data fields from {{ tool_a }} to the corresponding fields in {{ tool_b }}.</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="sn done">✓</div>
-        <div class="sb">
-          <h3>Test and activate</h3>
-          <p>Run a test with real data. Once it works, turn on the scenario. Make.com will run it automatically — no more manual work.</p>
-        </div>
-      </div>
-    </div>
-  </div>
+  
 
   <!-- Don't have these tools? -->
   <div class="card">
