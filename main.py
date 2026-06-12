@@ -2434,8 +2434,29 @@ async def api_compare_tools(tool_a: str, tool_b: str):
             "verdict": f"The decision rests on your requirements. Both integrate seamlessly using Make.com."
         })
     
+
+
 @app.get("/api/faq-answers")
 async def api_faq_answers(tool_a: str, tool_b: str):
+    conn, cursor = get_db_connection()
+    
+    # FIX: Check both directions (tool_a + tool_b OR tool_b + tool_a)
+    cursor.execute('''
+        SELECT * FROM integrations 
+        WHERE (tool_a ILIKE %s AND tool_b ILIKE %s) 
+           OR (tool_a ILIKE %s AND tool_b ILIKE %s)
+    ''', (tool_a, tool_b, tool_b, tool_a))
+    row = cursor.fetchone()
+    
+    if row and row.get("faq_1"):
+        # Return instantly from Database! 0 API Cost.
+        conn.close()
+        return JSONResponse(content={
+            "ans1": row["faq_1"], "ans2": row["faq_2"], "ans3": row["faq_3"],
+            "ans4": row["faq_4"], "ans5": row["faq_5"], "ans6": row["faq_6"]
+        })
+
+    # 2. If not in DB or columns are empty, ask Gemini
     try:
         prompt = (
             f"You are an expert SaaS integration analyst in 2026.\n"
@@ -2452,24 +2473,37 @@ async def api_faq_answers(tool_a: str, tool_b: str):
             model='gemini-2.5-flash',
             contents=prompt,
         )
-        answers = response.text.split("|||")
-        
-        # Clean up answers and pad array if response parsing varies
-        cleaned_answers = [ans.strip() for ans in answers]
-        while len(cleaned_answers) < 6:
-            cleaned_answers.append("Refer to the technical documentation above for detailed usage.")
+        answers = [ans.strip() for ans in response.text.split("|||")]
+        while len(answers) < 6:
+            answers.append("Refer to the official technical documentation for detailed usage.")
 
+        # 3. SAVE TO DATABASE (Using the corrected row ID)
+        if row:
+            cursor.execute('''
+                UPDATE integrations 
+                SET faq_1=%s, faq_2=%s, faq_3=%s, faq_4=%s, faq_5=%s, faq_6=%s 
+                WHERE id=%s
+            ''', (answers[0], answers[1], answers[2], answers[3], answers[4], answers[5], row["id"]))
+            conn.commit()
+            
+        conn.close()
         return JSONResponse(content={
-            "ans1": cleaned_answers[0],
-            "ans2": cleaned_answers[1],
-            "ans3": cleaned_answers[2],
-            "ans4": cleaned_answers[3],
-            "ans5": cleaned_answers[4],
-            "ans6": cleaned_answers[5]
+            "ans1": answers[0], "ans2": answers[1], "ans3": answers[2],
+            "ans4": answers[3], "ans5": answers[4], "ans6": answers[5]
         })
+
     except Exception as e:
-        print(f"Gemini FAQ Error: {e}")
-        return JSONResponse(content={})
+        print(f"Gemini API Error/Exhausted: {e}")
+        conn.close()
+        # FALLBACK: If API is exhausted or hits rate limits, send clean generic answers
+        return JSONResponse(content={
+            "ans1": f"Use Make.com to connect {tool_a} and {tool_b} without code. Create a scenario with a trigger and action.",
+            "ans2": "Yes. Make.com's free plan includes 1,000 operations/month — enough for most workflows.",
+            "ans3": "No. Make.com is a visual drag-and-drop builder. No coding is required.",
+            "ans4": f"You can sync data, trigger alerts, and push updates seamlessly between {tool_a} and {tool_b}.",
+            "ans5": f"{tool_a} is a specialized platform optimized for scalable operational tasks.",
+            "ans6": f"{tool_b} is an industry-standard tool designed to streamline your daily workflows."
+        })
 
 # --- MAIN DIRECTORY HOMEPAGE ---
 @app.get("/")
@@ -2581,19 +2615,51 @@ async def glossary(request: Request):
     return templates.TemplateResponse("glossary.html", {"request": request, "terms": terms})
 
 
-@app.get("/compare/{tool_a}-vs-{tool_b}")
-async def compare(request: Request, tool_a: str, tool_b: str):
-    # Get rich tool descriptions for comparison page
-    tool_a_info = get_tool_info(tool_a)
-    tool_b_info = get_tool_info(tool_b)
+@app.get("/compare/{slug_a}-vs-{slug_b}")
+async def compare_tools_page(request: Request, slug_a: str, slug_b: str):
+    # 1. Clean up slugs into clean names for the AI model
+    tool_a_name = slug_a.replace("-", " ").title()
+    tool_b_name = slug_b.replace("-", " ").title()
+
+    # 2. Generate the comparison directly on the server before the page loads
+    try:
+        prompt = (
+            f"Compare {tool_a_name} and {tool_b_name} as an expert tech analyst in 2026.\n"
+            f"Provide exactly 3 items separated by the delimiter '|||'.\n"
+            f"A short 1-sentence summary of what {tool_a_name} is uniquely best at.\n"
+            f"|||\n"
+            f"A short 1-sentence summary of what {tool_b_name} is uniquely best at.\n"
+            f"|||\n"
+            f"A clear, definitive verdict declaring exactly which tool is the absolute best choice for the majority of standard automation workflows, and why.\n"
+            f"Do not be neutral. Pick one clear winner based on features, pricing, or ease of integration in 2026."
+        )
+        
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        parts = response.text.split("|||")
+        
+        tool_a_text = parts[0].strip() if len(parts) > 0 else f"Elite choice for modern {tool_a_name} ecosystems."
+        tool_b_text = parts[1].strip() if len(parts) > 1 else f"Optimized performance tracker for {tool_b_name}."
+        verdict = parts[2].strip() if len(parts) > 2 else f"{tool_a_name} is the superior choice for scalable enterprise applications."
+        
+    except Exception as e:
+        print(f"Error pre-generating comparison: {e}")
+        tool_a_text = f"Top-tier choice for specialized operational scaling."
+        tool_b_text = f"Excellent choice for flexible workspace management."
+        verdict = f"{tool_a_name} wins due to its comprehensive ecosystem and robust API connectivity."
+
+    # 3. Return the fully-baked values instantly to the template
     return templates.TemplateResponse("compare.html", {
         "request": request,
-        "tool_a": tool_a_info["name"],
-        "tool_b": tool_b_info["name"],
-        "tool_a_info": tool_a_info,
-        "tool_b_info": tool_b_info,
-        "slug_a": tool_a,
-        "slug_b": tool_b,
+        "tool_a": tool_a_name,
+        "tool_b": tool_b_name,
+        "slug_a": slug_a,
+        "slug_b": slug_b,
+        "tool_a_text": tool_a_text,
+        "tool_b_text": tool_b_text,
+        "verdict": verdict
     })
 
 @app.get("/best-integrations-for/{tool}")
@@ -2664,15 +2730,6 @@ async def integration_page(request: Request, slug: str):
     conn, cursor = get_db_connection()
     cursor.execute('SELECT * FROM integrations WHERE slug = %s', (slug,))
     integration = cursor.fetchone()
-    popular_integrations = []
-    if integration:
-        cursor.execute('''
-            SELECT * FROM integrations 
-            WHERE slug != %s 
-            ORDER BY search_volume DESC 
-        ''', (slug,))
-        popular_integrations = cursor.fetchall()
-        
     conn.close()
 
     if not integration:
@@ -2681,12 +2738,52 @@ async def integration_page(request: Request, slug: str):
     tool_a_name = integration["tool_a"]
     tool_b_name = integration["tool_b"]
 
-    # Get rich descriptions for both tools
     tool_a_info = get_tool_info(tool_a_name)
     tool_b_info = get_tool_info(tool_b_name)
     together_desc = get_together_description(tool_a_name, tool_b_name)
 
-    # Part 7A: og:image and canonical for better SEO sharing
+    # NEW: Intelligent Database Caching for Setup Steps
+    if integration.get("step_1"):
+        # FAST PATH: Data already exists in database, no API call needed!
+        integration_steps = [
+            integration["step_1"], integration["step_2"], 
+            integration["step_3"], integration["step_4"]
+        ]
+    else:
+        # SLOW PATH: Ask Gemini, then save to Database for next time
+        try:
+            step_prompt = (
+                f"Provide a clear, practical, 4-step guide on how to integrate {tool_a_name} and {tool_b_name} using Make.com.\n"
+                f"Format it strictly as exactly 4 steps separated by '|||'. Keep each step brief (under 50 words)."
+            )
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=step_prompt,
+            )
+            steps_raw = response.text.split("|||")
+            integration_steps = [step.strip() for step in steps_raw if step.strip()][:4]
+            
+            while len(integration_steps) < 4:
+                integration_steps.append(f"Configure data mapping filters between {tool_a_name} and {tool_b_name}.")
+                
+            # SAVE TO DATABASE so we never have to ask Gemini for this again
+            conn, cursor = get_db_connection()
+            cursor.execute('''
+                UPDATE integrations SET step_1=%s, step_2=%s, step_3=%s, step_4=%s WHERE slug=%s
+            ''', (integration_steps[0], integration_steps[1], integration_steps[2], integration_steps[3], slug))
+            conn.commit()
+            conn.close()
+
+        except Exception as e:
+            print(f"Gemini API Exhausted/Error: {e}")
+            # FALLBACK: If API is exhausted, show generic text so the site doesn't break
+            integration_steps = [
+                f"Log into Make.com and add the {tool_a_name} connection module.",
+                f"Select your triggering event inside the {tool_a_name} integration node.",
+                f"Link the output connector directly to your target {tool_b_name} dashboard action.",
+                "Run a test scenario mapping to confirm parameters transfer successfully."
+            ]
+
     og_image = f"https://integration-directory.com/static/og-default.png"
     canonical = f"https://integration-directory.com/integrate/{slug}"
     ga4_id = os.environ.get("GA4_ID", "")
@@ -2695,38 +2792,38 @@ async def integration_page(request: Request, slug: str):
         "request": request,
         "data": integration,
         "integration": integration,
-        "popular_integrations": popular_integrations,
         "slug": slug,
         "tool_a": tool_a_name,
         "tool_b": tool_b_name,
-        "hours_saved": integration.get("hours_saved", 5),
         "review_date": "June 2026",
         "og_image": og_image,
         "canonical": canonical,
         "ga4_id": ga4_id,
+        
+        # Pass the steps directly to the frontend template
+        "step_1": integration_steps[0],
+        "step_2": integration_steps[1],
+        "step_3": integration_steps[2],
+        "step_4": integration_steps[3],
 
-        # Tool A details
-        "tool_a_emoji":       tool_a_info["emoji"],
-        "tool_a_category":    tool_a_info["category"],
+        # Tool infos...
+        "tool_a_emoji": tool_a_info["emoji"],
+        "tool_a_category": tool_a_info["category"],
         "tool_a_description": tool_a_info["description"],
-        "tool_a_features":    tool_a_info["features"],
-        "tool_a_plan":        tool_a_info["plan"],
-        "tool_a_url":         tool_a_info["url"],
-        "tool_a_short":       tool_a_info["short"],
+        "tool_a_features": tool_a_info["features"],
+        "tool_a_plan": tool_a_info["plan"],
+        "tool_a_url": tool_a_info["url"],
+        "tool_a_short": tool_a_info["short"],
 
-        # Tool B details
-        "tool_b_emoji":       tool_b_info["emoji"],
-        "tool_b_category":    tool_b_info["category"],
+        "tool_b_emoji": tool_b_info["emoji"],
+        "tool_b_category": tool_b_info["category"],
         "tool_b_description": tool_b_info["description"],
-        "tool_b_features":    tool_b_info["features"],
-        "tool_b_plan":        tool_b_info["plan"],
-        "tool_b_url":         tool_b_info["url"],
-        "tool_b_short":       tool_b_info["short"],
-
-        # "Better together" paragraph
+        "tool_b_features": tool_b_info["features"],
+        "tool_b_plan": tool_b_info["plan"],
+        "tool_b_url": tool_b_info["url"],
+        "tool_b_short": tool_b_info["short"],
         "together_description": together_desc,
-    })
- 
+    }) 
 
 
 # --- Dedicated Affiliate Landing Page (Generalized) ---
