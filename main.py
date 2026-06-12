@@ -2485,14 +2485,18 @@ async def home(request: Request, page: int = 1, q: str = None):
             conn.commit()
 
             cursor.execute(
-                'SELECT COUNT(*) as count FROM integrations WHERE tool_a ILIKE %s OR tool_b ILIKE %s OR description ILIKE %s',
-                (query, query, query)
+                'SELECT COUNT(*) as count FROM integrations ' \
+                'WHERE tool_a ILIKE %s OR tool_b ILIKE %s ' \
+                'OR similarity(tool_a, %s) > 0.25 OR similarity(tool_b, %s) > 0.25',
+                (f'%{query}%', f'%{query}%', f'%{query}%', f'%{query}%')
             )
             total_items = cursor.fetchone()['count']
 
             cursor.execute(
-                'SELECT * FROM integrations WHERE tool_a ILIKE %s OR tool_b ILIKE %s OR description ILIKE %s ORDER BY search_volume DESC NULLS LAST LIMIT %s OFFSET %s',
-                (query, query, query, items_per_page, offset)
+                'SELECT * FROM integrations WHERE tool_a ILIKE %s OR tool_b ILIKE %s ' \
+                'OR similarity(tool_a, %s) > 0.25 OR similarity(tool_b, %s) > 0.25 ' \
+                'ORDER BY search_volume DESC NULLS LAST LIMIT %s OFFSET %s',
+                (f'%{query}%', f'%{query}%', f'%{query}%', f'%{query}%', items_per_page, offset)
             )
         else:
             cursor.execute('SELECT COUNT(*) as count FROM integrations')
