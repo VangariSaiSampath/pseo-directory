@@ -2660,11 +2660,11 @@ async def compare_tools_page(request: Request, slug_a: str, slug_b: str):
             prompt = (
                 f"Compare {tool_a_display} and {tool_b_display} as an expert tech analyst in 2026.\n"
                 f"Provide exactly 3 items separated by the delimiter '|||'.\n"
-                f"Item 1: A short 1-sentence summary of what {tool_a_display} is uniquely best at.\n"
+                f"A short 1-sentence summary of what {tool_a_display} is uniquely best at.\n"
                 f"|||\n"
-                f"Item 2: A short 1-sentence summary of what {tool_b_display} is uniquely best at.\n"
+                f"A short 1-sentence summary of what {tool_b_display} is uniquely best at.\n"
                 f"|||\n"
-                f"Item 3: A clear, definitive verdict declaring exactly which tool is the absolute best choice for standard automation workflows, and why.\n"
+                f"A clear, definitive verdict declaring exactly which tool is the absolute best choice for standard automation workflows, and why.\n"
                 f"Pick one clear winner based on features, pricing, or ease of integration in 2026."
             )
             
