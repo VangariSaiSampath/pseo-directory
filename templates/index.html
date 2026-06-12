@@ -239,5 +239,36 @@
         }
     })();
 </script>
+<div id="cookie-banner" class="fixed bottom-0 inset-x-0 pb-2 sm:pb-5 z-50 transition-transform duration-500 transform translate-y-full">
+    <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+        <div class="p-3 rounded-lg bg-gray-900 shadow-lg sm:p-4 flex items-center justify-between flex-wrap">
+            <p class="text-sm text-white font-medium truncate">
+                We use cookies and similar technologies to improve your experience, serve personalized ads, and analyze traffic. By clicking "Accept", you consent to our use of cookies.
+                <a href="/privacy" class="underline text-blue-300 hover:text-blue-200">Learn more</a>
+            </p>
+            <div class="order-3 mt-2 flex-shrink-0 w-full sm:order-2 sm:mt-0 sm:w-auto flex gap-2">
+                <button onclick="acceptCookies()" class="flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-900 bg-white hover:bg-gray-50 focus:outline-none">
+                    Accept
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple logic to show the banner if they haven't accepted yet
+    document.addEventListener("DOMContentLoaded", function() {
+        if (!localStorage.getItem("cookiesAccepted")) {
+            setTimeout(() => {
+                document.getElementById("cookie-banner").classList.remove("translate-y-full");
+            }, 1000); // Slide up after 1 second
+        }
+    });
+
+    function acceptCookies() {
+        localStorage.setItem("cookiesAccepted", "true");
+        document.getElementById("cookie-banner").classList.add("translate-y-full");
+    }
+</script>
 </body>
 </html>

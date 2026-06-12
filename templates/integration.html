@@ -355,36 +355,36 @@
   </div>
 
   <!-- FAQ -->
+  <!-- FAQ Container -->
   <div class="card">
     <h2>Frequently asked questions</h2>
     <div class="faq">
       <div class="fq">
         <div class="fq-q" onclick="toggleFaq(this)">How do I connect {{ tool_a }} and {{ tool_b }}?</div>
-        <div class="fq-a">Use Make.com to connect them without code. Sign up free, create a scenario with {{ tool_a }} as trigger and {{ tool_b }} as action. Setup takes under 10 minutes.</div>
+        <div id="faq-ans-1" class="fq-a">Use Make.com to connect them without code. Sign up free, create a scenario with {{ tool_a }} as trigger and {{ tool_b }} as action. Setup takes under 10 minutes.</div>
       </div>
       <div class="fq">
         <div class="fq-q" onclick="toggleFaq(this)">Is this integration free?</div>
-        <div class="fq-a">Yes. Make.com's free plan includes 1,000 operations/month — enough for most small teams. No credit card required to start.</div>
+        <div id="faq-ans-2" class="fq-a">Yes. Make.com's free plan includes 1,000 operations/month — enough for most small teams. No credit card required to start.</div>
       </div>
       <div class="fq">
         <div class="fq-q" onclick="toggleFaq(this)">Do I need coding skills?</div>
-        <div class="fq-a">No. Make.com is a visual drag-and-drop builder. You connect modules by clicking, not writing code.</div>
+        <div id="faq-ans-3" class="fq-a">No. Make.com is a visual drag-and-drop builder. You connect modules by clicking, not writing code.</div>
       </div>
       <div class="fq">
         <div class="fq-q" onclick="toggleFaq(this)">What can I automate between {{ tool_a }} and {{ tool_b }}?</div>
-        <div class="fq-a">{{ together_description }}</div>
+        <div id="faq-ans-4" class="fq-a">{{ together_description }}</div>
       </div>
       <div class="fq">
         <div class="fq-q" onclick="toggleFaq(this)">What is {{ tool_a }} used for?</div>
-        <div class="fq-a">{{ tool_a_description }}</div>
+        <div id="faq-ans-5" class="fq-a">{{ tool_a_description }}</div>
       </div>
       <div class="fq">
         <div class="fq-q" onclick="toggleFaq(this)">What is {{ tool_b }} used for?</div>
-        <div class="fq-a">{{ tool_b_description }}</div>
+        <div id="faq-ans-6" class="fq-a">{{ tool_b_description }}</div>
       </div>
     </div>
   </div>
-
   <!-- Author bio -->
   <div class="bio">
     <div class="av2">SS</div>
@@ -408,9 +408,40 @@
   <div class="sc">
     <h3>Related Tools</h3>
     <ul>
+      <li><a href="/compare/make-vs-zapier">Make.com vs Zapier →</a></li>
+      <li><a href="/compare/claude-vs-chatgpt">claude-vs-chatgpt →</a></li>
+      <li><a href="/compare/claude-vs-gemini">claude-vs-gemini →</a></li>
+      <li><a href="/compare/n8n-vs-make">n8n-vs-make →</a></li>
+      <li><a href="/compare/ollama-vs-openai">ollama-vs-openai →</a></li>
+      <li><a href="/compare/cursor-vs-copilot">cursor-vs-copilot →</a></li>
+      <li><a href="/compare/trello-vs-asana">Trello vs Asana →</a></li>
+      <li><a href="/compare/airtable-vs-google-sheets">Airtable vs Google Sheets →</a></li>
+      <li><a href="/compare/slack-vs-discord">Slack vs Discord →</a></li>
+      <li><a href="/compare/notion-vs-evernote">Notion vs Evernote →</a></li>
+      <li><a href="/compare/hubspot-vs-salesforce">HubSpot vs Salesforce →</a></li>
+      <li><a href="/compare/shopify-vs-woocommerce">Shopify vs WooCommerce →</a></li>
+    </ul>
+  </div>
+  <div class="sc">
+    <h3>Top Integrations</h3>
+    <ul>
+      <li><a href="/best-integrations-for/make">Best Make.com integrations →</a></li>
+      <li><a href="/best-integrations-for/zapier">Best Zapier integrations →</a></li>
+      <li><a href="/best-integrations-for/claude">Best Claude integrations →</a></li>
+      <li><a href="/best-integrations-for/gemini">Best Gemini integrations →</a></li>
+      <li><a href="/best-integrations-for/n8n">Best n8n integrations →</a></li>
+      <li><a href="/best-integrations-for/ollama">Best Ollama integrations →</a></li>
+      <li><a href="/best-integrations-for/cursor">Best Cursor integrations →</a></li>
+      <li><a href="/best-integrations-for/trello">Best Trello integrations →</a></li>
+      <li><a href="/best-integrations-for/airtable">Best Airtable integrations →</a></li>
+      <li><a href="/best-integrations-for/slack">Best Slack integrations →</a></li> 
+      <li><a href="/best-integrations-for/notion">Best Notion integrations →</a></li>
+      <li><a href="/best-integrations-for/hubspot">Best HubSpot integrations →</a></li>
+      <li><a href="/best-integrations-for/salesforce">Best Salesforce integrations →</a></li>
+      <li><a href="/best-integrations-for/shopify">Best Shopify integrations →</a></li>
       <li><a href="/best-integrations-for/{{ tool_a | lower | replace(' ', '-') }}">Best integrations for {{ tool_a }} →</a></li>
       <li><a href="/best-integrations-for/{{ tool_b | lower | replace(' ', '-') }}">Best integrations for {{ tool_b }} →</a></li>
-      <li><a href="/compare/make-vs-zapier">Make.com vs Zapier →</a></li>
+
     </ul>
   </div>
   <div class="sc">
@@ -523,6 +554,50 @@ Keep it under 120 words. Use plain text, no markdown.`
     }
     btn.textContent = 'Generate →'; btn.disabled = false;
   }
+
+// Zero-Cost Gemini Live Tool Comparison Fetcher
+  async function fetchLiveComparison() {
+    const outEl = document.getElementById('live-ai-comparison');
+    if (!outEl) return;
+    
+    try {
+      const res = await fetch(`/api/compare-tools?tool_a={{ tool_a | urlencode }}&tool_b={{ tool_b | urlencode }}`);
+      const data = await res.json();
+      if (data.comparison) {
+        outEl.innerHTML = data.comparison;
+      }
+    } catch (e) {
+      console.error("Failed to fetch live comparison:", e);
+      outEl.innerHTML = "<p>Select the integration pathway that aligns best with your team's unique execution goals.</p>";
+    }
+  }
+  
+  // Run automatically when the page loads
+  window.addEventListener('DOMContentLoaded', fetchLiveComparison);
+
+// Dynamic Gemini FAQ Loader
+  async function loadDynamicFAQs() {
+    const toolA = "{{ tool_a }}";
+    const toolB = "{{ tool_b }}";
+    
+    try {
+      const res = await fetch(`/api/faq-answers?tool_a=${encodeURIComponent(toolA)}&tool_b=${encodeURIComponent(toolB)}`);
+      const data = await res.json();
+      
+      if (data.ans1) document.getElementById('faq-ans-1').textContent = data.ans1;
+      if (data.ans2) document.getElementById('faq-ans-2').textContent = data.ans2;
+      if (data.ans3) document.getElementById('faq-ans-3').textContent = data.ans3;
+      if (data.ans4) document.getElementById('faq-ans-4').textContent = data.ans4;
+      if (data.ans5) document.getElementById('faq-ans-5').textContent = data.ans5;
+      if (data.ans6) document.getElementById('faq-ans-6').textContent = data.ans6;
+    } catch (e) {
+      console.error("Failed to fetch dynamic FAQ answers:", e);
+    }
+  }
+
+  // Trigger when page finishes loading
+  window.addEventListener('DOMContentLoaded', loadDynamicFAQs);
+  
 </script>
 </body>
 </html>

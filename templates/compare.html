@@ -20,19 +20,47 @@
         <div class="grid grid-cols-2 gap-8 text-center">
             <div class="bg-white p-8 rounded-xl shadow-sm border">
                 <h2 class="text-2xl font-bold mb-4">{{ tool_a }}</h2>
-                <p class="text-gray-600">Best for Enterprise Teams</p>
+                <p id="tool-a-text" class="text-gray-600">Best for Enterprise Teams</p>
             </div>
             <div class="bg-white p-8 rounded-xl shadow-sm border">
                 <h2 class="text-2xl font-bold mb-4">{{ tool_b }}</h2>
-                <p class="text-gray-600">Best for Small Startups</p>
+                <p id="tool-b-text" class="text-gray-600">Best for Small Startups</p>
             </div>
         </div>
         
         <div class="mt-12 bg-white p-8 rounded-xl border text-center">
             <h3 class="text-xl font-bold mb-4">The Verdict</h3>
-            <p>If you need deep automation, use <strong>{{ tool_a }}</strong>. If you need simplicity, go with <strong>{{ tool_b }}</strong>. Both can be integrated using Make.com.</p>
+            <p id="verdict-text">If you need deep automation, use <strong>{{ tool_a }}</strong>. If you need simplicity, go with <strong>{{ tool_b }}</strong>. Both can be integrated using Make.com.</p>
             <a href="javascript:history.back()" class="inline-block mt-6 text-blue-600 font-bold">Back to Directory</a>
         </div>
     </div>
+
+    <!-- Zero-Cost Dynamic AI Content Overwriter -->
+    <script>
+    document.addEventListener("DOMContentLoaded", async function() {
+        // Grab values cleanly from the route wrapper context
+        const toolA = "{{ slug_a }}";
+        const toolB = "{{ slug_b }}";
+        
+        try {
+            // Fetch structured data packet from your cost-free backend route
+            const res = await fetch(`/api/compare-tools?tool_a=${encodeURIComponent(toolA)}&tool_b=${encodeURIComponent(toolB)}`);
+            const data = await res.json();
+            
+            // Instantly wipe static text and swap with targeted Gemini outputs
+            if (data.tool_a_text) {
+                document.getElementById('tool-a-text').textContent = data.tool_a_text;
+            }
+            if (data.tool_b_text) {
+                document.getElementById('tool-b-text').textContent = data.tool_b_text;
+            }
+            if (data.verdict) {
+                document.getElementById('verdict-text').textContent = data.verdict;
+            }
+        } catch (e) {
+            console.error("AI dynamic comparison injection failed:", e);
+        }
+    });
+    </script>
 </body>
 </html>

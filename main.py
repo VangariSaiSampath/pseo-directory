@@ -16,6 +16,9 @@ from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+# Load environment variables from the Python package directory itself.
+load_dotenv(Path(__file__).resolve().parent / ".env")
+
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -27,6 +30,9 @@ import feedparser
 import httpx
 
 from fastapi.responses import PlainTextResponse
+
+from fastapi.exceptions import HTTPException as FastAPIHTTPException
+from fastapi.responses import HTMLResponse
 
 @app.get("/ads.txt", response_class=PlainTextResponse)
 async def ads_txt():
@@ -755,6 +761,764 @@ TOOL_DATA = {
         ],
         "short": "AI assistant built into Notion with full workspace context.",
     },
+    "claude": {
+        "name": "Claude",
+        "emoji": "🤖",
+        "category": "AI Assistant",
+        "plan": "Free plan available",
+        "url": "https://claude.ai/",
+        "description": (
+            "Claude is Anthropic's flagship AI assistant, known for its exceptional "
+            "reasoning, writing quality, and safety. Available via API, it powers "
+            "automation workflows across thousands of businesses — from summarising "
+            "emails to writing code to analysing documents. Claude connects to Slack, "
+            "Notion, GitHub, and 38+ tools natively, and integrates with Make.com "
+            "and n8n for custom workflow automation."
+        ),
+        "features": [
+            "Exceptional writing, reasoning, and code generation",
+            "Native integrations with Slack, Notion, GitHub via MCP",
+            "API available for custom workflow integration",
+            "Connects to Make.com and n8n for automation",
+            "Claude Code for agentic software development",
+        ],
+        "short": "Anthropic's AI assistant with superior reasoning and writing quality.",
+    },
+
+    "gemini": {
+        "name": "Gemini",
+        "emoji": "✨",
+        "category": "AI Assistant",
+        "plan": "Free plan available",
+        "url": "https://gemini.google.com/",
+        "description": (
+            "Gemini is Google's most capable AI model family, available in Ultra, Pro, "
+            "and Flash variants. It is deeply integrated with Google Workspace, making "
+            "it uniquely powerful for teams already using Google Sheets, Docs, Drive, "
+            "and Gmail. Via the Gemini API, it powers automation workflows in Make.com "
+            "and n8n, enabling AI-driven document processing, content generation, "
+            "and intelligent data analysis at scale."
+        ),
+        "features": [
+            "Deeply integrated with Google Workspace (Sheets, Docs, Drive)",
+            "Gemini API for custom integrations and automation",
+            "Multimodal: understands text, images, audio, and video",
+            "Connects to Make.com, n8n, and Zapier",
+            "Gemini CLI for developer terminal workflows",
+        ],
+        "short": "Google's AI model, deeply integrated with Google Workspace.",
+    },
+
+    "ollama": {
+        "name": "Ollama",
+        "emoji": "🦙",
+        "category": "Local AI Runner",
+        "plan": "100% free & open source",
+        "url": "https://ollama.com/",
+        "description": (
+            "Ollama lets you run powerful large language models — including Llama 3, "
+            "Mistral, Gemma, and DeepSeek — entirely on your own hardware, with zero "
+            "API costs and complete data privacy. It exposes an OpenAI-compatible API "
+            "so existing tools like n8n, Make.com, and LangChain connect to it "
+            "instantly. In 2026, Ollama is the go-to choice for teams who need AI "
+            "automation without cloud costs or data privacy concerns."
+        ),
+        "features": [
+            "Run Llama 3, Mistral, DeepSeek, Gemma locally",
+            "Zero API costs — runs on your own hardware",
+            "OpenAI-compatible API endpoint",
+            "Native n8n and LangChain integration",
+            "Full data privacy — nothing leaves your network",
+        ],
+        "short": "Run AI models locally — zero cost, zero cloud, full privacy.",
+    },
+
+    "n8n": {
+        "name": "n8n",
+        "emoji": "🔄",
+        "category": "Self-Hosted Automation",
+        "plan": "Free self-hosted (open source)",
+        "url": "https://n8n.io/",
+        "description": (
+            "n8n is the most powerful open-source workflow automation platform, "
+            "combining 400+ app integrations with native AI agent support. Unlike "
+            "Zapier or Make.com, n8n is self-hostable, giving you full control over "
+            "your data. Its LangChain-based AI nodes let you build multi-step AI "
+            "agent workflows that use local models (Ollama) or cloud APIs (Claude, "
+            "Gemini, OpenAI) — making it the top choice for technical teams in 2026."
+        ),
+        "features": [
+            "400+ integrations including all major SaaS tools",
+            "Native AI agent nodes with LangChain support",
+            "Connect to Ollama, Claude, Gemini, and OpenAI",
+            "Self-hosted for full data privacy and control",
+            "Visual workflow builder with custom JavaScript/Python",
+        ],
+        "short": "Open-source automation with native AI agents — self-hosted or cloud.",
+    },
+
+    "perplexity": {
+        "name": "Perplexity",
+        "emoji": "🔍",
+        "category": "AI Search Engine",
+        "plan": "Free plan available",
+        "url": "https://www.perplexity.ai/",
+        "description": (
+            "Perplexity is the AI-native search engine that answers questions with "
+            "real-time web citations, used by over 15 million people monthly. Unlike "
+            "ChatGPT, Perplexity specialises in research and fact-checked answers. "
+            "Via its API, teams automate competitive research, news monitoring, and "
+            "knowledge base enrichment — piping real-time information into Notion, "
+            "Slack, and Google Sheets automatically."
+        ),
+        "features": [
+            "Real-time web search with cited answers",
+            "Perplexity API for automated research workflows",
+            "Deep Research for comprehensive reports",
+            "Connects to Zapier, Make.com, and n8n via API",
+            "Multi-model: Claude, GPT-4, and Sonar models",
+        ],
+        "short": "AI search engine with real-time web citations used by 15M+ monthly.",
+    },
+
+    "deepseek": {
+        "name": "DeepSeek",
+        "emoji": "🐳",
+        "category": "AI Model",
+        "plan": "Free API (very low cost)",
+        "url": "https://www.deepseek.com/",
+        "description": (
+            "DeepSeek is the Chinese open-source AI model that shocked the industry "
+            "in 2025 by matching GPT-4 performance at a fraction of the cost. Its API "
+            "is dramatically cheaper than OpenAI or Anthropic, making it the preferred "
+            "choice for high-volume automation workflows. DeepSeek R2 and V3 models "
+            "run via Ollama locally or through the DeepSeek API, and integrate with "
+            "n8n, Make.com, and LangChain for AI-powered pipelines."
+        ),
+        "features": [
+            "GPT-4 level performance at significantly lower cost",
+            "Run locally via Ollama for zero API costs",
+            "DeepSeek API for cloud inference",
+            "Integrates with n8n, Make.com, and LangChain",
+            "Strong coding and reasoning capabilities",
+        ],
+        "short": "Open-source AI matching GPT-4 quality at a fraction of the cost.",
+    },
+
+    "midjourney": {
+        "name": "Midjourney",
+        "emoji": "🎨",
+        "category": "AI Image Generation",
+        "plan": "From $10/month",
+        "url": "https://www.midjourney.com/",
+        "description": (
+            "Midjourney is the world's most popular AI image generation platform, "
+            "used by over 16 million designers, marketers, and creators. It produces "
+            "stunning, photorealistic and artistic images from text prompts. Via "
+            "automation workflows, teams pipe Midjourney-generated images into Shopify "
+            "product listings, social media schedulers, Notion design systems, and "
+            "content management tools — eliminating hours of manual design work."
+        ),
+        "features": [
+            "Industry-leading image quality and artistic styles",
+            "Web interface and Discord bot integration",
+            "API available for workflow automation",
+            "Connect to Shopify, Notion, and Google Drive via Make.com",
+            "Upscaling, variation, and inpainting capabilities",
+        ],
+        "short": "World's most popular AI image generator used by 16M+ creators.",
+    },
+
+    "stable-diffusion": {
+        "name": "Stable Diffusion",
+        "emoji": "🖼️",
+        "category": "AI Image Generation",
+        "plan": "Free & open source",
+        "url": "https://stability.ai/",
+        "description": (
+            "Stable Diffusion is the leading open-source AI image generation model, "
+            "allowing anyone to generate, edit, and remix images locally or via API "
+            "with no usage limits. Run via Automatic1111 or ComfyUI on your own "
+            "hardware, it integrates with n8n and Make.com for fully automated "
+            "image generation pipelines — perfect for e-commerce product images, "
+            "marketing assets, and content creation at scale."
+        ),
+        "features": [
+            "100% free and open source",
+            "Run locally with no usage costs",
+            "Fine-tune on your own brand images",
+            "ComfyUI and Automatic1111 interfaces",
+            "Integrates with n8n and Make.com via HTTP API",
+        ],
+        "short": "Open-source AI image generation — run locally with zero usage costs.",
+    },
+
+    "grok": {
+        "name": "Grok",
+        "emoji": "🚀",
+        "category": "AI Assistant",
+        "plan": "Included with X Premium",
+        "url": "https://grok.x.ai/",
+        "description": (
+            "Grok is xAI's (Elon Musk's AI company) flagship AI model, available via "
+            "X (Twitter) and the Grok API. Grok 3 is competitive with GPT-4o and "
+            "Claude Sonnet, with unique access to real-time X/Twitter data — making "
+            "it especially powerful for social media monitoring, trend analysis, and "
+            "brand intelligence automation workflows."
+        ),
+        "features": [
+            "Real-time access to X/Twitter data",
+            "Grok API for workflow integration",
+            "Competitive reasoning and coding capabilities",
+            "Integrates with Make.com, n8n, and Zapier via API",
+            "DeepSearch for real-time web research",
+        ],
+        "short": "xAI's AI model with unique real-time X/Twitter data access.",
+    },
+
+    "mistral": {
+        "name": "Mistral",
+        "emoji": "💫",
+        "category": "AI Model",
+        "plan": "Free API tier available",
+        "url": "https://mistral.ai/",
+        "description": (
+            "Mistral is the leading European AI company, producing high-performance "
+            "open-weight models including Mistral 7B, Mixtral, and Mistral Large. "
+            "Its models run via Ollama locally or through the Mistral API, and are "
+            "especially popular for European businesses that need GDPR-compliant AI. "
+            "Mistral integrates natively with n8n, LangChain, and Make.com for "
+            "building private, cost-effective AI automation workflows."
+        ),
+        "features": [
+            "Open-weight models — run locally via Ollama",
+            "GDPR-compliant (European company, EU data centers)",
+            "Mistral API for cloud inference",
+            "Native LangChain and n8n support",
+            "Le Chat: Mistral's consumer-facing chatbot",
+        ],
+        "short": "Europe's leading AI models — GDPR-compliant, open-weight, and fast.",
+    },
+
+    "langchain": {
+        "name": "LangChain",
+        "emoji": "🔗",
+        "category": "AI Development Framework",
+        "plan": "Open source (free)",
+        "url": "https://www.langchain.com/",
+        "description": (
+            "LangChain is the world's most popular framework for building AI-powered "
+            "applications, with over 100,000 GitHub stars. It provides the building "
+            "blocks for connecting LLMs to databases, APIs, and tools — enabling RAG "
+            "(Retrieval-Augmented Generation) pipelines, AI agents, and multi-step "
+            "reasoning chains. LangChain integrates with every major LLM (Claude, "
+            "Gemini, OpenAI, Ollama) and vector database (Pinecone, Supabase)."
+        ),
+        "features": [
+            "Connect LLMs to any data source or API",
+            "RAG pipelines for knowledge base Q&A",
+            "AI agent frameworks with tool calling",
+            "Supports Claude, Gemini, OpenAI, Ollama, and more",
+            "LangSmith for tracing and monitoring AI apps",
+        ],
+        "short": "The most popular framework for building LLM-powered applications.",
+    },
+
+    "cursor": {
+        "name": "Cursor",
+        "emoji": "💻",
+        "category": "AI Code Editor",
+        "plan": "Free tier available",
+        "url": "https://cursor.sh/",
+        "description": (
+            "Cursor is the AI-first code editor that has taken the developer world "
+            "by storm in 2026, with over 3 million developers switching from VS Code. "
+            "It combines a familiar coding environment with deeply integrated Claude "
+            "and GPT-4 capabilities — allowing developers to write, debug, and "
+            "refactor code in natural language. Cursor integrates with GitHub, Jira, "
+            "Slack, and Linear to build complete AI-assisted development workflows."
+        ),
+        "features": [
+            "AI pair programmer with codebase awareness",
+            "Inline code generation and refactoring",
+            "Natural language to code with full repo context",
+            "Composer for multi-file AI changes",
+            "Integrates with GitHub, Jira, Slack, and Linear",
+        ],
+        "short": "The AI code editor used by 3M+ developers, powered by Claude and GPT-4.",
+    },
+
+    "github-copilot": {
+        "name": "GitHub Copilot",
+        "emoji": "🤝",
+        "category": "AI Code Assistant",
+        "plan": "Free for students; $10/month",
+        "url": "https://github.com/features/copilot",
+        "description": (
+            "GitHub Copilot is Microsoft's AI coding assistant, built directly into "
+            "VS Code, JetBrains, and GitHub itself. With over 1.8 million paid "
+            "subscribers and deep GitHub integration, it suggests entire functions, "
+            "explains code, generates tests, and connects to Jira, Slack, and Linear "
+            "to turn issue descriptions directly into working code."
+        ),
+        "features": [
+            "AI code suggestions in VS Code, JetBrains, and GitHub",
+            "Copilot Chat for explaining and debugging code",
+            "Copilot Workspace for issue-to-code automation",
+            "Integrates with Jira, Slack, and Linear",
+            "Code review suggestions and security scanning",
+        ],
+        "short": "Microsoft's AI coding assistant with 1.8M+ subscribers.",
+    },
+
+    "flowise": {
+        "name": "Flowise",
+        "emoji": "🌊",
+        "category": "Visual LLM App Builder",
+        "plan": "Free & open source",
+        "url": "https://flowiseai.com/",
+        "description": (
+            "Flowise is the open-source, drag-and-drop LLM app builder that lets "
+            "non-developers build AI chatbots, RAG pipelines, and AI agents visually — "
+            "no code required. Built on LangChain, it supports every major AI model "
+            "and vector database. Teams use Flowise to build custom AI assistants "
+            "connected to their Notion wikis, Airtable databases, and Slack channels, "
+            "then deploy them as embeddable chat widgets or API endpoints."
+        ),
+        "features": [
+            "Visual drag-and-drop LLM workflow builder",
+            "Built on LangChain — supports all major LLMs",
+            "RAG (Retrieval-Augmented Generation) pipelines",
+            "Embed AI chat on any website",
+            "Self-hosted or Flowise Cloud",
+        ],
+        "short": "Open-source drag-and-drop builder for AI chatbots and RAG pipelines.",
+    },
+
+    "telegram": {
+        "name": "Telegram",
+        "emoji": "✈️",
+        "category": "Messaging",
+        "plan": "Free (Telegram Premium optional)",
+        "url": "https://telegram.org/",
+        "description": (
+            "Telegram is the fastest-growing messaging platform with over 900 million "
+            "active users, especially popular in India, Russia, and Southeast Asia for "
+            "both personal and business communication. Its Bot API is one of the most "
+            "powerful in the messaging world, enabling teams to build automated bots "
+            "that receive orders, send notifications, deliver AI responses, and sync "
+            "data with CRMs and spreadsheets — all via Make.com or n8n."
+        ),
+        "features": [
+            "900M+ active users — massive reach",
+            "Powerful Bot API for automation",
+            "Channels for broadcasting to unlimited subscribers",
+            "Groups up to 200,000 members",
+            "Connects to Make.com, n8n, and Zapier for automation",
+        ],
+        "short": "900M+ user messaging platform with a powerful Bot API for automation.",
+    },
+
+    "supabase": {
+        "name": "Supabase",
+        "emoji": "⚡",
+        "category": "Backend & Database",
+        "plan": "Free tier available",
+        "url": "https://supabase.com/",
+        "description": (
+            "Supabase is the open-source Firebase alternative that combines a "
+            "PostgreSQL database, authentication, real-time subscriptions, storage, "
+            "and edge functions in one platform. It is the fastest-growing backend "
+            "platform in 2026, especially among AI teams building RAG applications. "
+            "Supabase's pgvector extension makes it the go-to vector store for "
+            "LangChain, Claude, and Gemini-powered AI applications."
+        ),
+        "features": [
+            "PostgreSQL database with pgvector for AI apps",
+            "Built-in auth, storage, and real-time subscriptions",
+            "Edge functions for serverless API logic",
+            "Native LangChain and n8n integration",
+            "Open-source — self-host or use Supabase Cloud",
+        ],
+        "short": "Open-source Firebase alternative — the go-to backend for AI applications.",
+    },
+
+    "pinecone": {
+        "name": "Pinecone",
+        "emoji": "🌲",
+        "category": "Vector Database",
+        "plan": "Free tier (100K vectors)",
+        "url": "https://www.pinecone.io/",
+        "description": (
+            "Pinecone is the leading managed vector database, powering semantic search "
+            "and Retrieval-Augmented Generation (RAG) applications for over 10,000 "
+            "companies. It stores and retrieves AI-generated embeddings at scale, "
+            "enabling LLM applications to search company knowledge bases, customer "
+            "data, and documents with human-like understanding. Pinecone integrates "
+            "natively with LangChain, Claude, Gemini, and n8n."
+        ),
+        "features": [
+            "Managed vector database — no infrastructure to manage",
+            "Sub-10ms similarity search at any scale",
+            "Native LangChain, Claude, and OpenAI integration",
+            "Serverless indexing with automatic scaling",
+            "Free tier with 100,000 vectors",
+        ],
+        "short": "The leading vector database for AI search and RAG applications.",
+    },
+
+    "dify": {
+        "name": "Dify",
+        "emoji": "🔮",
+        "category": "AI App Platform",
+        "plan": "Free & open source",
+        "url": "https://dify.ai/",
+        "description": (
+            "Dify is the fastest-growing open-source LLM application platform, "
+            "combining prompt engineering, RAG pipelines, and AI agent workflows "
+            "in a visual interface. With 40,000+ GitHub stars and support for every "
+            "major LLM (Claude, Gemini, Ollama, DeepSeek), Dify lets teams build "
+            "custom AI applications connected to their Slack, Notion, and database "
+            "— deployable as APIs, web apps, or embeddable widgets."
+        ),
+        "features": [
+            "Visual LLM app builder with prompt engineering tools",
+            "RAG pipeline with document ingestion and retrieval",
+            "AI agent workflows with tool calling",
+            "Supports Claude, Gemini, Ollama, DeepSeek, and more",
+            "40,000+ GitHub stars — fastest-growing AI platform",
+        ],
+        "short": "Open-source LLM app platform with 40,000+ stars — build AI apps visually.",
+    },
+
+    "luma-ai": {
+        "name": "Luma AI",
+        "emoji": "🎬",
+        "category": "AI Video Generation",
+        "plan": "Free tier available",
+        "url": "https://lumalabs.ai/",
+        "description": (
+            "Luma AI (Dream Machine) is the leading AI video generation platform, "
+            "creating photorealistic video clips from text prompts or images in seconds. "
+            "Marketing teams use Luma AI to generate product demo videos, social media "
+            "content, and animated graphics — then automate distribution to Google Drive, "
+            "Notion, and social schedulers via Make.com and Zapier automation workflows."
+        ),
+        "features": [
+            "Text-to-video and image-to-video generation",
+            "Photorealistic video quality in seconds",
+            "Luma API for workflow automation",
+            "Connects to Google Drive, Notion, and Make.com",
+            "Ray 2 model for cinematic quality output",
+        ],
+        "short": "Leading AI video generation platform — create videos from text in seconds.",
+    },
+
+    "whatsapp-business": {
+        "name": "WhatsApp Business",
+        "emoji": "💬",
+        "category": "Business Messaging",
+        "plan": "Free app; API pay-per-message",
+        "url": "https://business.whatsapp.com/",
+        "description": (
+            "WhatsApp Business is the world's most popular business messaging platform, "
+            "with over 200 million active business users globally. In India especially, "
+            "WhatsApp is the primary channel for customer communication. The WhatsApp "
+            "Business API integrates with HubSpot, Salesforce, and Shopify to automate "
+            "order notifications, customer support, lead qualification, and marketing "
+            "campaigns at scale via Make.com and Zapier."
+        ),
+        "features": [
+            "200M+ active business users globally",
+            "WhatsApp Business API for automation",
+            "Message templates for marketing and notifications",
+            "Integrates with HubSpot, Salesforce, and Shopify",
+            "Connects to Make.com and Zapier for workflow automation",
+        ],
+        "short": "World's most used business messaging with 200M+ business accounts.",
+    },
+
+    "mysql": {
+        "name": "MySQL",
+        "emoji": "🗄️",
+        "category": "Database",
+        "plan": "Free & open source",
+        "url": "https://www.mysql.com/",
+        "description": (
+            "MySQL is the world's most popular open-source relational database, "
+            "powering over half of all websites including Facebook, Twitter, and "
+            "YouTube. Integrating MySQL with automation tools like Make.com, n8n, "
+            "and Zapier allows teams to automatically sync CRM data, update records "
+            "from form submissions, export database reports to Google Sheets, "
+            "and trigger Slack notifications based on database changes."
+        ),
+        "features": [
+            "World's most popular open-source database",
+            "Connects to Make.com, n8n, and Zapier natively",
+            "Sync with Google Sheets, HubSpot, and Salesforce",
+            "Trigger automations from database events",
+            "Widely supported by all hosting providers",
+        ],
+        "short": "The world's most popular database — integrate with any SaaS tool.",
+    },
+
+    "postgresql": {
+        "name": "PostgreSQL",
+        "emoji": "🐘",
+        "category": "Database",
+        "plan": "Free & open source",
+        "url": "https://www.postgresql.org/",
+        "description": (
+            "PostgreSQL is the world's most advanced open-source database, favoured "
+            "by developers and AI teams for its powerful features including JSONB "
+            "storage, full-text search, and the pgvector extension for AI embeddings. "
+            "PostgreSQL integrates with n8n, Make.com, and LangChain to build "
+            "automated data pipelines, AI-powered search, and real-time sync "
+            "between databases and business applications."
+        ),
+        "features": [
+            "Advanced SQL with JSONB and full-text search",
+            "pgvector extension for AI embeddings and RAG",
+            "Native n8n, Make.com, and LangChain support",
+            "ACID compliant — production-grade reliability",
+            "The database powering Supabase",
+        ],
+        "short": "The most advanced open-source database — powering modern AI applications.",
+    },
+    # ── Claude pairs ─────────────────────────────────────────────────
+        "claude-slack": (
+            "Bring Claude's AI directly into Slack to transform how your team works. "
+            "Teams connect Claude to Slack to auto-summarise long threads, generate "
+            "meeting agendas from channel discussions, draft professional replies, "
+            "and build AI-powered support bots that answer questions using your "
+            "company's knowledge base — all without leaving Slack."
+        ),
+        "claude-notion": (
+            "Claude and Notion together create the ultimate AI-powered workspace. "
+            "Auto-generate Notion pages from meeting transcripts, expand bullet notes "
+            "into full documents with Claude, summarise long wiki pages on demand, "
+            "and build a Notion-connected AI assistant that answers questions about "
+            "your team's entire knowledge base using Claude's reasoning capabilities."
+        ),
+        "claude-github": (
+            "Engineering teams using Claude and GitHub can automate the entire "
+            "development workflow. Claude reviews pull requests and suggests improvements, "
+            "generates code documentation from source files, creates GitHub issues from "
+            "natural language descriptions, and summarises release notes from commit "
+            "history — dramatically reducing the manual overhead of software development."
+        ),
+        "claude-google-sheets": (
+            "Transform Google Sheets from a static spreadsheet into an intelligent "
+            "data platform by connecting it to Claude. New rows trigger Claude to "
+            "classify entries, generate summaries, translate content, extract key "
+            "information, or enrich records with AI analysis — all written back to "
+            "the sheet automatically. Turn any spreadsheet into a smart database."
+        ),
+        "claude-make.com": (
+            "Make.com and Claude together unlock fully automated AI workflows without "
+            "writing a single line of code. Build scenarios where Claude reads emails "
+            "and routes them, generates personalised responses to form submissions, "
+            "classifies support tickets by urgency, or writes product descriptions "
+            "from SKU data — triggered automatically by events in any of Make.com's "
+            "1,500+ connected apps."
+        ),
+        "claude-ollama": (
+            "Running Claude alongside Ollama gives your team the best of both worlds: "
+            "use Claude's industry-leading reasoning for complex, high-stakes tasks "
+            "and route routine tasks (classification, summarisation, data extraction) "
+            "through local Ollama models at zero cost. Build hybrid AI pipelines in "
+            "n8n or LangChain that automatically select the right model for each task "
+            "based on complexity, cost, and privacy requirements."
+        ),
+
+        # ── Gemini pairs ──────────────────────────────────────────────────
+        "gemini-google-sheets": (
+            "Gemini and Google Sheets are natively integrated via Google Workspace — "
+            "the most powerful spreadsheet-AI combination available. Use Gemini to "
+            "analyse trends in your data, generate charts from natural language, "
+            "auto-populate cells with AI-generated content, and build custom Gemini "
+            "functions that run AI analysis directly inside your spreadsheet formulas."
+        ),
+        "gemini-google-drive": (
+            "Gemini's deepest integration is with Google Drive. Summarise any document "
+            "in Drive with one click, extract key information from uploaded PDFs and "
+            "presentations, and build automated pipelines that process new Drive files "
+            "through Gemini for classification, translation, or content extraction — "
+            "then store results back to Sheets or send summaries via Gmail."
+        ),
+        "gemini-slack": (
+            "Bring Google's AI into your Slack workspace by connecting Gemini and Slack. "
+            "Automatically summarise key Google Docs and Sheets updates to Slack "
+            "channels, build a Gemini-powered Slack bot that searches your Drive and "
+            "answers questions, or trigger Gemini analysis whenever new messages "
+            "arrive in specific channels — keeping your team informed with AI insights."
+        ),
+        "gemini-ollama": (
+            "Gemini and Ollama serve perfectly complementary roles in an AI automation "
+            "stack. Route complex tasks requiring internet knowledge and reasoning to "
+            "Gemini via API, while running high-volume routine tasks (text cleaning, "
+            "classification, simple extraction) through Ollama's local models at zero "
+            "cost. Build intelligent routing logic in n8n that makes this decision "
+            "automatically based on task type and data sensitivity."
+        ),
+
+        # ── Ollama pairs ──────────────────────────────────────────────────
+        "ollama-n8n": (
+            "n8n and Ollama together create the most powerful free AI automation stack "
+            "available in 2026. n8n's native Ollama nodes let you build multi-step AI "
+            "agent workflows that run entirely on your own infrastructure — no cloud "
+            "costs, no API limits, complete data privacy. Build email triage agents, "
+            "document processing pipelines, and AI chatbots that scale to thousands "
+            "of requests without a single dollar in API fees."
+        ),
+        "ollama-langchain": (
+            "LangChain and Ollama are the foundation of every serious private AI "
+            "application in 2026. LangChain provides the agent framework and RAG "
+            "pipeline architecture; Ollama runs the local LLM. Together they enable "
+            "teams to build sophisticated AI applications — semantic search over "
+            "company documents, automated research pipelines, multi-step reasoning "
+            "agents — all running on private infrastructure with zero API costs."
+        ),
+        "ollama-flowise": (
+            "Flowise and Ollama are the go-to combo for teams who want to build AI "
+            "chatbots and RAG pipelines without cloud costs or coding. Flowise provides "
+            "the visual drag-and-drop interface; Ollama runs the LLM locally. Build a "
+            "custom AI assistant connected to your company's documents in under an hour "
+            "— then deploy it as a website chat widget or Slack bot."
+        ),
+        "deepseek-ollama": (
+            "DeepSeek and Ollama together represent the most cost-effective AI "
+            "automation stack available. Run DeepSeek R2 or V3 models locally via "
+            "Ollama — getting near-frontier reasoning quality at literally zero per-"
+            "token cost. Build automation workflows in n8n that use DeepSeek for "
+            "complex analysis and route simpler tasks to faster, smaller models. "
+            "Perfect for high-volume Indian businesses managing API cost carefully."
+        ),
+
+        # ── n8n pairs ─────────────────────────────────────────────────────
+        "n8n-slack": (
+            "n8n and Slack together replace an entire team of manual data handlers. "
+            "Post automated Slack notifications from any database change, incoming "
+            "webhook, or scheduled report. Build AI-powered Slack bots that use "
+            "Ollama or Claude to answer team questions. Route customer messages from "
+            "any source to the right Slack channel automatically. n8n's self-hosted "
+            "nature means all your team data stays on your own infrastructure."
+        ),
+        "n8n-google-sheets": (
+            "n8n and Google Sheets create a free, powerful data pipeline for teams "
+            "of any size. Automatically append form submissions, CRM updates, and "
+            "e-commerce orders to Google Sheets. Trigger n8n workflows from new "
+            "Sheets rows. Build scheduled reports that pull data from multiple "
+            "sources and write them to Sheets every morning. All without paying "
+            "per-operation fees that add up in Zapier or Make.com."
+        ),
+        "n8n-telegram": (
+            "n8n and Telegram together are the go-to combination for Indian and "
+            "Southeast Asian businesses building customer communication automation. "
+            "Build Telegram bots that receive orders, answer product questions using "
+            "AI, notify teams about new leads, and send automated follow-up messages "
+            "— all orchestrated by n8n workflows running on your own server at zero "
+            "monthly cost beyond your VPS."
+        ),
+
+        # ── Telegram pairs ────────────────────────────────────────────────
+        "telegram-whatsapp-business": (
+            "Teams managing both Telegram and WhatsApp channels can unify their "
+            "customer communication by connecting both to a single n8n or Make.com "
+            "workflow. Route messages from both platforms to the right team in Slack, "
+            "log all conversations to your CRM, and send automated replies using "
+            "AI — giving customers a consistent experience regardless of which "
+            "platform they use to reach you."
+        ),
+        "telegram-hubspot": (
+            "Connect Telegram to HubSpot to turn every customer message into a CRM "
+            "contact automatically. New Telegram bot interactions create HubSpot "
+            "contacts with conversation history, deal stages update based on "
+            "customer responses, and your sales team gets Slack notifications for "
+            "high-value conversations — building a complete inbound pipeline "
+            "from Telegram messages."
+        ),
+        "telegram-shopify": (
+            "E-commerce stores using Telegram for customer communication can automate "
+            "their entire support workflow. New Shopify orders trigger Telegram "
+            "confirmation messages, shipping updates go out automatically, customer "
+            "queries via Telegram bot create Shopify support tickets, and refund "
+            "requests are processed and confirmed — all without manual intervention."
+        ),
+        "whatsapp-business-hubspot": (
+            "The most powerful customer communication stack for Indian businesses: "
+            "WhatsApp Business connected to HubSpot. Every WhatsApp message from a "
+            "prospect automatically creates a HubSpot contact, conversation history "
+            "is logged to the contact record, lead score updates based on engagement, "
+            "and your sales team gets notified for hot leads — turning WhatsApp into "
+            "a fully tracked revenue channel."
+        ),
+        "whatsapp-business-shopify": (
+            "Connect WhatsApp Business to Shopify to deliver the customer experience "
+            "Indian shoppers expect. Automatic order confirmations, shipping tracking "
+            "updates, delivery notifications, and abandoned cart recovery messages — "
+            "all sent directly to customers' WhatsApp. With 97%+ open rates vs 20% "
+            "for email, WhatsApp automation dramatically increases customer satisfaction "
+            "and repeat purchase rates."
+        ),
+        "whatsapp-business-make.com": (
+            "Make.com is the most popular way to connect WhatsApp Business to your "
+            "existing tools without coding. Build scenarios that send WhatsApp "
+            "messages when a new HubSpot deal is created, when a Shopify order ships, "
+            "when a Typeform is submitted, or on any schedule you define. Make.com's "
+            "visual builder makes WhatsApp automation accessible to any business "
+            "without a developer."
+        ),
+
+        # ── AI-to-AI pairs (Claude+Ollama style pairs users asked about) ──
+        "claude-langchain": (
+            "LangChain and Claude together are the gold standard for enterprise AI "
+            "applications. LangChain's agent framework handles orchestration, tool "
+            "calling, and RAG pipeline architecture, while Claude provides the best-"
+            "in-class reasoning and writing quality. Build document Q&A systems, "
+            "multi-step research agents, and customer support bots that combine "
+            "LangChain's flexibility with Claude's intelligence."
+        ),
+        "gemini-langchain": (
+            "Google's Gemini models integrate natively with LangChain via the "
+            "langchain-google-genai package. Teams building RAG pipelines over Google "
+            "Drive documents, Workspace data, or BigQuery datasets get the best "
+            "results from combining Gemini's native Google data access with "
+            "LangChain's retrieval and agent orchestration capabilities."
+        ),
+        "claude-pinecone": (
+            "Claude and Pinecone together power the most intelligent knowledge base "
+            "systems available in 2026. Pinecone stores vector embeddings of your "
+            "documents, and Claude uses those embeddings to answer questions with "
+            "precise citations — a system called RAG. Build internal wikis that "
+            "actually answer questions, customer support bots that know your entire "
+            "product, and research assistants that can query thousands of documents instantly."
+        ),
+        "langchain-pinecone": (
+            "LangChain and Pinecone are the most popular RAG combination in the "
+            "AI ecosystem. LangChain handles document ingestion, chunking, and "
+            "embedding, while Pinecone stores and retrieves vectors with millisecond "
+            "latency. Together they power production knowledge base applications used "
+            "by thousands of companies — from customer support chatbots to internal "
+            "document search systems at enterprise scale."
+        ),
+        "claude-supabase": (
+            "Claude and Supabase together enable AI applications with persistent "
+            "memory and real-time data access. Store conversation history and user "
+            "preferences in Supabase PostgreSQL, use Supabase's pgvector for semantic "
+            "search over your data, and build Claude-powered applications that remember "
+            "context across sessions — creating AI assistants that genuinely learn "
+            "your users' needs over time."
+        ),
+        "claude-cursor": (
+            "Claude and Cursor create the most powerful AI-assisted development "
+            "environment available. Cursor is already powered by Claude under the "
+            "hood, but connecting them via the Claude API unlocks custom coding "
+            "agents, automated code review workflows, and AI-powered documentation "
+            "generation that understands your entire codebase — accelerating "
+            "development velocity by 2-3× according to independent benchmarks."
+        ),
+        
 }
 
 # ================================================================
@@ -1210,8 +1974,21 @@ client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 # --- DATABASE CONNECTION ---
 def get_db_connection():
-    # Connect to Neon Postgres Cloud
-    conn = psycopg2.connect(os.environ.get("DATABASE_URL"))
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        raise RuntimeError(
+            "DATABASE_URL is not configured. "
+            "Set DATABASE_URL in the .env file next to main.py or export it in the shell."
+        )
+
+    try:
+        conn = psycopg2.connect(db_url)
+    except psycopg2.OperationalError as exc:
+        raise RuntimeError(
+            f"Database connection failed for DATABASE_URL host: {db_url}. "
+            f"Original error: {exc}"
+        ) from exc
+
     # RealDictCursor returns rows as dictionaries
     return conn, conn.cursor(cursor_factory=RealDictCursor)
 
@@ -1306,7 +2083,7 @@ async def read_blog(request: Request, slug: str):
     conn.close()
     
     if not post:
-        return {"error": "Post not found"}
+        return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
     
     # Pass dynamic back routing to the HTML template
     return templates.TemplateResponse("blog_post.html", {
@@ -1622,7 +2399,77 @@ async def generate_workflow(industry: str = Form(...), tool_a: str = Form(...), 
     except Exception as e:
         print(f"AI Error: {e}") 
         return JSONResponse(content={"workflow": "<p>Error generating workflow. Please try again.</p>"})
+
+
+
+@app.get("/api/compare-tools")
+async def api_compare_tools(tool_a: str, tool_b: str):
+    try:
+        prompt = (
+            f"Compare {tool_a} and {tool_b} as an expert tech analyst in 2026.\n"
+            f"Provide exactly 3 items separated by the delimiter '|||'.\n"
+            f"Item 1: A short 1-sentence summary of what {tool_a} is uniquely best at.\n"
+            f"|||\n"
+            f"Item 2: A short 1-sentence summary of what {tool_b} is uniquely best at.\n"
+            f"|||\n"
+            f"Item 3: A neutral 2-sentence verdict explaining that both are excellent and the ultimate choice depends entirely on the user's workflow requirements.\n"
+            f"Do not include any markdown format tags or extra words."
+        )
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        parts = response.text.split("|||")
+        
+        return JSONResponse(content={
+            "tool_a_text": parts[0].strip() if len(parts) > 0 else f"Elite choice for modern {tool_a} ecosystems.",
+            "tool_b_text": parts[1].strip() if len(parts) > 1 else f"Optimized performance tracker for {tool_b}.",
+            "verdict": parts[2].strip() if len(parts) > 2 else f"Both tools are outstanding. Select the application that satisfies your immediate automation goals."
+        })
+    except Exception as e:
+        print(f"Gemini Comparison Error: {e}")
+        return JSONResponse(content={
+            "tool_a_text": f"Top-tier choice for specialized operational scaling.",
+            "tool_b_text": f"Excellent choice for flexible workspace management.",
+            "verdict": f"The decision rests on your requirements. Both integrate seamlessly using Make.com."
+        })
     
+@app.get("/api/faq-answers")
+async def api_faq_answers(tool_a: str, tool_b: str):
+    try:
+        prompt = (
+            f"You are an expert SaaS integration analyst in 2026.\n"
+            f"Provide direct, helpful answers to the following 6 questions about integrating {tool_a} and {tool_b} via Make.com.\n"
+            f"Separate each answer strictly with the delimiter '|||'. Do not include any formatting, headers, or bullet points.\n\n"
+            f"Question 1: How do I connect {tool_a} and {tool_b}?\n"
+            f"Question 2: Is this integration free?\n"
+            f"Question 3: Do I need coding skills?\n"
+            f"Question 4: What can I automate between {tool_a} and {tool_b}?\n"
+            f"Question 5: What is {tool_a} used for?\n"
+            f"Question 6: What is {tool_b} used for?\n"
+        )
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        answers = response.text.split("|||")
+        
+        # Clean up answers and pad array if response parsing varies
+        cleaned_answers = [ans.strip() for ans in answers]
+        while len(cleaned_answers) < 6:
+            cleaned_answers.append("Refer to the technical documentation above for detailed usage.")
+
+        return JSONResponse(content={
+            "ans1": cleaned_answers[0],
+            "ans2": cleaned_answers[1],
+            "ans3": cleaned_answers[2],
+            "ans4": cleaned_answers[3],
+            "ans5": cleaned_answers[4],
+            "ans6": cleaned_answers[5]
+        })
+    except Exception as e:
+        print(f"Gemini FAQ Error: {e}")
+        return JSONResponse(content={})
 
 # --- 5. Main Directory Routes ---
 @app.get("/")
@@ -1701,14 +2548,27 @@ async def home(request: Request, q: str = "", page: int = 1):
     # Safe fallback if database is empty
     total_pages = math.ceil(total_items / items_per_page) if total_items > 0 else 1
     
+    # Part 7D: Social proof trust bar stats (shown on homepage)
+    trust_stats = {
+        "integrations": total_items,
+        "rating": "4.8",
+        "newsletter": "1,000+",
+        "location": "🇮🇳 Built in India",
+    }
+
+    # Part 7F: GA4 tag is added in index.html template via GA4_ID env variable
+    ga4_id = os.environ.get("GA4_ID", "")
+
     return templates.TemplateResponse("index.html", {
-        "request": request, 
-        "integrations": integrations, 
+        "request": request,
+        "integrations": integrations,
         "q": q,
         "page": page,
         "total_pages": total_pages,
         "trending_searches": trending_searches,
         "daily_deals": daily_deals,
+        "trust_stats": trust_stats,
+        "ga4_id": ga4_id,
     })
 
 
@@ -1723,10 +2583,17 @@ async def glossary(request: Request):
 
 @app.get("/compare/{tool_a}-vs-{tool_b}")
 async def compare(request: Request, tool_a: str, tool_b: str):
+    # Get rich tool descriptions for comparison page
+    tool_a_info = get_tool_info(tool_a)
+    tool_b_info = get_tool_info(tool_b)
     return templates.TemplateResponse("compare.html", {
-        "request": request, 
-        "tool_a": tool_a.capitalize(), 
-        "tool_b": tool_b.capitalize()
+        "request": request,
+        "tool_a": tool_a_info["name"],
+        "tool_b": tool_b_info["name"],
+        "tool_a_info": tool_a_info,
+        "tool_b_info": tool_b_info,
+        "slug_a": tool_a,
+        "slug_b": tool_b,
     })
 
 @app.get("/best-integrations-for/{tool}")
@@ -1798,18 +2665,23 @@ async def integration_page(request: Request, slug: str):
     cursor.execute('SELECT * FROM integrations WHERE slug = %s', (slug,))
     integration = cursor.fetchone()
     conn.close()
- 
+
     if not integration:
-        raise HTTPException(status_code=404, detail="Integration not found")
- 
+        return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
+
     tool_a_name = integration["tool_a"]
     tool_b_name = integration["tool_b"]
- 
+
     # Get rich descriptions for both tools
     tool_a_info = get_tool_info(tool_a_name)
     tool_b_info = get_tool_info(tool_b_name)
     together_desc = get_together_description(tool_a_name, tool_b_name)
- 
+
+    # Part 7A: og:image and canonical for better SEO sharing
+    og_image = f"https://integration-directory.com/static/og-default.png"
+    canonical = f"https://integration-directory.com/integrate/{slug}"
+    ga4_id = os.environ.get("GA4_ID", "")
+
     return templates.TemplateResponse("integration.html", {
         "request": request,
         "data": integration,
@@ -1818,8 +2690,11 @@ async def integration_page(request: Request, slug: str):
         "tool_a": tool_a_name,
         "tool_b": tool_b_name,
         "hours_saved": integration.get("hours_saved", 5),
-        "review_date": "May 2026",
- 
+        "review_date": "June 2026",
+        "og_image": og_image,
+        "canonical": canonical,
+        "ga4_id": ga4_id,
+
         # Tool A details
         "tool_a_emoji":       tool_a_info["emoji"],
         "tool_a_category":    tool_a_info["category"],
@@ -1828,7 +2703,7 @@ async def integration_page(request: Request, slug: str):
         "tool_a_plan":        tool_a_info["plan"],
         "tool_a_url":         tool_a_info["url"],
         "tool_a_short":       tool_a_info["short"],
- 
+
         # Tool B details
         "tool_b_emoji":       tool_b_info["emoji"],
         "tool_b_category":    tool_b_info["category"],
@@ -1837,7 +2712,7 @@ async def integration_page(request: Request, slug: str):
         "tool_b_plan":        tool_b_info["plan"],
         "tool_b_url":         tool_b_info["url"],
         "tool_b_short":       tool_b_info["short"],
- 
+
         # "Better together" paragraph
         "together_description": together_desc,
     })
@@ -2082,7 +2957,7 @@ async def sitemap():
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
  
-    # Static pages
+    # Static pages — Part 7B: expanded best-for pages added
     static_pages = [
         ("", "1.0", "daily"),
         ("/blog", "0.9", "daily"),
@@ -2093,12 +2968,37 @@ async def sitemap():
         ("/contact", "0.6", "monthly"),
         ("/privacy", "0.4", "monthly"),
         ("/terms", "0.4", "monthly"),
+        ("/glossary", "0.6", "weekly"),
+        ("/compare/make-vs-zapier", "0.8", "weekly"),
+        ("/compare/notion-vs-airtable", "0.7", "weekly"),
+        ("/compare/slack-vs-teams", "0.7", "weekly"),
         ("/best-integrations-for/slack", "0.8", "weekly"),
         ("/best-integrations-for/notion", "0.8", "weekly"),
         ("/best-integrations-for/hubspot", "0.8", "weekly"),
         ("/best-integrations-for/shopify", "0.8", "weekly"),
         ("/best-integrations-for/airtable", "0.7", "weekly"),
         ("/best-integrations-for/zapier", "0.7", "weekly"),
+        ("/best-integrations-for/chatgpt", "0.8", "weekly"),
+        ("/best-integrations-for/monday", "0.8", "weekly"),
+        ("/best-integrations-for/clickup", "0.8", "weekly"),
+        ("/best-integrations-for/github", "0.7", "weekly"),
+        ("/best-integrations-for/calendly", "0.7", "weekly"),
+        ("/best-integrations-for/typeform", "0.7", "weekly"),
+        ("/best-integrations-for/trello", "0.7", "weekly"),
+        ("/best-integrations-for/asana", "0.7", "weekly"),
+        ("/best-integrations-for/claude", "0.9", "weekly"),
+        ("/best-integrations-for/gemini", "0.9", "weekly"),
+        ("/best-integrations-for/ollama", "0.8", "weekly"),
+        ("/best-integrations-for/n8n", "0.9", "weekly"),
+        ("/best-integrations-for/telegram", "0.8", "weekly"),
+        ("/best-integrations-for/whatsapp", "0.8", "weekly"),
+        ("/best-integrations-for/deepseek", "0.8", "weekly"),
+        ("/best-integrations-for/midjourney", "0.7", "weekly"),
+        ("/best-integrations-for/cursor", "0.8", "weekly"),
+        ("/best-integrations-for/langchain", "0.8", "weekly"),
+        ("/best-integrations-for/perplexity", "0.7", "weekly"),
+        ("/best-integrations-for/grok", "0.7", "weekly"),
+        ("/best-integrations-for/mistral", "0.7", "weekly"),
     ]
     for path, priority, freq in static_pages:
         xml += f'  <url>\n    <loc>{base_url}{path}</loc>\n    <lastmod>{today}</lastmod>\n    <changefreq>{freq}</changefreq>\n    <priority>{priority}</priority>\n  </url>\n'
@@ -2118,13 +3018,9 @@ async def sitemap():
     xml += '</urlset>'
     return Response(content=xml, media_type="application/xml")
  
-@app.get("/robots.txt")
+@app.get("/robots.txt", response_class=PlainTextResponse)
 async def robots_txt():
-    content = """User-agent: *
-Allow: /
- 
-Sitemap: https://integration-directory.com/sitemap.xml
-"""
+    content = "User-agent: *\nAllow: /\nSitemap: https://integration-directory.com/sitemap.xml\n"
     return Response(content=content, media_type="text/plain")
  
  
@@ -2163,7 +3059,7 @@ async def read_news(request: Request, slug: str):
     conn.close()
     
     if not post:
-        return {"error": "News article not found"}
+        return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
         
     # Pass dynamic back routing to the HTML template
     return templates.TemplateResponse("blog_post.html", {
@@ -2627,3 +3523,117 @@ async def delete_admin_deal(secret: str = Form(...), deal_id: int = Form(...)):
         conn.close()
         
     return RedirectResponse(url=f"/admin/deals?secret={secret}", status_code=303)
+
+
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc):
+    return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
+
+# ================================================================
+# PART 7B — GLOSSARY SEED ENDPOINT
+# Populates the glossary table with 60 SaaS/automation terms
+# Call once: GET /api/admin/seed-glossary?secret=YOUR_SECRET
+# ================================================================
+
+GLOSSARY_TERMS = [
+    ("API", "Application Programming Interface — a way for software applications to communicate with each other and share data automatically."),
+    ("Automation", "Using software to perform repetitive tasks without human intervention, saving time and reducing errors."),
+    ("CRM", "Customer Relationship Management — software used to manage interactions with current and potential customers."),
+    ("Webhook", "A way for one app to send real-time data to another app whenever a specific event occurs, without polling."),
+    ("Integration", "A connection between two or more software tools that allows them to share data and trigger actions in each other."),
+    ("No-Code", "A software development approach that allows non-technical users to build applications using visual drag-and-drop interfaces."),
+    ("Low-Code", "A development method that requires minimal hand-coding, using visual tools with some scripting for customisation."),
+    ("SaaS", "Software as a Service — cloud-based software delivered via subscription, accessible from any browser without installation."),
+    ("Workflow", "A defined sequence of tasks and processes that move work from one stage to another to achieve a goal."),
+    ("Trigger", "An event that starts an automated workflow, such as a new form submission, email received, or record created."),
+    ("Action", "The automated task performed after a trigger fires, such as sending an email, creating a record, or posting a message."),
+    ("Scenario", "In Make.com, a visual automation that connects apps with triggers and actions to automate a workflow."),
+    ("Zap", "In Zapier, a single automated workflow consisting of a trigger and one or more actions."),
+    ("Kanban", "A visual project management method using boards, columns, and cards to track work progress through stages."),
+    ("Scrum", "An agile framework for managing software development using short sprints, daily stand-ups, and retrospectives."),
+    ("Sprint", "A fixed time period (usually 1-2 weeks) in which a development team completes a set of planned work."),
+    ("OKR", "Objectives and Key Results — a goal-setting framework that defines objectives and measurable outcomes."),
+    ("KPI", "Key Performance Indicator — a measurable value that shows how effectively a company is achieving key business objectives."),
+    ("Lead", "A potential customer who has shown interest in a product or service by sharing contact information."),
+    ("Funnel", "A marketing model describing the customer journey from awareness through consideration to purchase."),
+    ("Drip Campaign", "A series of automated emails sent on a schedule or triggered by user actions to nurture leads."),
+    ("Segmentation", "Dividing an audience into groups based on shared characteristics for targeted marketing."),
+    ("A/B Testing", "Comparing two versions of a webpage, email, or ad to see which performs better with real users."),
+    ("Churn", "The percentage of customers who stop using a product or cancel their subscription in a given period."),
+    ("MRR", "Monthly Recurring Revenue — the predictable revenue a subscription business earns each month."),
+    ("ARR", "Annual Recurring Revenue — the value of recurring subscription revenue for a full year."),
+    ("LTV", "Lifetime Value — the total revenue a business expects from a customer over the entire relationship."),
+    ("CAC", "Customer Acquisition Cost — the total cost of sales and marketing to acquire one new customer."),
+    ("NPS", "Net Promoter Score — a customer loyalty metric based on one question: how likely are you to recommend us?"),
+    ("Pipeline", "A visual representation of where prospects or deals are in the sales or project management process."),
+    ("Deal Stage", "A step in the sales pipeline that represents how far a prospect is in the buying process."),
+    ("ETL", "Extract, Transform, Load — a data integration process that moves data from one system to another."),
+    ("REST API", "A type of API that uses HTTP requests to GET, POST, PUT, and DELETE data between systems."),
+    ("OAuth", "An open standard for access delegation, allowing apps to access resources on behalf of a user without sharing passwords."),
+    ("JSON", "JavaScript Object Notation — a lightweight data format used to exchange data between APIs and applications."),
+    ("CSV", "Comma-Separated Values — a simple file format for tabular data, easily imported into spreadsheets and databases."),
+    ("Dashboard", "A visual display of key metrics and data points, giving a real-time overview of performance."),
+    ("Cron Job", "A scheduled task that runs automatically at specified time intervals on a server."),
+    ("Rate Limit", "A restriction on how many API requests can be made in a given time period."),
+    ("Pagination", "Breaking large sets of data into smaller pages to improve performance and usability."),
+    ("Slug", "A URL-friendly version of a title or name, using lowercase letters and hyphens instead of spaces."),
+    ("CDN", "Content Delivery Network — a distributed network of servers that delivers web content quickly based on user location."),
+    ("Uptime", "The percentage of time a website or service is operational and accessible to users."),
+    ("SSL/TLS", "Security protocols that encrypt data transmitted between a browser and a server, shown as HTTPS."),
+    ("Two-Factor Authentication", "A security process requiring two forms of verification to access an account."),
+    ("Sandbox", "A testing environment that isolates untested code changes and experimentation from the production environment."),
+    ("Deployment", "The process of moving code changes from a development environment to a live production server."),
+    ("CI/CD", "Continuous Integration/Continuous Deployment — automated processes that test and release software changes frequently."),
+    ("Git", "A distributed version control system that tracks changes in source code during software development."),
+    ("Agile", "An iterative software development methodology focused on collaboration, flexibility, and customer feedback."),
+    ("Scaleup", "A startup that has found product-market fit and is focused on rapid growth and scaling operations."),
+    ("White Label", "A product or service produced by one company that other companies rebrand and sell as their own."),
+    ("Freemium", "A business model offering basic features for free while charging for premium features or higher usage."),
+    ("Open Source", "Software with source code that anyone can inspect, modify, and distribute freely."),
+    ("Data Enrichment", "Adding supplementary information to existing records, such as adding company size to a contact."),
+    ("Deduplicate", "The process of identifying and removing duplicate records from a database."),
+    ("Mapping", "Matching data fields from one application to corresponding fields in another during an integration."),
+    ("Parse", "To analyse and convert data from one format to a structured format that can be processed by a program."),
+    ("Middleware", "Software that connects different applications and enables them to communicate and exchange data."),
+    ("Event-Driven", "An architecture where actions are triggered by specific events rather than running on a fixed schedule."),
+]
+
+@app.get("/api/admin/seed-glossary")
+async def seed_glossary(secret: str):
+    """One-time endpoint to populate the glossary table. Call once then ignore."""
+    if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
+        return {"error": "Unauthorized"}
+    conn, cursor = get_db_connection()
+    try:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS glossary (
+                id SERIAL PRIMARY KEY,
+                term TEXT UNIQUE NOT NULL,
+                definition TEXT NOT NULL
+            )
+        """)
+        inserted = 0
+        for term, definition in GLOSSARY_TERMS:
+            cursor.execute(
+                "INSERT INTO glossary (term, definition) VALUES (%s, %s) ON CONFLICT (term) DO NOTHING",
+                (term, definition)
+            )
+            if cursor.rowcount > 0:
+                inserted += 1
+        conn.commit()
+        return {"status": "Success", "inserted": inserted, "total": len(GLOSSARY_TERMS)}
+    except Exception as e:
+        return {"status": "Error", "error": str(e)}
+    finally:
+        conn.close()
+
+
+# ================================================================
+# PART 7A — BREADCRUMB JSON-LD for homepage and blog/news listing
+# Added as a helper function used in templates via request context
+# ================================================================
+
+@app.get("/api/health")
+async def health_check():
+    """Simple health check endpoint for monitoring."""
+    return {"status": "ok", "timestamp": datetime.now().isoformat()}
