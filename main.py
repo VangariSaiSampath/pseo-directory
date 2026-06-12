@@ -2471,93 +2471,89 @@ async def api_faq_answers(tool_a: str, tool_b: str):
         print(f"Gemini FAQ Error: {e}")
         return JSONResponse(content={})
 
-# --- 5. Main Directory Routes ---
+# --- MAIN DIRECTORY HOMEPAGE ---
 @app.get("/")
-async def home(request: Request, q: str = "", page: int = 1):
+async def home(request: Request, page: int = 1, q: str = None):
     conn, cursor = get_db_connection()
-    
-    # --- NEW: Fetch LIVE Trending Searches for the Sidebar Widget ---
-    cursor.execute('''
-        SELECT query, COUNT(*) as search_count 
-        FROM search_logs 
-        GROUP BY query 
-        ORDER BY search_count DESC 
-        LIMIT 5
-    ''')
-    trending_raw = cursor.fetchall()
-    trending_searches = [{"term": row['query'], "count": row['search_count']} for row in trending_raw]
-    # ----------------------------------------------------------------
-    
-    # --- NEW: Fetch E-Commerce Deals ---
-    cursor.execute("SELECT * FROM ecommerce_deals ORDER BY id DESC LIMIT 5")
-    daily_deals = [
-        {
-            "platform": "MAKE.COM",
-            "product_name": "Top Integration Tools",
-            "affiliate_link": "https://www.make.com/en/register?pc=sampath9",
-        },
-        {
-            "platform": "NOTION",
-            "product_name": "Free Workspace for Teams",
-            "affiliate_link": "https://www.notion.so/signup",
-        },
-        {
-            "platform": "HUBSPOT",
-            "product_name": "Free CRM — Forever Free",
-            "affiliate_link": "https://www.hubspot.com/products/crm",
-        },
-        {
-            "platform": "ZAPIER",
-            "product_name": "Automate 6,000+ Apps",
-            "affiliate_link": "https://zapier.com/sign-up",
-        },
-        {
-            "platform": "CLICKUP",
-            "product_name": "Free Project Management",
-            "affiliate_link": "https://clickup.com/",
-        },
-    ]
-    # ---------------------------------------------------------------
-
-
-
-    if q:
-        # Save search to database to keep trending searches updated
-        cursor.execute('INSERT INTO search_logs (query) VALUES (%s)', (q.strip().lower(),))
-        conn.commit()
-
     items_per_page = 15
     offset = (page - 1) * items_per_page
 
-    if q:
-        query = f"%{q}%"
-        cursor.execute('SELECT COUNT(*) as count FROM integrations WHERE tool_a ILIKE %s OR tool_b ILIKE %s OR description ILIKE %s', (query, query, query))
-        total_items = cursor.fetchone()['count']
-        
-        cursor.execute('SELECT * FROM integrations WHERE tool_a ILIKE %s OR tool_b ILIKE %s OR description ILIKE %s LIMIT %s OFFSET %s', (query, query, query, items_per_page, offset))
-        integrations = cursor.fetchall()
-    else:
-        cursor.execute('SELECT COUNT(*) as count FROM integrations')
-        total_items = cursor.fetchone()['count']
-        
-        cursor.execute('SELECT * FROM integrations LIMIT %s OFFSET %s', (items_per_page, offset))
-        integrations = cursor.fetchall()
-    
-    conn.close()
-    
-    # Safe fallback if database is empty
-    total_pages = math.ceil(total_items / items_per_page) if total_items > 0 else 1
-    
-    # Part 7D: Social proof trust bar stats (shown on homepage)
-    trust_stats = {
-        "integrations": total_items,
-        "rating": "4.8",
-        "newsletter": "1,000+",
-        "location": "🇮🇳 Built in India",
-    }
+    try:
+        if q:
+            query = f"%{q.strip()}%"
+            cursor.execute('INSERT INTO search_logs (query) VALUES (%s)', (q.strip().lower(),))
+            conn.commit()
 
-    # Part 7F: GA4 tag is added in index.html template via GA4_ID env variable
-    ga4_id = os.environ.get("GA4_ID", "")
+            cursor.execute(
+                'SELECT COUNT(*) as count FROM integrations WHERE tool_a ILIKE %s OR tool_b ILIKE %s OR description ILIKE %s',
+                (query, query, query)
+            )
+            total_items = cursor.fetchone()['count']
+
+            cursor.execute(
+                'SELECT * FROM integrations WHERE tool_a ILIKE %s OR tool_b ILIKE %s OR description ILIKE %s ORDER BY search_volume DESC NULLS LAST LIMIT %s OFFSET %s',
+                (query, query, query, items_per_page, offset)
+            )
+        else:
+            cursor.execute('SELECT COUNT(*) as count FROM integrations')
+            total_items = cursor.fetchone()['count']
+
+            cursor.execute(
+                'SELECT * FROM integrations ORDER BY search_volume DESC NULLS LAST LIMIT %s OFFSET %s',
+                (items_per_page, offset)
+            )
+
+        integrations = cursor.fetchall()
+
+        cursor.execute('''
+            SELECT query, COUNT(*) as search_count
+            FROM search_logs
+            GROUP BY query
+            ORDER BY search_count DESC
+            LIMIT 5
+        ''')
+        trending_raw = cursor.fetchall()
+        trending_searches = [{"term": row['query'], "count": row['search_count']} for row in trending_raw]
+
+        daily_deals = [
+            {
+                "platform": "MAKE.COM",
+                "product_name": "Top Integration Tools",
+                "affiliate_link": "https://www.make.com/en/register?pc=sampath9",
+            },
+            {
+                "platform": "NOTION",
+                "product_name": "Free Workspace for Teams",
+                "affiliate_link": "https://www.notion.so/signup",
+            },
+            {
+                "platform": "HUBSPOT",
+                "product_name": "Free CRM — Forever Free",
+                "affiliate_link": "https://www.hubspot.com/products/crm",
+            },
+            {
+                "platform": "ZAPIER",
+                "product_name": "Automate 6,000+ Apps",
+                "affiliate_link": "https://zapier.com/sign-up",
+            },
+            {
+                "platform": "CLICKUP",
+                "product_name": "Free Project Management",
+                "affiliate_link": "https://clickup.com/",
+            },
+        ]
+
+        total_pages = math.ceil(total_items / items_per_page) if total_items > 0 else 1
+        trust_stats = {
+            "integrations": total_items,
+            "rating": "4.8",
+            "newsletter": "1,000+",
+            "location": "🇮🇳 Built in India",
+        }
+        ga4_id = os.environ.get("GA4_ID", "")
+
+    finally:
+        conn.close()
 
     return templates.TemplateResponse("index.html", {
         "request": request,
@@ -2664,6 +2660,15 @@ async def integration_page(request: Request, slug: str):
     conn, cursor = get_db_connection()
     cursor.execute('SELECT * FROM integrations WHERE slug = %s', (slug,))
     integration = cursor.fetchone()
+    popular_integrations = []
+    if integration:
+        cursor.execute('''
+            SELECT * FROM integrations 
+            WHERE slug != %s 
+            ORDER BY search_volume DESC 
+        ''', (slug,))
+        popular_integrations = cursor.fetchall()
+        
     conn.close()
 
     if not integration:
@@ -2686,6 +2691,7 @@ async def integration_page(request: Request, slug: str):
         "request": request,
         "data": integration,
         "integration": integration,
+        "popular_integrations": popular_integrations,
         "slug": slug,
         "tool_a": tool_a_name,
         "tool_b": tool_b_name,
