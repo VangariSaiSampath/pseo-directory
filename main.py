@@ -2617,23 +2617,28 @@ async def glossary(request: Request):
 
 @app.get("/compare/{slug_a}-vs-{slug_b}")
 async def compare_tools_page(request: Request, slug_a: str, slug_b: str):
-    tool_a_name = slug_a.replace("-", " ").title()
-    tool_b_name = slug_b.replace("-", " ").title()
+    # 1. Clean slugs safely for wildcard lookup
+    tool_a_clean = slug_a.replace("-", " ")
+    tool_b_clean = slug_b.replace("-", " ")
 
     conn, cursor = get_db_connection()
     
-    # 1. Look up the combination in the database (checking both directions)
+    # 2. FAIL-SAFE DB LOOKUP (Using wildcard % to ensure it finds Make.com instantly)
     cursor.execute('''
         SELECT * FROM integrations 
         WHERE (tool_a ILIKE %s AND tool_b ILIKE %s) 
            OR (tool_a ILIKE %s AND tool_b ILIKE %s)
-    ''', (tool_a_name, tool_b_name, tool_b_name, tool_a_name))
+        LIMIT 1
+    ''', (f"%{tool_a_clean}%", f"%{tool_b_clean}%", f"%{tool_b_clean}%", f"%{tool_a_clean}%"))
     row = cursor.fetchone()
 
-    # 2. CACHE CHECK: If verdict exists, load from DB instantly! (0 API Cost)
+    print(f"--- DEBUG: Looking for {tool_a_clean} vs {tool_b_clean} ---")
+    print(f"--- DEBUG: Found in Database? {'YES (ID: ' + str(row['id']) + ')' if row else 'NO'} ---")
+
+    # 3. CACHE CHECK: Load from DB if it already exists
     if row and row.get("verdict"):
-        # Match the text correctly depending on how it was stored in the database
-        if row["tool_a"].lower() == tool_a_name.lower():
+        print("--- DEBUG: SUCCESS! Loaded instantly from Database Cache (0 API Cost). ---")
+        if tool_a_clean.lower() in row["tool_a"].lower():
             final_tool_a_text = row["tool_a_text"]
             final_tool_b_text = row["tool_b_text"]
         else:
@@ -2644,17 +2649,17 @@ async def compare_tools_page(request: Request, slug_a: str, slug_b: str):
         conn.close()
 
     else:
-        # 3. SLOW PATH: Ask Gemini, then Save to Database
+        print("--- DEBUG: No cache found. Asking Gemini API... ---")
         try:
             prompt = (
-                f"Compare {tool_a_name} and {tool_b_name} as an expert tech analyst in 2026.\n"
+                f"Compare {tool_a_clean} and {tool_b_clean} as an expert tech analyst in 2026.\n"
                 f"Provide exactly 3 items separated by the delimiter '|||'.\n"
-                f"A short 1-sentence summary of what {tool_a_name} is uniquely best at.\n"
+                f"Item 1: A short 1-sentence summary of what {tool_a_clean} is uniquely best at.\n"
                 f"|||\n"
-                f"A short 1-sentence summary of what {tool_b_name} is uniquely best at.\n"
+                f"Item 2: A short 1-sentence summary of what {tool_b_clean} is uniquely best at.\n"
                 f"|||\n"
-                f"A clear, definitive verdict declaring exactly which tool is the absolute best choice for the majority of standard automation workflows, and why.\n"
-                f"Do not be neutral. Pick one clear winner based on features, pricing, or ease of integration in 2026."
+                f"Item 3: A clear, definitive verdict declaring exactly which tool is the absolute best choice for standard automation workflows, and why.\n"
+                f"Pick one clear winner based on features, pricing, or ease of integration in 2026."
             )
             
             response = client.models.generate_content(
@@ -2663,42 +2668,44 @@ async def compare_tools_page(request: Request, slug_a: str, slug_b: str):
             )
             parts = response.text.split("|||")
             
-            final_tool_a_text = parts[0].strip() if len(parts) > 0 else f"Elite choice for modern {tool_a_name} ecosystems."
-            final_tool_b_text = parts[1].strip() if len(parts) > 1 else f"Optimized performance tracker for {tool_b_name}."
-            final_verdict = parts[2].strip() if len(parts) > 2 else f"{tool_a_name} is the superior choice for scalable enterprise applications."
+            final_tool_a_text = parts[0].strip() if len(parts) > 0 else f"Elite choice for modern {tool_a_clean} ecosystems."
+            final_tool_b_text = parts[1].strip() if len(parts) > 1 else f"Optimized performance tracker for {tool_b_clean}."
+            final_verdict = parts[2].strip() if len(parts) > 2 else f"{tool_a_clean.title()} is the superior choice for scalable applications."
             
-            # SAVE TO DATABASE so we never ask Gemini again
+            # 4. SAVE TO DATABASE
             if row:
-                # Match DB column orientation before saving
-                if row["tool_a"].lower() == tool_a_name.lower():
-                    save_a_text = final_tool_a_text
-                    save_b_text = final_tool_b_text
+                if tool_a_clean.lower() in row["tool_a"].lower():
+                    save_a = final_tool_a_text
+                    save_b = final_tool_b_text
                 else:
-                    save_a_text = final_tool_b_text
-                    save_b_text = final_tool_a_text
+                    save_a = final_tool_b_text
+                    save_b = final_tool_a_text
 
                 cursor.execute('''
                     UPDATE integrations 
                     SET tool_a_text=%s, tool_b_text=%s, verdict=%s 
                     WHERE id=%s
-                ''', (save_a_text, save_b_text, final_verdict, row["id"]))
+                ''', (save_a, save_b, final_verdict, row["id"]))
                 conn.commit()
-            
+                print(f"--- DEBUG: SAVED! Successfully locked AI text into Database Row ID {row['id']}! ---")
+            else:
+                print("--- DEBUG: FAILED TO SAVE. Database row does not exist for these tools. ---")
+
         except Exception as e:
-            print(f"Gemini pre-generating comparison error/exhaustion: {e}")
-            # FALLBACK: Prevents the site from crashing if rate limits are hit
+            print(f"--- DEBUG: Gemini API Failed (Likely 429 Quota Exhausted): {e} ---")
+            print("--- DEBUG: Using fallback text. Database save skipped to protect cache. ---")
             final_tool_a_text = f"Top-tier choice for specialized operational scaling."
             final_tool_b_text = f"Excellent choice for flexible workspace management."
-            final_verdict = f"{tool_a_name} wins due to its comprehensive ecosystem and robust API connectivity."
+            final_verdict = f"{tool_a_clean.title()} wins due to its comprehensive ecosystem and robust API connectivity."
         
         finally:
             conn.close()
 
-    # 4. Return instant response to the template
+    # 5. Return response to HTML template
     return templates.TemplateResponse("compare.html", {
         "request": request,
-        "tool_a": tool_a_name,
-        "tool_b": tool_b_name,
+        "tool_a": tool_a_clean.title(),
+        "tool_b": tool_b_clean.title(),
         "slug_a": slug_a,
         "slug_b": slug_b,
         "tool_a_text": final_tool_a_text,
