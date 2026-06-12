@@ -2503,7 +2503,7 @@ async def api_faq_answers(tool_a: str, tool_b: str):
             "ans4": f"You can sync data, trigger alerts, and push updates seamlessly between {tool_a} and {tool_b}.",
             "ans5": f"{tool_a} is a specialized platform optimized for scalable operational tasks.",
             "ans6": f"{tool_b} is an industry-standard tool designed to streamline your daily workflows."
-        })
+        })  
 
 # --- MAIN DIRECTORY HOMEPAGE ---
 @app.get("/")
@@ -2617,49 +2617,93 @@ async def glossary(request: Request):
 
 @app.get("/compare/{slug_a}-vs-{slug_b}")
 async def compare_tools_page(request: Request, slug_a: str, slug_b: str):
-    # 1. Clean up slugs into clean names for the AI model
     tool_a_name = slug_a.replace("-", " ").title()
     tool_b_name = slug_b.replace("-", " ").title()
 
-    # 2. Generate the comparison directly on the server before the page loads
-    try:
-        prompt = (
-            f"Compare {tool_a_name} and {tool_b_name} as an expert tech analyst in 2026.\n"
-            f"Provide exactly 3 items separated by the delimiter '|||'.\n"
-            f"A short 1-sentence summary of what {tool_a_name} is uniquely best at.\n"
-            f"|||\n"
-            f"A short 1-sentence summary of what {tool_b_name} is uniquely best at.\n"
-            f"|||\n"
-            f"A clear, definitive verdict declaring exactly which tool is the absolute best choice for the majority of standard automation workflows, and why.\n"
-            f"Do not be neutral. Pick one clear winner based on features, pricing, or ease of integration in 2026."
-        )
-        
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-        )
-        parts = response.text.split("|||")
-        
-        tool_a_text = parts[0].strip() if len(parts) > 0 else f"Elite choice for modern {tool_a_name} ecosystems."
-        tool_b_text = parts[1].strip() if len(parts) > 1 else f"Optimized performance tracker for {tool_b_name}."
-        verdict = parts[2].strip() if len(parts) > 2 else f"{tool_a_name} is the superior choice for scalable enterprise applications."
-        
-    except Exception as e:
-        print(f"Error pre-generating comparison: {e}")
-        tool_a_text = f"Top-tier choice for specialized operational scaling."
-        tool_b_text = f"Excellent choice for flexible workspace management."
-        verdict = f"{tool_a_name} wins due to its comprehensive ecosystem and robust API connectivity."
+    conn, cursor = get_db_connection()
+    
+    # 1. Look up the combination in the database (checking both directions)
+    cursor.execute('''
+        SELECT * FROM integrations 
+        WHERE (tool_a ILIKE %s AND tool_b ILIKE %s) 
+           OR (tool_a ILIKE %s AND tool_b ILIKE %s)
+    ''', (tool_a_name, tool_b_name, tool_b_name, tool_a_name))
+    row = cursor.fetchone()
 
-    # 3. Return the fully-baked values instantly to the template
+    # 2. CACHE CHECK: If verdict exists, load from DB instantly! (0 API Cost)
+    if row and row.get("verdict"):
+        # Match the text correctly depending on how it was stored in the database
+        if row["tool_a"].lower() == tool_a_name.lower():
+            final_tool_a_text = row["tool_a_text"]
+            final_tool_b_text = row["tool_b_text"]
+        else:
+            final_tool_a_text = row["tool_b_text"]
+            final_tool_b_text = row["tool_a_text"]
+        
+        final_verdict = row["verdict"]
+        conn.close()
+
+    else:
+        # 3. SLOW PATH: Ask Gemini, then Save to Database
+        try:
+            prompt = (
+                f"Compare {tool_a_name} and {tool_b_name} as an expert tech analyst in 2026.\n"
+                f"Provide exactly 3 items separated by the delimiter '|||'.\n"
+                f"A short 1-sentence summary of what {tool_a_name} is uniquely best at.\n"
+                f"|||\n"
+                f"A short 1-sentence summary of what {tool_b_name} is uniquely best at.\n"
+                f"|||\n"
+                f"A clear, definitive verdict declaring exactly which tool is the absolute best choice for the majority of standard automation workflows, and why.\n"
+                f"Do not be neutral. Pick one clear winner based on features, pricing, or ease of integration in 2026."
+            )
+            
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt,
+            )
+            parts = response.text.split("|||")
+            
+            final_tool_a_text = parts[0].strip() if len(parts) > 0 else f"Elite choice for modern {tool_a_name} ecosystems."
+            final_tool_b_text = parts[1].strip() if len(parts) > 1 else f"Optimized performance tracker for {tool_b_name}."
+            final_verdict = parts[2].strip() if len(parts) > 2 else f"{tool_a_name} is the superior choice for scalable enterprise applications."
+            
+            # SAVE TO DATABASE so we never ask Gemini again
+            if row:
+                # Match DB column orientation before saving
+                if row["tool_a"].lower() == tool_a_name.lower():
+                    save_a_text = final_tool_a_text
+                    save_b_text = final_tool_b_text
+                else:
+                    save_a_text = final_tool_b_text
+                    save_b_text = final_tool_a_text
+
+                cursor.execute('''
+                    UPDATE integrations 
+                    SET tool_a_text=%s, tool_b_text=%s, verdict=%s 
+                    WHERE id=%s
+                ''', (save_a_text, save_b_text, final_verdict, row["id"]))
+                conn.commit()
+            
+        except Exception as e:
+            print(f"Gemini pre-generating comparison error/exhaustion: {e}")
+            # FALLBACK: Prevents the site from crashing if rate limits are hit
+            final_tool_a_text = f"Top-tier choice for specialized operational scaling."
+            final_tool_b_text = f"Excellent choice for flexible workspace management."
+            final_verdict = f"{tool_a_name} wins due to its comprehensive ecosystem and robust API connectivity."
+        
+        finally:
+            conn.close()
+
+    # 4. Return instant response to the template
     return templates.TemplateResponse("compare.html", {
         "request": request,
         "tool_a": tool_a_name,
         "tool_b": tool_b_name,
         "slug_a": slug_a,
         "slug_b": slug_b,
-        "tool_a_text": tool_a_text,
-        "tool_b_text": tool_b_text,
-        "verdict": verdict
+        "tool_a_text": final_tool_a_text,
+        "tool_b_text": final_tool_b_text,
+        "verdict": final_verdict
     })
 
 @app.get("/best-integrations-for/{tool}")
