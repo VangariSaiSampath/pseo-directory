@@ -2617,13 +2617,17 @@ async def glossary(request: Request):
 
 @app.get("/compare/{slug_a}-vs-{slug_b}")
 async def compare_tools_page(request: Request, slug_a: str, slug_b: str):
-    # 1. Clean slugs safely for wildcard lookup
-    tool_a_clean = slug_a.replace("-", " ")
-    tool_b_clean = slug_b.replace("-", " ")
+    # 1. Clean slugs and strip common web extensions like '.com' for accurate matching
+    tool_a_clean = slug_a.replace("-", " ").replace(".com", "").strip()
+    tool_b_clean = slug_b.replace("-", " ").replace(".com", "").strip()
+
+    # Pretty names for the UI
+    tool_a_display = tool_a_clean.title()
+    tool_b_display = tool_b_clean.title()
 
     conn, cursor = get_db_connection()
     
-    # 2. FAIL-SAFE DB LOOKUP (Using wildcard % to ensure it finds Make.com instantly)
+    # 2. Look up using stripped names with wildcards
     cursor.execute('''
         SELECT * FROM integrations 
         WHERE (tool_a ILIKE %s AND tool_b ILIKE %s) 
@@ -2632,10 +2636,9 @@ async def compare_tools_page(request: Request, slug_a: str, slug_b: str):
     ''', (f"%{tool_a_clean}%", f"%{tool_b_clean}%", f"%{tool_b_clean}%", f"%{tool_a_clean}%"))
     row = cursor.fetchone()
 
-    print(f"--- DEBUG: Looking for {tool_a_clean} vs {tool_b_clean} ---")
-    print(f"--- DEBUG: Found in Database? {'YES (ID: ' + str(row['id']) + ')' if row else 'NO'} ---")
+    print(f"--- DEBUG: Looking for '{tool_a_clean}' vs '{tool_b_clean}' ---")
 
-    # 3. CACHE CHECK: Load from DB if it already exists
+    # 3. CACHE CHECK: If it exists in DB with content, serve it instantly
     if row and row.get("verdict"):
         print("--- DEBUG: SUCCESS! Loaded instantly from Database Cache (0 API Cost). ---")
         if tool_a_clean.lower() in row["tool_a"].lower():
@@ -2643,20 +2646,23 @@ async def compare_tools_page(request: Request, slug_a: str, slug_b: str):
             final_tool_b_text = row["tool_b_text"]
         else:
             final_tool_a_text = row["tool_b_text"]
-            final_tool_b_text = row["tool_a_text"]
+            final_tool_a_text = row["tool_a_text"]
         
         final_verdict = row["verdict"]
+        # Use actual DB names for display matching configuration
+        tool_a_display = row["tool_a"]
+        tool_b_display = row["tool_b"]
         conn.close()
 
     else:
-        print("--- DEBUG: No cache found. Asking Gemini API... ---")
+        print("--- DEBUG: Cache missing or empty. Requesting Gemini AI... ---")
         try:
             prompt = (
-                f"Compare {tool_a_clean} and {tool_b_clean} as an expert tech analyst in 2026.\n"
+                f"Compare {tool_a_display} and {tool_b_display} as an expert tech analyst in 2026.\n"
                 f"Provide exactly 3 items separated by the delimiter '|||'.\n"
-                f"Item 1: A short 1-sentence summary of what {tool_a_clean} is uniquely best at.\n"
+                f"Item 1: A short 1-sentence summary of what {tool_a_display} is uniquely best at.\n"
                 f"|||\n"
-                f"Item 2: A short 1-sentence summary of what {tool_b_clean} is uniquely best at.\n"
+                f"Item 2: A short 1-sentence summary of what {tool_b_display} is uniquely best at.\n"
                 f"|||\n"
                 f"Item 3: A clear, definitive verdict declaring exactly which tool is the absolute best choice for standard automation workflows, and why.\n"
                 f"Pick one clear winner based on features, pricing, or ease of integration in 2026."
@@ -2668,11 +2674,11 @@ async def compare_tools_page(request: Request, slug_a: str, slug_b: str):
             )
             parts = response.text.split("|||")
             
-            final_tool_a_text = parts[0].strip() if len(parts) > 0 else f"Elite choice for modern {tool_a_clean} ecosystems."
-            final_tool_b_text = parts[1].strip() if len(parts) > 1 else f"Optimized performance tracker for {tool_b_clean}."
-            final_verdict = parts[2].strip() if len(parts) > 2 else f"{tool_a_clean.title()} is the superior choice for scalable applications."
+            final_tool_a_text = parts[0].strip() if len(parts) > 0 else f"Elite choice for modern {tool_a_display} ecosystems."
+            final_tool_b_text = parts[1].strip() if len(parts) > 1 else f"Optimized performance tracker for {tool_b_display}."
+            final_verdict = parts[2].strip() if len(parts) > 2 else f"{tool_a_display} is the superior choice for scalable applications."
             
-            # 4. SAVE TO DATABASE
+            # 4. SAVE TO DATABASE (UPDATE existing row OR INSERT brand new row)
             if row:
                 if tool_a_clean.lower() in row["tool_a"].lower():
                     save_a = final_tool_a_text
@@ -2686,26 +2692,32 @@ async def compare_tools_page(request: Request, slug_a: str, slug_b: str):
                     SET tool_a_text=%s, tool_b_text=%s, verdict=%s 
                     WHERE id=%s
                 ''', (save_a, save_b, final_verdict, row["id"]))
-                conn.commit()
-                print(f"--- DEBUG: SAVED! Successfully locked AI text into Database Row ID {row['id']}! ---")
+                print(f"--- DEBUG: SAVED! Successfully updated existing Database Row ID {row['id']}! ---")
             else:
-                print("--- DEBUG: FAILED TO SAVE. Database row does not exist for these tools. ---")
+                # If row completely missing from DB, dynamically CREATE IT right now!
+                cursor.execute('''
+                    INSERT INTO integrations (tool_a, tool_b, tool_a_text, tool_b_text, verdict, slug) 
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                ''', (tool_a_display, tool_b_display, final_tool_a_text, final_tool_b_text, final_verdict, f"{slug_a}-vs-{slug_b}"))
+                print("--- DEBUG: SAVED! Created a brand new integration row in the database successfully! ---")
+            
+            conn.commit()
 
         except Exception as e:
-            print(f"--- DEBUG: Gemini API Failed (Likely 429 Quota Exhausted): {e} ---")
-            print("--- DEBUG: Using fallback text. Database save skipped to protect cache. ---")
+            print(f"--- DEBUG: Gemini API Failed: {e} ---")
+            print("--- DEBUG: Using fallback text. Save skipped to protect cache integrity. ---")
             final_tool_a_text = f"Top-tier choice for specialized operational scaling."
             final_tool_b_text = f"Excellent choice for flexible workspace management."
-            final_verdict = f"{tool_a_clean.title()} wins due to its comprehensive ecosystem and robust API connectivity."
+            final_verdict = f"{tool_a_display} wins due to its comprehensive ecosystem and robust connectivity."
         
         finally:
             conn.close()
 
-    # 5. Return response to HTML template
+    # 5. Return clean variables to your template
     return templates.TemplateResponse("compare.html", {
         "request": request,
-        "tool_a": tool_a_clean.title(),
-        "tool_b": tool_b_clean.title(),
+        "tool_a": tool_a_display,
+        "tool_b": tool_b_display,
         "slug_a": slug_a,
         "slug_b": slug_b,
         "tool_a_text": final_tool_a_text,
