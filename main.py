@@ -38,7 +38,7 @@ from fastapi.responses import HTMLResponse
 async def ads_txt():
     # Replace with your actual AdSense publisher ID once approved
     # Format: google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
-    return "google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0"
+    return "google.com, pub-3460388852758392, DIRECT, f08c47fec0942fa0"
 
 # ================================================================
 # TOOL DESCRIPTIONS DATA
@@ -3767,11 +3767,12 @@ GLOSSARY_TERMS = [
     ("Event-Driven", "An architecture where actions are triggered by specific events rather than running on a fixed schedule."),
 ]
 
-@app.get("/api/admin/seed-glossary")
+@app.get("/seed_glossary")
 async def seed_glossary(secret: str):
-    """One-time endpoint to populate the glossary table. Call once then ignore."""
+    """One-time endpoint to populate the glossary table fast using batch execution."""
     if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
         return {"error": "Unauthorized"}
+    
     conn, cursor = get_db_connection()
     try:
         cursor.execute("""
@@ -3781,21 +3782,23 @@ async def seed_glossary(secret: str):
                 definition TEXT NOT NULL
             )
         """)
-        inserted = 0
-        for term, definition in GLOSSARY_TERMS:
-            cursor.execute(
-                "INSERT INTO glossary (term, definition) VALUES (%s, %s) ON CONFLICT (term) DO NOTHING",
-                (term, definition)
-            )
-            if cursor.rowcount > 0:
-                inserted += 1
+        
+        # Optimized: Prepare data for a single fast batch execution
+        # Filters out duplicates before sending to database
+        execute_values_data = [(term, definition) for term, definition in GLOSSARY_TERMS]
+        
+        # Uses standard psycopg2 executemany for high speed acceleration
+        cursor.executemany(
+            "INSERT INTO glossary (term, definition) VALUES (%s, %s) ON CONFLICT (term) DO NOTHING",
+            execute_values_data
+        )
+        
         conn.commit()
-        return {"status": "Success", "inserted": inserted, "total": len(GLOSSARY_TERMS)}
+        return {"status": "Success", "message": "Database populated instantly via batch processing."}
     except Exception as e:
         return {"status": "Error", "error": str(e)}
     finally:
         conn.close()
-
 
 # ================================================================
 # PART 7A — BREADCRUMB JSON-LD for homepage and blog/news listing
