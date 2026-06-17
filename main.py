@@ -2408,11 +2408,11 @@ async def api_compare_tools(tool_a: str, tool_b: str):
         prompt = (
             f"Compare {tool_a} and {tool_b} as an expert tech analyst in 2026.\n"
             f"Provide exactly 3 items separated by the delimiter '|||'.\n"
-            f"Item 1: A short 1-sentence summary of what {tool_a} is uniquely best at.\n"
+            f"A short 1-sentence summary of what {tool_a} is uniquely best at.\n"
             f"|||\n"
-            f"Item 2: A short 1-sentence summary of what {tool_b} is uniquely best at.\n"
+            f"A short 1-sentence summary of what {tool_b} is uniquely best at.\n"
             f"|||\n"
-            f"Item 3: A neutral 2-sentence verdict explaining that both are excellent and the ultimate choice depends entirely on the user's workflow requirements.\n"
+            f"A neutral 2-sentence verdict explaining that both are excellent and the ultimate choice depends entirely on the user's workflow requirements.\n"
             f"Do not include any markdown format tags or extra words."
         )
         response = client.models.generate_content(
@@ -2786,7 +2786,6 @@ async def curated_list(request: Request, tool: str):
         "trending_searches": trending_searches,  # <-- Now passing trending searches
         "daily_deals": daily_deals               # <-- Now passing daily deals
     })
-
 
 @app.get("/integrate/{slug}")
 async def integration_page(request: Request, slug: str):
