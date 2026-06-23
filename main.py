@@ -2440,34 +2440,46 @@ async def api_compare_tools(tool_a: str, tool_b: str):
 async def api_faq_answers(tool_a: str, tool_b: str):
     conn, cursor = get_db_connection()
     
-    # FIX: Check both directions (tool_a + tool_b OR tool_b + tool_a)
+    # 1. Clean inputs for robust matching
+    tool_a_clean = tool_a.replace(".com", "").strip()
+    tool_b_clean = tool_b.replace(".com", "").strip()
+    
+    # 2. Check both directions in the database
     cursor.execute('''
         SELECT * FROM integrations 
         WHERE (tool_a ILIKE %s AND tool_b ILIKE %s) 
            OR (tool_a ILIKE %s AND tool_b ILIKE %s)
-    ''', (tool_a, tool_b, tool_b, tool_a))
+    ''', (f"%{tool_a_clean}%", f"%{tool_b_clean}%", f"%{tool_b_clean}%", f"%{tool_a_clean}%"))
     row = cursor.fetchone()
     
     if row and row.get("faq_1"):
-        # Return instantly from Database! 0 API Cost.
+        # THE FIX: Check if the tools are swapped in the DB relative to the URL
+        if tool_a_clean.lower() in row["tool_a"].lower():
+            final_ans5 = row["faq_5"]
+            final_ans6 = row["faq_6"]
+        else:
+            final_ans5 = row["faq_6"]
+            final_ans6 = row["faq_5"]
+
         conn.close()
+        # Return instantly from Database Cache (0 API Cost)
         return JSONResponse(content={
             "ans1": row["faq_1"], "ans2": row["faq_2"], "ans3": row["faq_3"],
-            "ans4": row["faq_4"], "ans5": row["faq_5"], "ans6": row["faq_6"]
+            "ans4": row["faq_4"], "ans5": final_ans5, "ans6": final_ans6
         })
 
-    # 2. If not in DB or columns are empty, ask Gemini
+    # 3. If not in DB or empty, ask Gemini
     try:
         prompt = (
             f"You are an expert SaaS integration analyst in 2026.\n"
-            f"Provide direct, helpful answers to the following 6 questions about integrating {tool_a} and {tool_b} via Make.com.\n"
+            f"Provide direct, helpful answers to the following 6 questions about integrating {tool_a_clean.title()} and {tool_b_clean.title()} via Make.com.\n"
             f"Separate each answer strictly with the delimiter '|||'. Do not include any formatting, headers, or bullet points.\n\n"
-            f"Question 1: How do I connect {tool_a} and {tool_b}?\n"
+            f"Question 1: How do I connect {tool_a_clean.title()} and {tool_b_clean.title()}?\n"
             f"Question 2: Is this integration free?\n"
             f"Question 3: Do I need coding skills?\n"
-            f"Question 4: What can I automate between {tool_a} and {tool_b}?\n"
-            f"Question 5: What is {tool_a} used for?\n"
-            f"Question 6: What is {tool_b} used for?\n"
+            f"Question 4: What can I automate between {tool_a_clean.title()} and {tool_b_clean.title()}?\n"
+            f"Question 5: What is {tool_a_clean.title()} used for?\n"
+            f"Question 6: What is {tool_b_clean.title()} used for?\n"
         )
         response = client.models.generate_content(
             model='gemini-2.5-flash',
@@ -2477,13 +2489,21 @@ async def api_faq_answers(tool_a: str, tool_b: str):
         while len(answers) < 6:
             answers.append("Refer to the official technical documentation for detailed usage.")
 
-        # 3. SAVE TO DATABASE (Using the corrected row ID)
+        # 4. SAVE TO DATABASE safely
         if row:
+            # Align the generated answers with the Database's physical column orientation
+            if tool_a_clean.lower() in row["tool_a"].lower():
+                save_faq_5 = answers[4]
+                save_faq_6 = answers[5]
+            else:
+                save_faq_5 = answers[5]
+                save_faq_6 = answers[4]
+
             cursor.execute('''
                 UPDATE integrations 
                 SET faq_1=%s, faq_2=%s, faq_3=%s, faq_4=%s, faq_5=%s, faq_6=%s 
                 WHERE id=%s
-            ''', (answers[0], answers[1], answers[2], answers[3], answers[4], answers[5], row["id"]))
+            ''', (answers[0], answers[1], answers[2], answers[3], save_faq_5, save_faq_6, row["id"]))
             conn.commit()
             
         conn.close()
@@ -2493,17 +2513,18 @@ async def api_faq_answers(tool_a: str, tool_b: str):
         })
 
     except Exception as e:
-        print(f"Gemini API Error/Exhausted: {e}")
+        print(f"Gemini API Error: {e}")
         conn.close()
-        # FALLBACK: If API is exhausted or hits rate limits, send clean generic answers
+        # FALLBACK: Clean generic text if API limits are hit
         return JSONResponse(content={
-            "ans1": f"Use Make.com to connect {tool_a} and {tool_b} without code. Create a scenario with a trigger and action.",
-            "ans2": "Yes. Make.com's free plan includes 1,000 operations/month — enough for most workflows.",
-            "ans3": "No. Make.com is a visual drag-and-drop builder. No coding is required.",
-            "ans4": f"You can sync data, trigger alerts, and push updates seamlessly between {tool_a} and {tool_b}.",
-            "ans5": f"{tool_a} is a specialized platform optimized for scalable operational tasks.",
-            "ans6": f"{tool_b} is an industry-standard tool designed to streamline your daily workflows."
-        })  
+            "ans1": f"Use Make.com to connect {tool_a_clean.title()} and {tool_b_clean.title()} without code.",
+            "ans2": "Yes. Make.com's free plan includes 1,000 operations/month.",
+            "ans3": "No. Make.com is a visual drag-and-drop builder.",
+            "ans4": f"You can sync data seamlessly between {tool_a_clean.title()} and {tool_b_clean.title()}.",
+            "ans5": f"{tool_a_clean.title()} is a specialized platform optimized for your workflow.",
+            "ans6": f"{tool_b_clean.title()} is an industry-standard tool designed to streamline tasks."
+        })
+
 
 # --- MAIN DIRECTORY HOMEPAGE ---
 @app.get("/")
