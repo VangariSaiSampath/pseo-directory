@@ -2529,7 +2529,7 @@ async def home(request: Request, page: int = 1, q: str = None):
             cursor.execute(
                 'SELECT * FROM integrations WHERE tool_a ILIKE %s OR tool_b ILIKE %s ' \
                 'OR similarity(tool_a, %s) > 0.25 OR similarity(tool_b, %s) > 0.25 ' \
-                'ORDER BY search_volume DESC NULLS LAST LIMIT %s OFFSET %s',
+                'LIMIT %s OFFSET %s',
                 (f'%{query}%', f'%{query}%', f'%{query}%', f'%{query}%', items_per_page, offset)
             )
         else:
@@ -2537,7 +2537,7 @@ async def home(request: Request, page: int = 1, q: str = None):
             total_items = cursor.fetchone()['count']
 
             cursor.execute(
-                'SELECT * FROM integrations ORDER BY search_volume DESC NULLS LAST LIMIT %s OFFSET %s',
+                'SELECT * FROM integrations LIMIT %s OFFSET %s',
                 (items_per_page, offset)
             )
 
