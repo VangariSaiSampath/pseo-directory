@@ -2440,11 +2440,10 @@ async def api_compare_tools(tool_a: str, tool_b: str):
 async def api_faq_answers(tool_a: str, tool_b: str):
     conn, cursor = get_db_connection()
     
-    # 1. Clean inputs for robust matching
+    # Clean inputs for robust matching
     tool_a_clean = tool_a.replace(".com", "").strip()
     tool_b_clean = tool_b.replace(".com", "").strip()
     
-    # 2. Check both directions in the database
     cursor.execute('''
         SELECT * FROM integrations 
         WHERE (tool_a ILIKE %s AND tool_b ILIKE %s) 
@@ -2453,13 +2452,24 @@ async def api_faq_answers(tool_a: str, tool_b: str):
     row = cursor.fetchone()
     
     if row and row.get("faq_1"):
-        # THE FIX: Check if the tools are swapped in the DB relative to the URL
-        if tool_a_clean.lower() in row["tool_a"].lower():
-            final_ans5 = row["faq_5"]
-            final_ans6 = row["faq_6"]
+        db_faq5 = str(row["faq_5"])
+        db_faq6 = str(row["faq_6"])
+
+        # --- SMART CONTENT FIX ---
+        # Instead of trusting the database order, we read the text.
+        # We count how many times each tool is mentioned in the answers.
+        score_5_a = db_faq5.lower().count(tool_a_clean.lower())
+        score_5_b = db_faq5.lower().count(tool_b_clean.lower())
+        score_6_a = db_faq6.lower().count(tool_a_clean.lower())
+        score_6_b = db_faq6.lower().count(tool_b_clean.lower())
+
+        # If Answer 6 talks about Tool A more, and Answer 5 talks about Tool B more -> Swap them!
+        if score_6_a > score_5_a and score_5_b > score_6_b:
+            final_ans5 = db_faq6
+            final_ans6 = db_faq5
         else:
-            final_ans5 = row["faq_6"]
-            final_ans6 = row["faq_5"]
+            final_ans5 = db_faq5
+            final_ans6 = db_faq6
 
         conn.close()
         # Return instantly from Database Cache (0 API Cost)
@@ -2468,7 +2478,7 @@ async def api_faq_answers(tool_a: str, tool_b: str):
             "ans4": row["faq_4"], "ans5": final_ans5, "ans6": final_ans6
         })
 
-    # 3. If not in DB or empty, ask Gemini
+    # If not in DB or empty, ask Gemini (Standard Generation)
     try:
         prompt = (
             f"You are an expert SaaS integration analyst in 2026.\n"
@@ -2489,21 +2499,13 @@ async def api_faq_answers(tool_a: str, tool_b: str):
         while len(answers) < 6:
             answers.append("Refer to the official technical documentation for detailed usage.")
 
-        # 4. SAVE TO DATABASE safely
         if row:
-            # Align the generated answers with the Database's physical column orientation
-            if tool_a_clean.lower() in row["tool_a"].lower():
-                save_faq_5 = answers[4]
-                save_faq_6 = answers[5]
-            else:
-                save_faq_5 = answers[5]
-                save_faq_6 = answers[4]
-
+            # Save exactly what Gemini generated
             cursor.execute('''
                 UPDATE integrations 
                 SET faq_1=%s, faq_2=%s, faq_3=%s, faq_4=%s, faq_5=%s, faq_6=%s 
                 WHERE id=%s
-            ''', (answers[0], answers[1], answers[2], answers[3], save_faq_5, save_faq_6, row["id"]))
+            ''', (answers[0], answers[1], answers[2], answers[3], answers[4], answers[5], row["id"]))
             conn.commit()
             
         conn.close()
@@ -2514,7 +2516,8 @@ async def api_faq_answers(tool_a: str, tool_b: str):
 
     except Exception as e:
         print(f"Gemini API Error: {e}")
-        conn.close()
+        if not conn.closed:
+            conn.close()
         # FALLBACK: Clean generic text if API limits are hit
         return JSONResponse(content={
             "ans1": f"Use Make.com to connect {tool_a_clean.title()} and {tool_b_clean.title()} without code.",
