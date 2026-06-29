@@ -61,15 +61,11 @@
 
     <a class="back-link" href="{{ back_url }}">← {{ back_text }}</a>
 
-    <div class="ai-notice">
-      ⚠️ <strong>AI-generated content:</strong> This article was written by an AI. Please verify any technical steps independently before applying to production systems.
-    </div>
-
     <div class="article-header">
       <h1>{{ post.title }}</h1>
       <div class="article-meta">
-        <span class="ai-badge">AI-generated</span>
-        Published: {{ post.published_date | string | truncate(10, True, '') }}
+        <span class="ai-badge">Expert Guide</span>
+        By <strong>Vangari Sai Sampath</strong> · Automation Specialist · Published: {{ post.published_date | string | truncate(10, True, '') }}
       </div>
     </div>
 

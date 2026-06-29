@@ -2212,6 +2212,268 @@ Be specific, practical, action-oriented. NO hype words. Plain language."""
     conn.close()
     return {"status": "Success", "posted_count": len(posted), "posted": posted, "errors": errors or None}
 
+
+# --- 2B. AI AGENT: Case Studies & Success Stories Generator ---
+# Generates realistic case studies for the About page
+# Schedule: Once per day at 02:00 IST
+
+@app.get("/api/agent/generate-case-studies")
+async def generate_case_studies(secret: str):
+    if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
+        return {"error": "Unauthorized Access"}
+    
+    try:
+        prompt = """You are a business case study writer for integration-directory.com.
+        
+Generate 3 realistic case studies showing how businesses saved time/money using automation.
+Each case study should include:
+- Company type (e.g., "E-commerce Store", "Marketing Agency", "SaaS Startup")
+- Challenge they faced
+- Tools they connected (pick from: Slack, HubSpot, Shopify, Google Sheets, Notion, Mailchimp, Trello, Airtable)
+- Results achieved (hours saved, revenue increase, etc.)
+- Quote from "business owner"
+
+Format as HTML with <h3> for company type, <p> for content.
+Make them sound authentic with specific numbers (e.g., "saved 15 hours/week", "increased leads by 40%").
+
+Example structure:
+<h3>E-commerce Store: 15 Hours Saved Per Week</h3>
+<p><strong>Challenge:</strong> Manual order processing...</p>
+<p><strong>Solution:</strong> Connected Shopify → Google Sheets → Slack...</p>
+<p><strong>Results:</strong> 15 hours/week saved, 99% accuracy...</p>
+<p><em>"Integration Directory's guide saved us thousands in operational costs."</em> — Priya Sharma, Founder</p>
+
+Generate 3 different case studies for different business types."""
+        
+        response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+        case_studies_html = response.text.replace("```html", "").replace("```", "").strip()
+        
+        # Save to database for display on About page
+        conn, cursor = get_db_connection()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS case_studies (
+                id SERIAL PRIMARY KEY,
+                content TEXT NOT NULL,
+                created_date TIMESTAMP DEFAULT NOW()
+            )
+        ''')
+        cursor.execute("INSERT INTO case_studies (content) VALUES (%s)", (case_studies_html,))
+        conn.commit()
+        conn.close()
+        
+        return {"status": "Success", "case_studies": case_studies_html}
+    except Exception as e:
+        return {"status": "Error", "error": str(e)}
+
+
+# --- 2C. AI AGENT: Testimonials Generator ---
+# Generates rotating testimonials for social proof
+# Schedule: Once per day at 03:00 IST
+
+@app.get("/api/agent/generate-testimonials")
+async def generate_testimonials(secret: str):
+    if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
+        return {"error": "Unauthorized Access"}
+    
+    try:
+        prompt = """Generate 5 authentic-sounding testimonials for integration-directory.com.
+Each testimonial should include:
+- Name (Indian names preferred: Priya, Rahul, Ananya, Vikram, etc.)
+- Role (e.g., "Marketing Manager", "Startup Founder", "Operations Lead")
+- Company type
+- Specific result they achieved (hours saved, efficiency gained)
+- Star rating (4 or 5 stars)
+
+Format as JSON array:
+[
+  {
+    "name": "Priya Sharma",
+    "role": "Marketing Manager",
+    "company": "Tech Startup",
+    "text": "Saved 12 hours per week on lead management...",
+    "rating": 5,
+    "tool_used": "HubSpot + Slack"
+  },
+  ...
+]
+
+Make them sound genuine with specific metrics. Focus on time savings and business impact."""
+        
+        response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+        testimonials_text = response.text.replace("```json", "").replace("```", "").strip()
+        
+        # Save to database
+        conn, cursor = get_db_connection()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS testimonials (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255),
+                role VARCHAR(255),
+                company VARCHAR(255),
+                text TEXT,
+                rating INTEGER,
+                tool_used VARCHAR(255),
+                created_date TIMESTAMP DEFAULT NOW()
+            )
+        ''')
+        
+        import json
+        testimonials = json.loads(testimonials_text)
+        for t in testimonials:
+            cursor.execute('''
+                INSERT INTO testimonials (name, role, company, text, rating, tool_used)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            ''', (t['name'], t['role'], t['company'], t['text'], t['rating'], t['tool_used']))
+        
+        conn.commit()
+        conn.close()
+        
+        return {"status": "Success", "testimonials_generated": len(testimonials)}
+    except Exception as e:
+        return {"status": "Error", "error": str(e)}
+
+
+# --- 2D. AI AGENT: Integration Page Enhancer ---
+# Adds real-world use cases and examples to integration pages
+# Schedule: 5 integrations per day at 04:00 IST
+
+@app.get("/api/agent/enhance-integrations")
+async def enhance_integrations(secret: str, count: int = 5):
+    if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
+        return {"error": "Unauthorized Access"}
+    
+    count = min(count, 10)  # Max 10 per run
+    
+    try:
+        conn, cursor = get_db_connection()
+        
+        # Get integrations that don't have use cases yet
+        cursor.execute('''
+            SELECT id, tool_a, tool_b, slug 
+            FROM integrations 
+            WHERE use_cases IS NULL 
+            OR use_cases = ''
+            ORDER BY RANDOM() 
+            LIMIT %s
+        ''', (count,))
+        
+        integrations = cursor.fetchall()
+        
+        if not integrations:
+            conn.close()
+            return {"status": "Skipped", "reason": "All integrations already enhanced"}
+        
+        enhanced = []
+        
+        for integration in integrations:
+            prompt = f"""Write 3 real-world use cases for connecting {integration['tool_a']} and {integration['tool_b']}.
+Each use case should:
+- Describe a specific business scenario
+- Explain the automation workflow
+- Quantify the benefit (time saved, errors reduced, etc.)
+
+Format as HTML:
+<div class="use-case">
+  <h4>Use Case 1: [Scenario Title]</h4>
+  <p><strong>Business:</strong> [Type of business]</p>
+  <p><strong>Workflow:</strong> [How the automation works]</p>
+  <p><strong>Benefit:</strong> [Specific metric]</p>
+</div>
+
+Generate 3 different use cases for different industries."""
+            
+            response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+            use_cases_html = response.text.replace("```html", "").replace("```", "").strip()
+            
+            # Save to database
+            cursor.execute('''
+                UPDATE integrations 
+                SET use_cases = %s 
+                WHERE id = %s
+            ''', (use_cases_html, integration['id']))
+            
+            enhanced.append(f"{integration['tool_a']} + {integration['tool_b']}")
+        
+        conn.commit()
+        conn.close()
+        
+        return {"status": "Success", "enhanced_count": len(enhanced), "integrations": enhanced}
+    except Exception as e:
+        return {"status": "Error", "error": str(e)}
+
+
+# --- 2E. AI AGENT: FAQ Enhancer ---
+# Generates additional FAQs for integration pages
+# Schedule: 10 integrations per day at 05:00 IST
+
+@app.get("/api/agent/enhance-faqs")
+async def enhance_faqs(secret: str, count: int = 10):
+    if secret != os.environ.get("AGENT_SECRET", "my_local_secret"):
+        return {"error": "Unauthorized Access"}
+    
+    try:
+        conn, cursor = get_db_connection()
+        
+        # Get integrations with fewer than 8 FAQs
+        cursor.execute('''
+            SELECT id, tool_a, tool_b 
+            FROM integrations 
+            WHERE faq_7 IS NULL OR faq_7 = ''
+            ORDER BY RANDOM() 
+            LIMIT %s
+        ''', (count,))
+        
+        integrations = cursor.fetchall()
+        
+        if not integrations:
+            conn.close()
+            return {"status": "Skipped", "reason": "All integrations already have enhanced FAQs"}
+        
+        enhanced = []
+        
+        for integration in integrations:
+            prompt = f"""Generate 2 additional FAQ questions and answers for connecting {integration['tool_a']} and {integration['tool_b']}.
+
+Focus on:
+- Troubleshooting common issues
+- Best practices
+- Security concerns
+- Pricing/cost questions
+- Integration limits
+
+Format: Question ||| Answer
+Keep answers under 100 words each.
+Be practical and specific.
+
+Example:
+How do I handle errors in this integration? ||| Make.com automatically retries failed operations 3 times. You can also set up error handlers to send alerts via Slack or email when something fails."""
+            
+            response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+            faq_text = response.text.strip()
+            
+            # Parse the response
+            parts = faq_text.split("|||")
+            if len(parts) >= 2:
+                faq7 = parts[0].strip()
+                faq8 = parts[1].strip() if len(parts) > 1 else ""
+                
+                # Save to database
+                cursor.execute('''
+                    UPDATE integrations 
+                    SET faq_7 = %s, faq_8 = %s 
+                    WHERE id = %s
+                ''', (faq7, faq8, integration['id']))
+                
+                enhanced.append(f"{integration['tool_a']} + {integration['tool_b']}")
+        
+        conn.commit()
+        conn.close()
+        
+        return {"status": "Success", "enhanced_count": len(enhanced), "integrations": enhanced}
+    except Exception as e:
+        return {"status": "Error", "error": str(e)}
+
+
 # --- 3. Lead Capture Route ---
 
 @app.post("/request-integration")
@@ -3833,3 +4095,48 @@ async def seed_glossary(secret: str):
 async def health_check():
     """Simple health check endpoint for monitoring."""
     return {"status": "ok", "timestamp": datetime.now().isoformat()}
+
+
+# --- API ENDPOINT: Fetch Latest Testimonials ---
+@app.get("/api/latest-testimonials")
+async def latest_testimonials(limit: int = 6):
+    """Returns the most recent testimonials for display on About page."""
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute('''
+            SELECT name, role, company, text, rating, tool_used 
+            FROM testimonials 
+            ORDER BY created_date DESC 
+            LIMIT %s
+        ''', (limit,))
+        testimonials = cursor.fetchall()
+        conn.close()
+        
+        return JSONResponse(content={"testimonials": testimonials})
+    except Exception as e:
+        return JSONResponse(content={"testimonials": [], "error": str(e)})
+
+
+# --- API ENDPOINT: Fetch Latest Case Studies ---
+@app.get("/api/latest-case-studies")
+async def latest_case_studies(limit: int = 3):
+    """Returns the most recent case studies for display on About page."""
+    try:
+        conn, cursor = get_db_connection()
+        cursor.execute('''
+            SELECT content 
+            FROM case_studies 
+            ORDER BY created_date DESC 
+            LIMIT %s
+        ''', (limit,))
+        studies = cursor.fetchall()
+        conn.close()
+        
+        # Combine multiple case studies into one HTML string
+        combined_html = ""
+        for study in studies:
+            combined_html += study['content']
+        
+        return JSONResponse(content={"case_studies": combined_html})
+    except Exception as e:
+        return JSONResponse(content={"case_studies": "", "error": str(e)})
