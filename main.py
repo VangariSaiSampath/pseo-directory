@@ -4098,7 +4098,7 @@ async def health_check():
 
 
 # --- API ENDPOINT: Fetch Latest Testimonials ---
-@app.get("/api/latest-testimonials")
+#@app.get("/api/latest-testimonials")
 async def latest_testimonials(limit: int = 6):
     """Returns the most recent testimonials for display on About page."""
     try:
@@ -4118,7 +4118,7 @@ async def latest_testimonials(limit: int = 6):
 
 
 # --- API ENDPOINT: Fetch Latest Case Studies ---
-@app.get("/api/latest-case-studies")
+#@app.get("/api/latest-case-studies")
 async def latest_case_studies(limit: int = 3):
     """Returns the most recent case studies for display on About page."""
     try:
